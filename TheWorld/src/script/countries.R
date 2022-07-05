@@ -1,0 +1,113 @@
+
+
+# --------------------------------------------------------------------------------
+# Shiny module: flights
+# --------------------------------------------------------------------------------
+
+# -- Library
+library(geojsonio)
+
+# -- Source dependencies
+
+
+# -------------------------------------
+# UI items section
+# -------------------------------------
+
+# -- Where gone checkbox
+countries_UI <- function(id){
+  
+  # namespace
+  ns <- NS(id)
+  
+  # UI
+  wellPanel(
+    
+    # hide / show checkbox
+    checkboxInput(ns("submit_countries"), label = "Countries", value = FALSE, width = NULL)
+    
+  )
+  
+}
+
+
+# -------------------------------------
+# Server logic
+# -------------------------------------
+
+countries_Server <- function(id, r, path) {
+  moduleServer(id, function(input, output, session) {
+    
+    # get namespace
+    ns <- session$ns
+    
+    # -- prepare
+    #filename <- "flights.csv"
+    # cols <- c(id = "numeric",
+    #           from = "character",
+    #           to = "character",
+    #           date = "character",
+    #           airline = "character",
+    #           flight.number = "character",
+    #           departure.time = "character",
+    #           arrival.time = "character")
+    
+    # -- load data
+    #r$flights <- reactiveVal(read.data(path$data, filename, cols))
+    
+    
+    
+    WorldCountry <<- geojson_read(file.path(path$resource, "countries.geojson"), what = "sp")
+    
+    #r$Country <- reactiveVal(data.frame(name = c("France", "Norway", "Australia")))
+    countries <- reactive(unique(r$whereGone()$country))
+    
+    observeEvent(countries(), {
+                 
+                 data_Map <- WorldCountry[WorldCountry@data$ADMIN %in% countries(), ]
+                 
+                 r$proxymap %>% 
+                   addPolygons(data = data_Map, weight = 1, color = "red", group = "countries")
+                 
+                 })
+    
+
+    # -------------------------------------
+    # Outputs
+    # -------------------------------------
+    
+    
+    # -------------------------------------
+    # Event observers
+    # -------------------------------------
+    
+    # -- Observe checkbox
+    observeEvent(input$submit_countries, {
+
+      # checkbox marked
+      if(input$submit_countries){
+
+        cat("Show group: countries \n")
+
+        # proxy map
+        r$proxymap %>%
+
+          # Show group
+          showGroup('countries')
+
+      }else{
+
+        cat("Hide group: countries \n")
+
+        # proxy map
+        r$proxymap %>%
+
+          # clear group
+          hideGroup('countries')
+      }
+
+    })
+    
+  })
+}
+
