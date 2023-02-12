@@ -36,9 +36,9 @@ body <- dashboardBody(
                     column(width = 2,
                            search_Input("map"),
                            whereGone_UI("wheregone"),
-                           #flights_UI("flights"),
-                           #countries_UI("countries"),
-                           #tracks_UI("tracks")
+                           flights_UI("flights"),
+                           countries_UI("countries"),
+                           tracks_UI("tracks")
                            ),
                     column(width = 10,
                            map_UI("map")
