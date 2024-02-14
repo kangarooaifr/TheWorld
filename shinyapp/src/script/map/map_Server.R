@@ -25,10 +25,10 @@ map_Server <- function(id, r, path) {
         addTiles(group = "OSM") %>%
         
         # Set view point
-        setView(lng = 2.55, lat = 49, zoom = 5) %>%
+        setView(lng = 2.55, lat = 49, zoom = 5)
         
         # Add National Geographic
-        addProviderTiles(providers$Stamen.Watercolor)
+        #addProviderTiles(providers$Stamen.Watercolor)
       
     })
     
