@@ -25,7 +25,10 @@ whereGone_Server <- function(id, r, path) {
               lat = "numeric")
     
     # -- load data
-    r$whereGone <- reactiveVal(read.data(path$data, filename, cols))
+    r$whereGone <- reactiveVal(kfiles::read_data(file = filename,
+                                                 path = path$data,
+                                                 colClasses = cols,
+                                                 create = FALSE))
     
     # -- add markers to map (hidden)
     observeEvent(r$whereGone(), {

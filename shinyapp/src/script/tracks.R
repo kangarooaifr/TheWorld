@@ -53,7 +53,6 @@ tracks_Server <- function(id, r, path) {
     
     
     # -- load track
-    #r$airports <- reactiveVal(read.data(path$resource, filename, cols))
     track1 <- reactive(read_sf(gpx_file, layer = "track_points"))
     
     observeEvent(track1(), {

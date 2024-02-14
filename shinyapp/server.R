@@ -3,20 +3,12 @@
 # Shiny: server logic of the Shiny web application
 
 # -- Library
-
 library(shiny)
 library(shinyWidgets)
 
 
 # -- init env
-
 source("./environment.R")
-
-
-# -- Dependencies
-
-source("~/Work/R/Library/Read and write/read.data.R")
-source("~/Work/R/Library/Read and write/write.data.R")
 
 
 # -- Define server logic

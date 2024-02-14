@@ -41,26 +41,12 @@ countries_Server <- function(id, r, path) {
     # get namespace
     ns <- session$ns
     
-    # -- prepare
-    #filename <- "flights.csv"
-    # cols <- c(id = "numeric",
-    #           from = "character",
-    #           to = "character",
-    #           date = "character",
-    #           airline = "character",
-    #           flight.number = "character",
-    #           departure.time = "character",
-    #           arrival.time = "character")
-    
     # -- load data
-    #r$flights <- reactiveVal(read.data(path$data, filename, cols))
-    
-    
-    
-    WorldCountry <<- geojson_read(file.path(path$resource, "countries.geojson"), what = "sp")
-    
-    #r$Country <- reactiveVal(data.frame(name = c("France", "Norway", "Australia")))
+    WorldCountry <- geojson_read(file.path(path$resource, "countries.geojson"), what = "sp")
+
+    # -- countries    
     countries <- reactive(unique(r$whereGone()$country))
+    
     
     observeEvent(countries(), {
                  
