@@ -2,15 +2,6 @@
 
 # Shiny: server logic of the Shiny web application
 
-# -- Library
-library(shiny)
-library(shinyWidgets)
-
-
-# -- init env
-source("./environment.R")
-
-
 # -- Define server logic
 
 shinyServer(

@@ -1,19 +1,8 @@
 
+
 # --------------------------------------------------------------------------------
 # This is the user-interface definition of the Shiny web application
 # --------------------------------------------------------------------------------
-
-# -- Library
-
-library(shiny)
-library(shinydashboard)
-library(shinyWidgets)
-library(leaflet)
-
-# -- Environment
-
-source("./environment.R")
-
 
 # -- Define Sidebar UI
 
