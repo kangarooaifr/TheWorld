@@ -1,55 +1,52 @@
 
-# --------------------------------------------------------------------------------
-# Shiny module: map
-# --------------------------------------------------------------------------------
 
-library(leaflet)
-
-
-# -------------------------------------
+# ------------------------------------------------------------------------------
 # Server logic
-# -------------------------------------
+# ------------------------------------------------------------------------------
 
 map_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
-    # -------------------------------------
-    # Outputs
-    # -------------------------------------
+    # --------------------------------------------------------------------------
+    # The map
+    # --------------------------------------------------------------------------
     
-    # -- Output: map
+    # -- Declare the map output
     output$map <- renderLeaflet({
+      
       leaflet() %>%
         
-        # Add default OpenStreetMap map tiles
+        # -- Add default OpenStreetMap map tiles
         addTiles(group = "OSM") %>%
         
-        # Set view point
+        # -- Set view point
+        # TODO: set values as parameters (probably saved as RDS?)
         setView(lng = 2.55, lat = 49, zoom = 5)
         
-        # Add National Geographic
+        # -- Add National Geographic
+        # TODO: set as optional parameters when calling module
         #addProviderTiles(providers$Stamen.Watercolor)
       
     })
     
-    # -- Declare proxy map
+    # -- Declare proxy for the map
     r$proxymap <- leafletProxy('map')
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Event observers
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- Observe mouse clicks
     observeEvent(input$map_click, {
 
-      # Get the click info
+      # -- Get the click info
       click <- input$map_click
 
-      # print
+      # -- print
       cat("Point clicked: lng =", click$lng, "/ lat =", click$lat, "\n")
       
-      # store
+      # -- store
       r$map_click <- input$map_click
 
     })
@@ -58,13 +55,13 @@ map_Server <- function(id, r, path) {
     # -- Observe map center
     observeEvent(input$map_center, {
       
-      # Get the click info
+      # -- Get the click info
       center <- input$map_center
       
-      # print
+      # -- print
       cat("Map center: lng =", center$lng, "/ lat =", center$lat, "\n")
       
-      # cache map center
+      # -- store
       r$map_center <- input$map_center
       
     })
@@ -73,26 +70,27 @@ map_Server <- function(id, r, path) {
     # -- Observe search
     observeEvent(input$search, {
       
-      # check value
+      # -- check
       req(input$search)
       
-      # trace      
+      # -- print
       cat("search input =", input$search, "\n")
       
-      # get search result
+      # -- get search result
+      # TODO: rework, this function should be part of a package
       res <- mygeocode(input$search)
       
-      # update map
+      # -- check & update map
       if (!is.null(res)){
+        
         leafletProxy('map') %>%
           flyTo('map', lng = res[1], lat = res[2], zoom = 12)
-      }
-      else{
+        
+      } else 
+        
         showNotification("No result found", type = "error")
-      }
       
     })
     
   })
 }
-

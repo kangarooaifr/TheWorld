@@ -3,10 +3,12 @@
 # Dependencies
 # ------------------------------------------------------------------------------
 
-# -- Library
+# -- Library for main app
 library(shiny)
 library(shinydashboard)
 library(shinyWidgets)
+
+# -- Module dependencies
 library(leaflet)
 
 
