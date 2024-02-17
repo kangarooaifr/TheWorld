@@ -1,22 +1,16 @@
 
-# --------------------------------------------------------------------------------
-# Shiny module: wheregone
-# --------------------------------------------------------------------------------
 
-# -- Library
-
-
-# -------------------------------------
+# ------------------------------------------------------------------------------
 # Server logic
-# -------------------------------------
+# ------------------------------------------------------------------------------
 
 whereGone_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
-    # get namespace
+    # -- get namespace
     ns <- session$ns
     
-    # -- declare
+    # -- declare objects
     filename <- "where_gone.csv"
     cols <- c(country = "character",
               state = "character",
@@ -30,12 +24,15 @@ whereGone_Server <- function(id, r, path) {
                                                  colClasses = cols,
                                                  create = FALSE))
     
+    
+    # --------------------------------------------------------------------------
+    # Event observers
+    # --------------------------------------------------------------------------
+    
     # -- add markers to map (hidden)
     observeEvent(r$whereGone(), {
       
       cat("Updating where gone markers \n")
-      
-      DEBUG_WHERE_GONE <<- r$whereGone()
       
       # get proxy map
       r$proxymap %>%
@@ -55,16 +52,7 @@ whereGone_Server <- function(id, r, path) {
                    )
     })
     
-    
-    # -------------------------------------
-    # Outputs
-    # -------------------------------------
   
-    
-    # -------------------------------------
-    # Event observers
-    # -------------------------------------
-
     # -- Observe whereGone button
     observeEvent(input$submit_whereGone, {
 
@@ -126,4 +114,3 @@ whereGone_Server <- function(id, r, path) {
     
   })
 }
-
