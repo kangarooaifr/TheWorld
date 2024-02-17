@@ -1,8 +1,11 @@
 
 
 # --------------------------------------------------------------------------------
-# Shiny module: flights
+# Shiny module: countries
 # --------------------------------------------------------------------------------
+
+# -- COMMENTS
+# TODO: rework this, should probably be part of wheregone/country !?
 
 # -- Library
 library(geojsonio)
@@ -48,6 +51,10 @@ countries_Server <- function(id, r, path) {
     countries <- reactive(unique(r$whereGone()$country))
     
     
+    # -------------------------------------
+    # Event observers
+    # -------------------------------------
+  
     observeEvent(countries(), {
                  
                  data_Map <- WorldCountry[WorldCountry@data$ADMIN %in% countries(), ]
@@ -57,15 +64,6 @@ countries_Server <- function(id, r, path) {
                  
                  })
     
-
-    # -------------------------------------
-    # Outputs
-    # -------------------------------------
-    
-    
-    # -------------------------------------
-    # Event observers
-    # -------------------------------------
     
     # -- Observe checkbox
     observeEvent(input$submit_countries, {

@@ -4,12 +4,13 @@
 # Shiny module: tracks
 # --------------------------------------------------------------------------------
 
+# -----------------------
+# TODO: rework: this should be part of kmaps
+
 # -- Library
 library(sf)
 library(ggplot2)
 library(leaflet)
-
-# -- Source dependencies
 
 
 # -------------------------------------
