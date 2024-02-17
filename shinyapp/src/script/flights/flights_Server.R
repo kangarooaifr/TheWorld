@@ -12,7 +12,7 @@ flights_Server <- function(id, r, path) {
     
     # -- load airports
     r$airports <- reactiveVal(kfiles::read_data(file = file_list$airports,
-                                                path = path$resource, 
+                                                path = path$resources, 
                                                 colClasses = colClasses_airports,
                                                 create = FALSE))
     

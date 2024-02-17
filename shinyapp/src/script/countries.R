@@ -42,7 +42,7 @@ countries_Server <- function(id, r, path) {
     ns <- session$ns
     
     # -- load data
-    WorldCountry <- geojson_read(file.path(path$resource, "countries.geojson"), what = "sp")
+    WorldCountry <- geojson_read(file.path(path$resources, "countries.geojson"), what = "sp")
 
     # -- countries    
     countries <- reactive(unique(r$whereGone()$country))
