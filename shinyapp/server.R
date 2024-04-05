@@ -29,6 +29,8 @@ shinyServer(
     # - flights:
     # ----------------------------------------------------------------------
     
+    # -- kitems: generate dynamic sidebar
+    output$menu <- renderMenu(kitems::dynamic_sidebar(r))
     
     # map
     map_Server(id = "map", r = r, path = path)
@@ -44,6 +46,11 @@ shinyServer(
     
     #
     tracks_Server(id = "tracks", r = r, path = path)
+    
+    
+    # -- locations
+    location_Server(id = "locationmngr", r = r, path = path$data)
+    
     
   }
 )
