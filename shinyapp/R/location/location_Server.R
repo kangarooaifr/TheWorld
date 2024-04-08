@@ -10,16 +10,15 @@ location_Server <- function(id, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    
-    
-    
-    # -- location table
-    # id, name, lng, lat, ... city/country?, beenthere, wishlist, type
-    
-    # -- 
+    # -- launch kitems sub module
     kitems::kitemsManager_Server(id = "location", r, path)
-    
-    
+  
+    # -- 
+    observeEvent(r$map_click, {
+      
+      cat("map click", str(r$map_click), "\n")
+      
+    })
     
   })
 }
