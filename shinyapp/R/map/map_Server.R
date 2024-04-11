@@ -62,6 +62,7 @@ map_Server <- function(id, r, path) {
       cat("Map center: lng =", center$lng, "/ lat =", center$lat, "\n")
       
       # -- store
+      r$map_click <- NULL
       r$map_center <- input$map_center
       
     })
