@@ -16,18 +16,6 @@ location_panel_UI <- function(id)
   
 }
 
-# -- location panel
-location_form_UI <- function(id)
-{
-  
-  # -- namespace
-  ns <- NS(id)
-  
-  # -- ui
-  uiOutput(ns("add_location_form"))
-  
-}
-
 
 # -- location markers
 show_location_BTN <- function(id)

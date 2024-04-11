@@ -40,44 +40,80 @@ location_Server <- function(id, r, path) {
         renderUI(
           
           wellPanel(
+            
             h4("Location"),
             p("Coordinates:"), 
+            
             tags$ul(tags$li("long =", r$map_click[1]), 
                     tags$li("lat =", r$map_click[2])),
-            actionButton(inputId = ns("add_location"), label = "", icon = icon("plus"))))
+            
+            # -- name
+            textInput(inputId = ns("name"), 
+                      label = "Name"),
+            
+            # -- type
+            selectizeInput(inputId = ns("type"), 
+                           label = "Type", 
+                           choices = r[[r_items]]()$type, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'),
+                                          create = TRUE)),
+            
+            # -- country          
+            selectizeInput(inputId = ns("country"), 
+                           label = "Country", 
+                           choices = countries$country.en, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'),
+                                          create = FALSE)),
+            
+            # -- state / region
+            selectizeInput(inputId = ns("state"), 
+                           label = "State", 
+                           choices = r[[r_items]]()$state, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'),
+                                          create = TRUE)),
+            
+            # -- zip code
+            textInput(inputId = ns("zip.code"), 
+                      label = "Zip code"),
+            
+            # -- city
+            selectizeInput(inputId = ns("city"), 
+                           label = "City", 
+                           choices = r[[r_items]]()$city, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'),
+                                          create = TRUE)),
+            
+            # -- address
+            textInput(inputId = ns("address"), 
+                      label = "Address"),
+            
+            # -- comment
+            textInput(inputId = ns("comment"), 
+                      label = "Comment"),
+            
+            # -- been.there
+            checkboxInput(inputId = ns("been.there"), 
+                          label = "Been there", 
+                          value = FALSE),
+            
+            # -- wish.list
+            checkboxInput(inputId = ns("wish.list"), 
+                          label = "Wish list", 
+                          value = FALSE),
+            
+            # -- action btn
+            actionButton(inputId = ns("confirm_add_location"), 
+                         label = "Create")))
       
     }, ignoreNULL = FALSE)
     
-    
-    # -- Observer add location button
-    observeEvent(input$add_location, {
-      
-      # -- location form
-      output$add_location_form <- renderUI(
-        
-        wellPanel(
-          
-          textInput(inputId = ns("name"), label = "Name"),
-          selectizeInput(inputId = ns("type"), label = "Type", choices = r[[r_items]]()$type, options = list(create = TRUE)),
-          selectizeInput(inputId = ns("country"), label = "Country", choices = countries$country.en, options = list(create = FALSE)),
-          selectizeInput(inputId = ns("state"), label = "State", choices = r[[r_items]]()$state, options = list(create = TRUE)),
-          textInput(inputId = ns("zip.code"), label = "Zip code"),
-          selectizeInput(inputId = ns("city"), label = "City", choices = r[[r_items]]()$city, options = list(create = TRUE)),
-          textInput(inputId = ns("address"), label = "Address"),
-          textInput(inputId = ns("comment"), label = "Comment"),
-          checkboxInput(inputId = ns("been.there"), label = "Been there", value = FALSE),
-          checkboxInput(inputId = ns("wish.list"), label = "Wish list", value = FALSE),
-          
-          actionButton(inputId = ns("confirm_add_location"), label = "Create")))
-      
-    })
-    
-    
+
     # -- Observer add location button
     observeEvent(input$confirm_add_location, {
-      
-      # -- update output
-      output$add_location_form <- NULL
       
       cat(">>> DEBUG input \n")
       
