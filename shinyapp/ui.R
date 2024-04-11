@@ -1,25 +1,18 @@
 
+
 # --------------------------------------------------------------------------------
 # This is the user-interface definition of the Shiny web application
 # --------------------------------------------------------------------------------
-
-# -- Library
-
-library(shiny)
-library(shinydashboard)
-library(shinyWidgets)
-library(leaflet)
-
-# -- Environment
-
-source("./environment.R")
-
 
 # -- Define Sidebar UI
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"), selected = TRUE)),
+    
+    # -- add dynamic section
+    sidebarMenu(tabName = "location", sidebarMenuOutput("menu")),
+    
     collapsed = TRUE)
 
 
@@ -35,17 +28,25 @@ body <- dashboardBody(
                 fluidRow(
                     column(width = 2,
                            search_Input("map"),
-                           whereGone_UI("wheregone"),
+                           location_panel_UI("locationmngr"),
+                           show_location_BTN("locationmngr"),
+                           #whereGone_UI("wheregone"),
                            flights_UI("flights"),
                            countries_UI("countries"),
-                           tracks_UI("tracks")
-                           ),
+                           tracks_UI("tracks")),
+                    
                     column(width = 10,
-                           map_UI("map")
-                           )
-                )
+                           map_UI("map")))),
+        
+        
+        # -- kitems admin
+        tabItem(tabName = "location",
                 
-        )
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("locationmngr-location"))))
+        
     )
 )
 
