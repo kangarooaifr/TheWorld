@@ -103,7 +103,10 @@ location_Server <- function(id, r, path) {
     
     
     # -- Observer show location button
-    observeEvent(input$show_location, {
+    observeEvent({
+      input$show_location
+      r[[r_items]]()
+    }, {
       
       # -- option
       cat("[location] Show location, option =", input$show_location_option, "\n")
