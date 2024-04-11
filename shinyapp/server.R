@@ -49,7 +49,7 @@ shinyServer(
     
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path$data)
+    location_Server(id = "locationmngr", r = r, path = path)
     
     
   }

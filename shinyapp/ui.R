@@ -28,12 +28,16 @@ body <- dashboardBody(
                 fluidRow(
                     column(width = 2,
                            search_Input("map"),
-                           whereGone_UI("wheregone"),
+                           location_panel_UI("locationmngr"),
+                           location_form_UI("locationmngr"),
+                           #whereGone_UI("wheregone"),
                            flights_UI("flights"),
                            countries_UI("countries"),
                            tracks_UI("tracks")),
                     
                     column(width = 10,
+                           show_location_BTN("locationmngr"),
+                           br(), br(),
                            map_UI("map")))),
         
         
@@ -43,7 +47,6 @@ body <- dashboardBody(
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         
                          kitems::admin_ui("locationmngr-location"))))
         
     )
