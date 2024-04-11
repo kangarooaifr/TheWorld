@@ -25,6 +25,11 @@ location_Server <- function(id, r, path) {
     r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
+    # -- icon set
+    icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
+                             wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
+                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'blue'))
+    
     
     # -- Observe map click
     observeEvent(r$map_click, {
@@ -123,40 +128,45 @@ location_Server <- function(id, r, path) {
       # -- check dim
       if(dim(locations)[1] > 0){
         
-        # -- get area bounds
+        # -- get bounding box (args for flyToBounds)
         lng_min <- min(locations$lng)
         lng_max <- max(locations$lng)
         lat_min <- min(locations$lat)
         lat_max <- max(locations$lat)
         
-        # -- get proxy map
+        DEBUG_locations <<- locations
+        
+        # -- prepare marker icon
+        locations <- transform(locations, icon = ifelse(been.there, 'been.there', ifelse(wish.list, 'wish.list', 'default')))
+        
+        # -- update map (proxy)
         r$proxymap %>%
           
           # -- cleanup
           clearGroup("location") %>%
           
           # -- Add markers
-          addMarkers(data = locations,
-                     lng = ~lng,
-                     lat = ~lat,
-                     group = "location",
-                     label = ~city,
-                     popup = ~sprintf(
-                       paste0(
-                         "Name:", city,
-                         br(),
-                         "lng = ", lng,
-                         br(),
-                         "lat = ", lat,
-                         br(),
-                         actionLink(inputId = "delete_%s", 
-                                    label =  "Delete", 
-                                    onclick = sprintf(
-                                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                      ns("button_click")))), id),
-                     #clusterOptions = markerClusterOptions(),
-                     clusterOptions = NULL
-          ) %>%
+          addAwesomeMarkers(data = locations,
+                            lng = ~lng,
+                            lat = ~lat,
+                            group = "location",
+                            icon = ~icons[icon],
+                            label = ~city,
+                            popup = ~sprintf(
+                              paste0(
+                                "Name:", city,
+                                br(),
+                                "lng = ", lng,
+                                br(),
+                                "lat = ", lat,
+                                br(),
+                                actionLink(inputId = "delete_%s", 
+                                           label =  "Delete", 
+                                           onclick = sprintf(
+                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("button_click")))), id),
+                            #clusterOptions = markerClusterOptions(),
+                            clusterOptions = NULL) %>%
           
           # -- set view
           flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, options = list(padding = c(50, 50)))
