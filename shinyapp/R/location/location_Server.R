@@ -114,9 +114,7 @@ location_Server <- function(id, r, path) {
 
     # -- Observer add location button
     observeEvent(input$confirm_add_location, {
-      
-      cat(">>> DEBUG input \n")
-      
+
       # -- build values
       input_values <- data.frame(id = NA,
                                  name = input$name,
@@ -131,8 +129,6 @@ location_Server <- function(id, r, path) {
                                  comment = input$comment,
                                  been.there = input$been.there,
                                  wish.list = input$wish.list)
-      
-      str(input_values)
       
       # -- create item
       item <- kitems::item_create(values = input_values, data.model = r[[r_data_model]]())
@@ -169,9 +165,7 @@ location_Server <- function(id, r, path) {
         lng_max <- max(locations$lng)
         lat_min <- min(locations$lat)
         lat_max <- max(locations$lat)
-        
-        DEBUG_locations <<- locations
-        
+
         # -- prepare marker icon
         locations <- transform(locations, icon = ifelse(been.there, 'been.there', ifelse(wish.list, 'wish.list', 'default')))
         
