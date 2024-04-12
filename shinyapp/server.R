@@ -52,8 +52,8 @@ shinyServer(
     # -- locations
     location_Server(id = "locationmngr", r = r, path = path)
     
-    # -- flights
-    flight_Server(id = "flightmngr", r = r, path = path)
+    # -- transports
+    transport_Server(id = "transportmngr", r = r, path = path)
     
   }
 )

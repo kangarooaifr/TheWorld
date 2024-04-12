@@ -11,7 +11,7 @@ sidebar <- dashboardSidebar(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"), selected = TRUE)),
     
     # -- add dynamic section
-    sidebarMenu(tabName = "location", sidebarMenuOutput("menu")),
+    sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
     
     collapsed = TRUE)
 
@@ -39,13 +39,21 @@ body <- dashboardBody(
                            map_UI("map")))),
         
         
-        # -- kitems admin
+        # -- kitems admin (location)
         tabItem(tabName = "location",
                 
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         kitems::admin_ui("locationmngr-location"))))
+                         kitems::admin_ui("locationmngr-location")))),
+        
+        # -- kitems admin (transport)
+        tabItem(tabName = "transport",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("transportmngr-transport"))))
         
     )
 )
