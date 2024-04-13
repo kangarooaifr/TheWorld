@@ -59,6 +59,67 @@ transport_Server <- function(id, r, path) {
     r_data_model <- kitems::dm_name(id = kitems_id)
     r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
+    r_trigger_create <- kitems::trigger_create_name(id = kitems_id)
+    
+    
+    # -------------------------------------
+    # Add transport
+    # -------------------------------------
+    
+    observeEvent(input$add_transport, {
+      
+      # -- display modal
+      showModal(modalDialog(
+        
+        title = "Select aiport",
+        
+        "Select the origin.",
+        
+        selectizeInput(inputId = ns("select_airport"), label = "Airport", choices = NULL),
+        
+        footer = tagList(
+          modalButton("Cancel"),
+          actionButton(inputId = ns("confirm_airport"), label = "OK")
+        )
+      ))
+      
+      # create the selectizeInput with empty choices, then
+      updateSelectizeInput(session, 'select_airport', choices = airports$IATA, server = TRUE)
+      
+      
+      observeEvent(input$confirm_airport, {
+        
+        removeModal()
+        
+        cache_origin <<- function() {
+          
+          cat("inside cache_origin() \n ")
+          input$select_airport
+          
+          233
+          
+          # --------------------------------------
+          # TODO: 
+          # - rework the iata airport csv to include id, ...
+          # - update the selectInput (create named list for choices...)
+          # - add destination input
+          # - cache origin / destination
+          
+          
+        }
+        
+        r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
+
+
+      })
+      
+      
+    })
+    
+    
+    # ------------------------------------------------------------------------------
+    # OLD OLD OLD
+    # ------------------------------------------------------------------------------
     
     
     # -------------------------------------
