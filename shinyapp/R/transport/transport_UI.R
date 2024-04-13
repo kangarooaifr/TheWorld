@@ -1,10 +1,11 @@
 
+
 # -------------------------------------
 # UI items section
 # -------------------------------------
 
-# -- Where gone checkbox
-flights_UI <- function(id){
+# -- panel
+transport_UI <- function(id){
   
   # namespace
   ns <- NS(id)
@@ -12,15 +13,13 @@ flights_UI <- function(id){
   # UI
   wellPanel(
     
-    # hide / show checkbox
-    actionButton(inputId = ns("print_flights"),
-                 label = "print flights"),
+    p("Transport"),
     
-    checkboxInput(inputId =  ns("submit_flights"), 
-                  label = "flights", 
-                  value = FALSE, 
-                  width = NULL)
+    # + button
+    actionButton(inputId = ns("add_transport"),
+                 label = "",
+                 icon = icon(name = "plus", lib = "font-awesome")),
     
-  )
+    kitems::create_BTN(ns("transport")))
   
 }
