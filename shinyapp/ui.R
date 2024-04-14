@@ -11,7 +11,7 @@ sidebar <- dashboardSidebar(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"), selected = TRUE)),
     
     # -- add dynamic section
-    sidebarMenu(tabName = "location", sidebarMenuOutput("menu")),
+    sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
     
     collapsed = TRUE)
 
@@ -29,9 +29,9 @@ body <- dashboardBody(
                     column(width = 2,
                            search_Input("map"),
                            location_panel_UI("locationmngr"),
-                           show_location_BTN("locationmngr"),
-                           #whereGone_UI("wheregone"),
-                           flights_UI("flights"),
+                           # show_location_BTN("locationmngr"),
+                           # whereGone_UI("wheregone"),
+                           route_UI("routemngr"),
                            countries_UI("countries"),
                            tracks_UI("tracks")),
                     
@@ -39,13 +39,21 @@ body <- dashboardBody(
                            map_UI("map")))),
         
         
-        # -- kitems admin
+        # -- kitems admin (location)
         tabItem(tabName = "location",
                 
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         kitems::admin_ui("locationmngr-location"))))
+                         kitems::admin_ui("locationmngr-location")))),
+        
+        # -- kitems admin (route)
+        tabItem(tabName = "route",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("routemngr-route"))))
         
     )
 )
