@@ -34,6 +34,7 @@ body <- dashboardBody(
                            tracks_UI("tracks")),
                     
                     column(width = 10,
+                           country_INPUT("map"),
                            map_UI("map")))),
         
         

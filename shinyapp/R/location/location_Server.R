@@ -142,6 +142,7 @@ location_Server <- function(id, r, path) {
     observeEvent({
       input$show_location
       r[[r_items]]()
+      r$filter_country
     }, {
       
       # -- option
@@ -154,7 +155,12 @@ location_Server <- function(id, r, path) {
       else if(input$show_location_option == "wish-list")
         locations <- locations[locations$wish.list, ]
       
-      cat("-- apply filter output dim =", dim(locations)[1], "obs. \n")
+      cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
+      
+      # -- filter by country
+      if(!is.null(r$filter_country)){
+        locations <- locations[locations$country %in% r$filter_country, ]
+        cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
       
       # -- check dim
       if(dim(locations)[1] > 0){
@@ -201,7 +207,7 @@ location_Server <- function(id, r, path) {
           flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, options = list(padding = c(50, 50)))
       }
       
-    })
+    }, ignoreNULL = FALSE)
     
     
     # -- Observe: button click from marker popup
