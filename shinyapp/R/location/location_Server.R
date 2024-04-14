@@ -38,9 +38,8 @@ location_Server <- function(id, r, path) {
         NULL
       else 
         renderUI(
-          
-          wellPanel(
             
+          tagList(
             h4("Location"),
             p("Coordinates:"), 
             
