@@ -23,7 +23,6 @@ body <- dashboardBody(
     tabItems(
     
         tabItem(tabName = "dashboard",
-                h2("Dashboard"),
                 
                 fluidRow(
                     column(width = 2,
@@ -31,7 +30,7 @@ body <- dashboardBody(
                            location_panel_UI("locationmngr"),
                            route_UI("routemngr"),
                            country_UI("country"),
-                           tracks_UI("tracks")),
+                           track_UI("tracks")),
                     
                     column(width = 10,
                            country_INPUT("map"),

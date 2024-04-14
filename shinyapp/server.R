@@ -43,7 +43,7 @@ shinyServer(
     
     
     #
-    tracks_Server(id = "tracks", r = r, path = path)
+    track_Server(id = "track", r = r, path = path)
     
     # **********************************************************
     
