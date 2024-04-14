@@ -20,6 +20,16 @@ transport_UI <- function(id){
                  label = "",
                  icon = icon(name = "plus", lib = "font-awesome")),
     
-    kitems::create_BTN(ns("transport")))
+    # -- radio btn
+    radioButtons(inputId = ns("show_transport_option"), 
+                 label = "", 
+                 choiceNames = list(icon("plane"), icon("ship"), icon("bus")), 
+                 choiceValues = list("air", "sea", "road"), 
+                 inline = TRUE),
+    
+    # -- display btn
+    actionButton(inputId = ns("show_transport"), label = "Show transport")
+    
+    )
   
 }

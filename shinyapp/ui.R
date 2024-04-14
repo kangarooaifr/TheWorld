@@ -30,8 +30,8 @@ body <- dashboardBody(
                            search_Input("map"),
                            location_panel_UI("locationmngr"),
                            show_location_BTN("locationmngr"),
-                           #whereGone_UI("wheregone"),
-                           flights_UI("flights"),
+                           # whereGone_UI("wheregone"),
+                           transport_UI("transportmngr"),
                            countries_UI("countries"),
                            tracks_UI("tracks")),
                     

@@ -27,14 +27,15 @@ transport_Server <- function(id, r, path) {
     
     
     # -- colClasses
-    colClasses_airports <- c(Name = "character",
-                             City = "character",
-                             Country = "character",
-                             IATA = "character",
-                             ICAO = "character",
-                             Latitude = "numeric",
-                             Longitude = "numeric",
-                             Altitude = "numeric")
+    colClasses_airports <- c(id = "numeric",
+                             name = "character",
+                             city = "character",
+                             country = "character",
+                             iata = "character",
+                             icao = "character",
+                             latitude = "numeric",
+                             longitude = "numeric",
+                             altitude = "numeric")
     
     
     # -- load airports
@@ -71,48 +72,47 @@ transport_Server <- function(id, r, path) {
       # -- display modal
       showModal(modalDialog(
         
-        title = "Select aiport",
+        title = "Select route",
         
         "Select the origin.",
         
-        selectizeInput(inputId = ns("select_airport"), label = "Airport", choices = NULL),
+        # -- create the selectizeInput with empty choices (perfo)
+        selectizeInput(inputId = ns("select_origin"), label = "Origin", choices = NULL),
+        selectizeInput(inputId = ns("select_destination"), label = "Destination", choices = NULL),
         
         footer = tagList(
           modalButton("Cancel"),
-          actionButton(inputId = ns("confirm_airport"), label = "OK")
+          actionButton(inputId = ns("confirm_route"), label = "OK")
         )
       ))
       
-      # create the selectizeInput with empty choices, then
-      updateSelectizeInput(session, 'select_airport', choices = airports$IATA, server = TRUE)
+      # -- update the selectizeInput with choices (server)
+      choices <-airports$id
+      names(choices) <- airports$iata
+      choices <- as.list(choices)
+      updateSelectizeInput(session, 'select_origin', choices = choices, server = TRUE)
+      updateSelectizeInput(session, 'select_destination', choices = choices, server = TRUE)
       
-      
-      observeEvent(input$confirm_airport, {
+      # -- observe modal action btn
+      observeEvent(input$confirm_route, {
         
+        # -- close
         removeModal()
         
+        # -- declare cache function
         cache_origin <<- function() {
-          
-          cat("inside cache_origin() \n ")
-          input$select_airport
-          
-          233
-          
-          # --------------------------------------
-          # TODO: 
-          # - rework the iata airport csv to include id, ...
-          # - update the selectInput (create named list for choices...)
-          # - add destination input
-          # - cache origin / destination
-          
-          
-        }
+          cat("[cache_origin] origin =", input$select_origin, "\n ")
+          input$select_origin}
         
+        # -- declare cache function
+        cache_destination <<- function() {
+          cat("[cache_origin] origin =", input$select_destination, "\n ")
+          input$select_destination}
+        
+        # -- call trigger
         r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
-
-
+        
       })
-      
       
     })
     
@@ -123,24 +123,32 @@ transport_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Event observers
+    # Display routes
     # -------------------------------------
 
-    # -- add markers to map (hidden)
-    observeEvent(input$print_transports, {
+    # -- add path to map
+    observeEvent(input$show_transport, {
       
-      cat("Updating transport segments \n")
+      cat("[transportS] Updating transport segments \n")
+      
+      # -- get flight data
+      transports <- r[[r_items]]()
+      transports <- transports[transports$type == 'flight', ]
       
       # -- Helper: add transport route to map
-      addtransport <- function(from, to){
+      addtransport <- function(transportid){
         
-        cat("[transportS]    - transport from", from, "to", to, "\n")
+        # -- get route parameters
+        origin <- transports[transports$id == transportid, 'origin']
+        destination <- transports[transports$id == transportid, 'destination']
+        origin_name <- airports[airports$id == origin, 'name']
+        destination_name <- airports[airports$id == destination, 'name']
+        
+        cat("-- transport origin", origin, "/ destination", destination, "\n")
         
         # -- compute great circle route
-        route <- gcIntermediate(p1 = get_iata_lnglat(airports = r$airports(), 
-                                                     iata.code = from), 
-                                p2 = get_iata_lnglat(airports = r$airports(), 
-                                                     iata.code = to), 
+        route <- gcIntermediate(p1 = airport_coord(airports, id = origin), 
+                                p2 = airport_coord(airports, id = destination), 
                                 n = 100, 
                                 addStartEnd = TRUE)
         
@@ -148,13 +156,13 @@ transport_Server <- function(id, r, path) {
         r$proxymap %>%
           
           # add fight route
-          addPolylines(data = route, group = "transports", color = "purple", weight = 2, popup = "test")
+          addPolylines(data = route, group = "routes", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
         
       }
       
-      # apply helper to transports df
-      cat("[transportS] -- Looping over transport list... \n")
-      apply(r$transports(), MARGIN = 1, function(x) addtransport(x['from'], x['to']))
+      # -- apply helper to transports df
+      cat("[transportS] Looping over transport list... \n")
+      lapply(transports$id, addtransport)
         
     })
     
