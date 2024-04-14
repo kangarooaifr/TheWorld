@@ -53,7 +53,7 @@ shinyServer(
     location_Server(id = "locationmngr", r = r, path = path)
     
     # -- transports
-    transport_Server(id = "transportmngr", r = r, path = path)
+    route_Server(id = "routemngr", r = r, path = path)
     
   }
 )

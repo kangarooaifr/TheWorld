@@ -5,7 +5,7 @@
 # -------------------------------------
 
 # -- panel
-transport_UI <- function(id){
+route_UI <- function(id){
   
   # namespace
   ns <- NS(id)
@@ -13,22 +13,22 @@ transport_UI <- function(id){
   # UI
   wellPanel(
     
-    p("Transport"),
+    p("Route"),
     
     # + button
-    actionButton(inputId = ns("add_transport"),
+    actionButton(inputId = ns("add_route"),
                  label = "",
                  icon = icon(name = "plus", lib = "font-awesome")),
     
     # -- radio btn
-    radioButtons(inputId = ns("show_transport_option"), 
+    radioButtons(inputId = ns("show_route_option"), 
                  label = "", 
                  choiceNames = list(icon("plane"), icon("ship"), icon("bus")), 
                  choiceValues = list("air", "sea", "road"), 
                  inline = TRUE),
     
     # -- display btn
-    actionButton(inputId = ns("show_transport"), label = "Show transport"),
+    actionButton(inputId = ns("show_route"), label = "Show route"),
     
     # -- show / hide
     checkboxInput(inputId = ns("show_hide"), label = "Show / hide")

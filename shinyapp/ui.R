@@ -31,7 +31,7 @@ body <- dashboardBody(
                            location_panel_UI("locationmngr"),
                            show_location_BTN("locationmngr"),
                            # whereGone_UI("wheregone"),
-                           transport_UI("transportmngr"),
+                           route_UI("routemngr"),
                            countries_UI("countries"),
                            tracks_UI("tracks")),
                     
@@ -47,13 +47,13 @@ body <- dashboardBody(
                   column(width = 12,
                          kitems::admin_ui("locationmngr-location")))),
         
-        # -- kitems admin (transport)
-        tabItem(tabName = "transport",
+        # -- kitems admin (route)
+        tabItem(tabName = "route",
                 
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         kitems::admin_ui("transportmngr-transport"))))
+                         kitems::admin_ui("routemngr-route"))))
         
     )
 )

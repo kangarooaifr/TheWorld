@@ -12,7 +12,7 @@ library(geosphere)
 # Module Server logic
 # ------------------------------------------------------------------------------
 
-transport_Server <- function(id, r, path) {
+route_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace
@@ -46,11 +46,11 @@ transport_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Data manager (transports)
+    # Data manager (routes)
     # -------------------------------------
     
     # -- module id
-    kitems_id <- "transport"
+    kitems_id <- "route"
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
@@ -64,10 +64,10 @@ transport_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Add transport
+    # Add route
     # -------------------------------------
     
-    observeEvent(input$add_transport, {
+    observeEvent(input$add_route, {
       
       # -- display modal
       showModal(modalDialog(
@@ -122,24 +122,24 @@ transport_Server <- function(id, r, path) {
     # -------------------------------------
 
     # -- add path to map
-    observeEvent(input$show_transport, {
+    observeEvent(input$show_route, {
       
-      cat("[transportS] Updating transport segments \n")
+      cat("[routeS] Updating route segments \n")
       
       # -- get flight data
-      transports <- r[[r_items]]()
-      transports <- transports[transports$type == 'flight', ]
+      routes <- r[[r_items]]()
+      routes <- routes[routes$type == 'flight', ]
       
-      # -- Helper: add transport route to map
-      addtransport <- function(transportid){
+      # -- Helper: add route route to map
+      addroute <- function(routeid){
         
         # -- get route parameters
-        origin <- transports[transports$id == transportid, 'origin']
-        destination <- transports[transports$id == transportid, 'destination']
+        origin <- routes[routes$id == routeid, 'origin']
+        destination <- routes[routes$id == routeid, 'destination']
         origin_name <- airports[airports$id == origin, 'name']
         destination_name <- airports[airports$id == destination, 'name']
         
-        cat("-- transport origin", origin, "/ destination", destination, "\n")
+        cat("-- route origin", origin, "/ destination", destination, "\n")
         
         # -- compute great circle route
         route <- gcIntermediate(p1 = airport_coord(airports, id = origin), 
@@ -151,13 +151,13 @@ transport_Server <- function(id, r, path) {
         r$proxymap %>%
           
           # add fight route
-          addPolylines(data = route, group = "transports", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+          addPolylines(data = route, group = "routes", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
         
       }
       
-      # -- apply helper to transports df
-      cat("[transportS] Looping over transport list... \n")
-      lapply(transports$id, addtransport)
+      # -- apply helper to routes df
+      cat("[routes] Looping over route list... \n")
+      lapply(routes$id, addroute)
       
       # -- update hide / show
       updateCheckboxInput(inputId = "show_hide", value = TRUE)
@@ -175,23 +175,23 @@ transport_Server <- function(id, r, path) {
       # checkbox marked
       if(input$show_hide){
         
-        cat("Show group: transports \n")
+        cat("Show group: routes \n")
         
         # proxy map
         r$proxymap %>%
           
           # Show group
-          showGroup('transports')
+          showGroup('routes')
         
       }else{
         
-        cat("Hide group: transports \n")
+        cat("Hide group: routes \n")
         
         # proxy map
         r$proxymap %>%
           
           # clear group
-          hideGroup('transports')
+          hideGroup('routes')
       }
       
     })
