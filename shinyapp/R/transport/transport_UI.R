@@ -28,7 +28,10 @@ transport_UI <- function(id){
                  inline = TRUE),
     
     # -- display btn
-    actionButton(inputId = ns("show_transport"), label = "Show transport")
+    actionButton(inputId = ns("show_transport"), label = "Show transport"),
+    
+    # -- show / hide
+    checkboxInput(inputId = ns("show_hide"), label = "Show / hide")
     
     )
   

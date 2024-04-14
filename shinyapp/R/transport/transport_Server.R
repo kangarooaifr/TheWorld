@@ -117,11 +117,6 @@ transport_Server <- function(id, r, path) {
     })
     
     
-    # ------------------------------------------------------------------------------
-    # OLD OLD OLD
-    # ------------------------------------------------------------------------------
-    
-    
     # -------------------------------------
     # Display routes
     # -------------------------------------
@@ -156,26 +151,29 @@ transport_Server <- function(id, r, path) {
         r$proxymap %>%
           
           # add fight route
-          addPolylines(data = route, group = "routes", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+          addPolylines(data = route, group = "transports", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
         
       }
       
       # -- apply helper to transports df
       cat("[transportS] Looping over transport list... \n")
       lapply(transports$id, addtransport)
+      
+      # -- update hide / show
+      updateCheckboxInput(inputId = "show_hide", value = TRUE)
         
     })
     
-    
+
     # -------------------------------------
-    # Event observers
+    # Hide / Show
     # -------------------------------------
     
     # -- Observe checkbox
-    observeEvent(input$submit_transports, {
+    observeEvent(input$show_hide, {
       
       # checkbox marked
-      if(input$submit_transports){
+      if(input$show_hide){
         
         cat("Show group: transports \n")
         
