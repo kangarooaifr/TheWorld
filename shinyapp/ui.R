@@ -29,10 +29,8 @@ body <- dashboardBody(
                     column(width = 2,
                            search_Input("map"),
                            location_panel_UI("locationmngr"),
-                           # show_location_BTN("locationmngr"),
-                           # whereGone_UI("wheregone"),
                            route_UI("routemngr"),
-                           countries_UI("countries"),
+                           country_UI("country"),
                            tracks_UI("tracks")),
                     
                     column(width = 10,

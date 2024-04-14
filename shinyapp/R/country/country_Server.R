@@ -1,44 +1,18 @@
 
 
-# --------------------------------------------------------------------------------
-# Shiny module: countries
-# --------------------------------------------------------------------------------
-
-# -- COMMENTS
-# TODO: rework this, should probably be part of wheregone/country !?
+# ------------------------------------------------------------------------------
+# Shiny module: country
+# ------------------------------------------------------------------------------
 
 # -- Library
 library(geojsonio)
-
-# -- Source dependencies
-
-
-# -------------------------------------
-# UI items section
-# -------------------------------------
-
-# -- Where gone checkbox
-countries_UI <- function(id){
-  
-  # namespace
-  ns <- NS(id)
-  
-  # UI
-  wellPanel(
-    
-    # hide / show checkbox
-    checkboxInput(ns("submit_countries"), label = "Countries", value = FALSE, width = NULL)
-    
-  )
-  
-}
 
 
 # -------------------------------------
 # Server logic
 # -------------------------------------
 
-countries_Server <- function(id, r, path) {
+country_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace
@@ -68,10 +42,10 @@ countries_Server <- function(id, r, path) {
     
     
     # -- Observe checkbox
-    observeEvent(input$submit_countries, {
+    observeEvent(input$hide_show, {
 
       # checkbox marked
-      if(input$submit_countries){
+      if(input$hide_show){
 
         cat("Show group: countries \n")
 
