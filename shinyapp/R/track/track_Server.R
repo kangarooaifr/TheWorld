@@ -1,44 +1,19 @@
 
 
-# --------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Shiny module: tracks
-# --------------------------------------------------------------------------------
-
-# -----------------------
-# TODO: rework: this should be part of kmaps
+# ------------------------------------------------------------------------------
 
 # -- Library
 library(sf)
-library(ggplot2)
 library(leaflet)
-
-
-# -------------------------------------
-# UI items section
-# -------------------------------------
-
-# -- Where gone checkbox
-tracks_UI <- function(id){
-  
-  # namespace
-  ns <- NS(id)
-  
-  # UI
-  wellPanel(
-    
-    # hide / show checkbox
-    checkboxInput(ns("submit_tracks"), label = "tracks", value = FALSE, width = NULL)
-    
-  )
-  
-}
 
 
 # -------------------------------------
 # Server logic
 # -------------------------------------
 
-tracks_Server <- function(id, r, path) {
+track_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace
@@ -67,6 +42,7 @@ tracks_Server <- function(id, r, path) {
       # add to leaflet map
       r$proxymap %>%
         addPolylines(data = track2, group = "tracks")
+
     })
 
     
