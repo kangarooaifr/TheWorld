@@ -41,8 +41,6 @@ shinyServer(
     # where gone
     # whereGone_Server(id = "wheregone", r = r, path = path)
     
-    # countries
-    #countries_Server(id = "countries", r = r, path = path)
     
     #
     tracks_Server(id = "tracks", r = r, path = path)
@@ -52,8 +50,14 @@ shinyServer(
     # -- locations
     location_Server(id = "locationmngr", r = r, path = path)
     
+    # countries
+    countries_Server(id = "countries", r = r, path = path)
+    
+    
     # -- transports
     route_Server(id = "routemngr", r = r, path = path)
+    
+    
     
   }
 )

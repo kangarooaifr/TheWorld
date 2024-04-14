@@ -45,10 +45,12 @@ countries_Server <- function(id, r, path) {
     ns <- session$ns
     
     # -- load data
-    WorldCountry <- geojson_read(file.path(path$resources, "countries.geojson"), what = "sp")
+    cat("[countries] Read countries geojson data... \n")
+    countries_geojson <- geojson_read(file.path(path$resources, "countries.geojson"), what = "sp")
 
     # -- countries    
-    countries <- reactive(unique(r$whereGone()$country))
+    r_items <- "location_items"
+    countries <- reactive(unique(r[[r_items]]()[r[[r_items]]()$been.there, 'country']))
     
     
     # -------------------------------------
@@ -57,10 +59,10 @@ countries_Server <- function(id, r, path) {
   
     observeEvent(countries(), {
                  
-                 data_Map <- WorldCountry[WorldCountry@data$ADMIN %in% countries(), ]
+                 data_map <- countries_geojson[countries_geojson@data$ADMIN %in% countries(), ]
                  
                  r$proxymap %>% 
-                   addPolygons(data = data_Map, weight = 1, color = "red", group = "countries")
+                   addPolygons(data = data_map, weight = 1, color = "red", group = "countries")
                  
                  })
     
