@@ -116,13 +116,38 @@ map_Server <- function(id, r, path) {
     # Filters
     # --------------------------------------------------------------------------
     
+    # -- trigger: set filter choices
+    observeEvent(r$filter_country_choices, {
+      
+      # -- update choices
+      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices)
+      
+    })
+    
+    
     # -- Observe
     observeEvent(input$filter_country, {
       
-      cat("[map] EVENT: Filter country =", input$filter_country, "\n")
-      r$filter_country <- input$filter_country
+      str(input$filter_country)
+      
+      if(identical(input$filter_country, ""))
+        r$filter_country <- NULL
+      else {
+        cat("[map] EVENT: Filter country =", input$filter_country, "\n")
+        r$filter_country <- input$filter_country}
       
     }, ignoreInit = TRUE)
+    
+    # -- reset
+    observeEvent(input$filter_reset, {
+      
+      cat("[map] EVENT: Reset filter country \n")
+      
+      # -- update filter
+      updateSelectizeInput(inputId = "filter_country", selected = character(0))
+      
+      
+    })
     
     
   })

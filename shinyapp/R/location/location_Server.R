@@ -31,6 +31,17 @@ location_Server <- function(id, r, path) {
                              default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'blue'))
     
     
+    # -- update filter choices
+    observeEvent(r[[r_items]](), {
+      
+      locations <- r[[r_items]]()
+      choices <- unique(locations$country)
+      
+      r$filter_country_choices <- choices
+      
+    })
+    
+    
     # -- Observe map click
     observeEvent(r$map_click, {
       
