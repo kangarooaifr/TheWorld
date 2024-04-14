@@ -53,7 +53,7 @@ body <- dashboardBody(
                   column(width = 12,
                          kitems::admin_ui("routemngr-route")))),
         
-        # -- kitems admin (route)
+        # -- kitems admin (trip)
         tabItem(tabName = "trip",
                 
                 # -- Admin UI
