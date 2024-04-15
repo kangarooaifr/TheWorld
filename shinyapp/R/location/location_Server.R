@@ -19,6 +19,7 @@ location_Server <- function(id, r, path) {
     
     # -- settings
     fly_duration <- 1.0
+    coord_digits <- 3
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
@@ -50,20 +51,41 @@ location_Server <- function(id, r, path) {
     })
     
     
-    # -- Observe map click
+    # -------------------------------------
+    # [EVENT] Map click
+    # -------------------------------------
+    
+    # -- Event: map click
     observeEvent(r$map_click, {
       
-      output$location_panel <- if(is.null(r$map_click))
-        NULL
-      else 
-        renderUI(
-            
-          tagList(
-            h4("Location"),
+      # -- get values
+      lng <- r$map_click[['lng']]
+      lat <- r$map_click[['lat']]
+      
+      # -- display popup
+      r$proxymap %>% 
+        clearPopups() %>%
+        addPopups(lng, lat, 
+                  paste("Longitude:", round(lng, digits = coord_digits), br(),
+                        "Latitude:", round(lat, digits = coord_digits), 
+                        hr(),
+                        actionLink(inputId = ns("link_add"), 
+                                   label =  "add to my locations", 
+                                   icon = icon("plus"),
+                                   onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_locations")))))
+    })
+    
+    
+    # -- Event: popup link (add_to_locations)
+    observeEvent(input$add_to_locations, {
+    
+      # -- modal
+      showModal(modalDialog(
+    
             p("Coordinates:"), 
             
-            tags$ul(tags$li("long =", r$map_click[1]), 
-                    tags$li("lat =", r$map_click[2])),
+            tags$ul(tags$li("long =", r$map_click[['lng']]), 
+                    tags$li("lat =", r$map_click[['lat']])),
             
             # -- name
             textInput(inputId = ns("name"), 
@@ -123,16 +145,28 @@ location_Server <- function(id, r, path) {
                           label = "Wish list", 
                           value = FALSE),
             
-            # -- action btn
-            actionButton(inputId = ns("confirm_add_location"), 
-                         label = "Create")))
+            # -- title
+            title = "Add to my locations",
+            
+            # -- actions
+            footer = tagList(
+              modalButton("Cancel"),
+              actionButton(inputId = ns("confirm_add_location"), 
+                           label = "Create"))))
       
-    }, ignoreNULL = FALSE)
+    })
     
 
-    # -- Observer add location button
+    # -- Event: btn confirm_add_location
     observeEvent(input$confirm_add_location, {
 
+      # -- close dialog
+      removeModal()
+      
+      # -- clear popup
+      r$proxymap %>% 
+        clearPopups()
+      
       # -- build values
       input_values <- data.frame(id = NA,
                                  name = input$name,
@@ -156,6 +190,8 @@ location_Server <- function(id, r, path) {
       
     })
     
+    
+    # -------------------------------------
     
     # -- Observe: display button
     # dependencies on display options, items and filter
