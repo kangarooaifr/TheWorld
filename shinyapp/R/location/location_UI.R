@@ -11,11 +11,20 @@ location_panel_UI <- function(id)
   # -- namespace
   ns <- NS(id)
   
-  # -- ui
+  # -- return
   wellPanel(
-    p("Locations"),
+    
+    # -- title
+    h4("Locations"),
+    
+    # -- main panel (to be moved)
     uiOutput(ns("location_panel")),
-    radioButtons(inputId = ns("show_location_option"), label = "", choiceNames = list(icon("circle-check"), icon("heart"), icon("location-dot")), choiceValues = list("been-there", "wish-list", "all"), inline = TRUE),
-    actionButton(inputId = ns("show_location"), label = "Show locations"))
+    
+    # -- display
+    radioButtons(inputId = ns("display_options"), label = "", choiceNames = list(icon("circle-check"), icon("heart"), icon("location-dot")), choiceValues = list("been-there", "wish-list", "all"), inline = TRUE),
+    actionButton(inputId = ns("display_btn"), label = "Show locations"),
+    
+    # -- hide / show
+    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE))
   
 }

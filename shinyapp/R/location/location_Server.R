@@ -13,8 +13,9 @@ location_Server <- function(id, r, path) {
     # -- load countries
     countries <- read.csv(file = file.path(path$resources, "countries.csv"), encoding = "UTF-8")
     
-    # -- id
+    # -- ids
     kitems_id <- "location"
+    group_id <- "locations"
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
@@ -30,6 +31,10 @@ location_Server <- function(id, r, path) {
                              wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
                              default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'blue'))
     
+    
+    # -------------------------------------
+    # Filter: country >>> to be moved to country module!
+    # -------------------------------------
     
     # -- update filter choices
     observeEvent(r[[r_items]](), {
@@ -149,21 +154,22 @@ location_Server <- function(id, r, path) {
     })
     
     
-    # -- Observer show location button
+    # -- Observe: display button
+    # dependencies on button, items and filter
     observeEvent({
-      input$show_location
+      input$display_btn
       r[[r_items]]()
       r$filter_country
     }, {
       
       # -- option
-      cat("[location] Show location, option =", input$show_location_option, "\n")
+      cat("[location] Show location, option =", input$display_options, "\n")
       
       # -- get the data & apply option
       locations <- r[[r_items]]()
-      if(input$show_location_option == "been-there")
+      if(input$display_options == "been-there")
         locations <- locations[locations$been.there, ]
-      else if(input$show_location_option == "wish-list")
+      else if(input$display_options == "wish-list")
         locations <- locations[locations$wish.list, ]
       
       cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
@@ -189,13 +195,13 @@ location_Server <- function(id, r, path) {
         r$proxymap %>%
           
           # -- cleanup
-          clearGroup("location") %>%
+          clearGroup(group_id) %>%
           
           # -- Add markers
           addAwesomeMarkers(data = locations,
                             lng = ~lng,
                             lat = ~lat,
-                            group = "location",
+                            group = group_id,
                             icon = ~icons[icon],
                             label = ~city,
                             popup = ~sprintf(
@@ -220,6 +226,36 @@ location_Server <- function(id, r, path) {
       
     }, ignoreNULL = FALSE)
     
+    
+    # -------------------------------------
+    # Hide / show
+    # -------------------------------------
+    
+    # -- Observe: hide_show
+    observeEvent(input$hide_show, {
+      
+      # -- test input
+      if(input$hide_show){
+        
+        cat("Show group:", group_id, "\n")
+        
+        # -- update proxy
+        r$proxymap %>%
+          showGroup(group_id)
+        
+      } else {
+        
+        cat("Hide group:", group_id, "\n")
+        
+        # -- update proxy
+        r$proxymap %>%
+          hideGroup(group_id)
+      }
+      
+    })
+    
+    
+    # -------------------------------------
     
     # -- Observe: button click from marker popup
     observeEvent(input$button_click, {
