@@ -37,6 +37,31 @@ location_Server <- function(id, r, path) {
     
     
     # -------------------------------------
+    # Load resources (airports)
+    # -------------------------------------
+    
+    # -- File name
+    filename <- "airports.csv"
+    
+    # -- colClasses
+    colClasses_airports <- c(id = "numeric",
+                             name = "character",
+                             city = "character",
+                             country = "character",
+                             iata = "character",
+                             icao = "character",
+                             latitude = "numeric",
+                             longitude = "numeric",
+                             altitude = "numeric")
+    
+    # -- load
+    r$airports <- kfiles::read_data(file = filename,
+                                    path = path$resources, 
+                                    colClasses = colClasses_airports,
+                                    create = FALSE)
+    
+    
+    # -------------------------------------
     # Filter: country >>> to be moved to country module!
     # -------------------------------------
     

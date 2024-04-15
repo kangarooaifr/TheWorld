@@ -12,8 +12,9 @@ Documentation
 Location module exposes the following connectors into the global r
 communication object:
 
-- r\$filter_country_choices: vector, contains the list of countries from
-  the (unfiltered) location items
+- r\$filter_country_choices: vector, country names from the (unfiltered)
+  location items
+- r\$airports: data.frame, data about airports
 
 ### Event Observers
 
@@ -27,9 +28,3 @@ connectors:
 
 - r\$proxymap: to update the map with markers
 - r\$map_click: used to add new location
-
-``` r
-print(3)
-```
-
-    ## [1] 3

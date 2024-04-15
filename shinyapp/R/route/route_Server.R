@@ -18,32 +18,6 @@ route_Server <- function(id, r, path) {
     # get namespace
     ns <- session$ns
     
-    # -------------------------------------
-    # Load resources (airports)
-    # -------------------------------------
-    
-    # -- File name
-    filename <- "airports.csv"
-    
-    
-    # -- colClasses
-    colClasses_airports <- c(id = "numeric",
-                             name = "character",
-                             city = "character",
-                             country = "character",
-                             iata = "character",
-                             icao = "character",
-                             latitude = "numeric",
-                             longitude = "numeric",
-                             altitude = "numeric")
-    
-    
-    # -- load airports
-    airports <- kfiles::read_data(file = filename,
-                                  path = path$resources, 
-                                  colClasses = colClasses_airports,
-                                  create = FALSE)
-    
     
     # -------------------------------------
     # Data manager (routes)
@@ -87,8 +61,8 @@ route_Server <- function(id, r, path) {
       ))
       
       # -- update the selectizeInput with choices (server)
-      choices <-airports$id
-      names(choices) <- airports$iata
+      choices <- r$airports$id
+      names(choices) <- r$airports$iata
       choices <- as.list(choices)
       updateSelectizeInput(session, 'select_origin', choices = choices, server = TRUE)
       updateSelectizeInput(session, 'select_destination', choices = choices, server = TRUE)
@@ -136,14 +110,14 @@ route_Server <- function(id, r, path) {
         # -- get route parameters
         origin <- routes[routes$id == routeid, 'origin']
         destination <- routes[routes$id == routeid, 'destination']
-        origin_name <- airports[airports$id == origin, 'name']
-        destination_name <- airports[airports$id == destination, 'name']
+        origin_name <- r$airports[r$airports$id == origin, 'name']
+        destination_name <- r$airports[r$airports$id == destination, 'name']
         
         cat("-- route origin", origin, "/ destination", destination, "\n")
         
         # -- compute great circle route
-        route <- gcIntermediate(p1 = airport_coord(airports, id = origin), 
-                                p2 = airport_coord(airports, id = destination), 
+        route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
+                                p2 = airport_coord(r$airports, id = destination), 
                                 n = 100, 
                                 addStartEnd = TRUE)
         
