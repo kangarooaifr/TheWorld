@@ -125,11 +125,10 @@ map_Server <- function(id, r, path) {
     })
     
     
-    # -- Observe
+    # -- Observe: update filter
     observeEvent(input$filter_country, {
       
-      str(input$filter_country)
-      
+      # -- check filter reset
       if(identical(input$filter_country, ""))
         r$filter_country <- NULL
       else {
@@ -138,7 +137,7 @@ map_Server <- function(id, r, path) {
       
     }, ignoreInit = TRUE)
     
-    # -- reset
+    # -- reset filter
     observeEvent(input$filter_reset, {
       
       cat("[map] EVENT: Reset filter country \n")
