@@ -13,11 +13,11 @@ country_UI <- function(id){
   # UI
   wellPanel(
     
-    p("Countries"),
-    p("Displays already visited countries."),
+    h4("Countries"),
+    p("Displays visited countries.", br(), "(locations marked as *been there*)"),
     
     # hide / show checkbox
-    checkboxInput(ns("hide_show"), label = "Hide / show countries", value = FALSE, width = NULL)
+    checkboxInput(ns("hide_show"), label = "Hide / Show", value = FALSE)
     
   )
   

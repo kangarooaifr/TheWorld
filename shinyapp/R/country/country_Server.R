@@ -15,9 +15,13 @@ library(geojsonio)
 country_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
-    # get namespace
+    # -- get namespace
     ns <- session$ns
+
+    # -- ids
+    group_id <- "countries"
     
+        
     # -- load data
     cat("[countries] Read countries geojson data... \n")
     countries_geojson <- geojson_read(file.path(path$resources, "countries.geojson"), what = "sp")
@@ -59,23 +63,23 @@ country_Server <- function(id, r, path) {
       # checkbox marked
       if(input$hide_show){
 
-        cat("Show group: countries \n")
+        cat("Show group:", group_id, "\n")
 
         # proxy map
         r$proxymap %>%
 
           # Show group
-          showGroup('countries')
+          showGroup(group_id)
 
       }else{
 
-        cat("Hide group: countries \n")
+        cat("Hide group:", group_id, "\n")
 
         # proxy map
         r$proxymap %>%
 
           # clear group
-          hideGroup('countries')
+          hideGroup(group_id)
       }
 
     })
