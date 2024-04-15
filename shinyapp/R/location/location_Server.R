@@ -17,6 +17,9 @@ location_Server <- function(id, r, path) {
     kitems_id <- "location"
     group_id <- "locations"
     
+    # -- settings
+    fly_duration <- 1.0
+    
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
     
@@ -221,7 +224,8 @@ location_Server <- function(id, r, path) {
                             clusterOptions = NULL) %>%
           
           # -- set view
-          flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, options = list(padding = c(50, 50)))
+          flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
+                      options = list(duration = fly_duration, padding = c(50, 50)))
       }
       
     }, ignoreNULL = FALSE)
