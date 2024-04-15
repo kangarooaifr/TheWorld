@@ -155,9 +155,9 @@ location_Server <- function(id, r, path) {
     
     
     # -- Observe: display button
-    # dependencies on button, items and filter
+    # dependencies on display options, items and filter
     observeEvent({
-      input$display_btn
+      input$display_options
       r[[r_items]]()
       r$filter_country
     }, {

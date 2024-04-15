@@ -22,8 +22,7 @@ location_panel_UI <- function(id)
     
     # -- display
     radioButtons(inputId = ns("display_options"), label = "", choiceNames = list(icon("circle-check"), icon("heart"), icon("location-dot")), choiceValues = list("been-there", "wish-list", "all"), inline = TRUE),
-    actionButton(inputId = ns("display_btn"), label = "Show locations"),
-    
+
     # -- hide / show
     checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE))
   
