@@ -23,8 +23,8 @@ route_UI <- function(id){
     # -- radio btn
     radioButtons(inputId = ns("show_route_option"), 
                  label = "", 
-                 choiceNames = list(icon("plane"), icon("ship"), icon("bus")), 
-                 choiceValues = list("air", "sea", "road"), 
+                 choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")), 
+                 choiceValues = list("air", "train", "sea", "road"), 
                  inline = TRUE),
     
     # -- display btn

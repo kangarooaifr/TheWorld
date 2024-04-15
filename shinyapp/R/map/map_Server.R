@@ -8,6 +8,13 @@ map_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
+    # Communication objects
+    # --------------------------------------------------------------------------
+    
+    r$filter_country <- NULL
+    
+    
+    # --------------------------------------------------------------------------
     # The map
     # --------------------------------------------------------------------------
     
@@ -68,6 +75,17 @@ map_Server <- function(id, r, path) {
     })
     
     
+    # -- Observer map bounds
+    observeEvent(input$map_bounds, {
+      bounds <- input$map_bounds
+      cat("Map bounds: north =", bounds$north, "/ east =", bounds$east, "/ south =", bounds$south, "\ west =", bounds$west, "\n")
+    })
+    
+    
+    # --------------------------------------------------------------------------
+    # Search
+    # --------------------------------------------------------------------------
+    
     # -- Observe search
     observeEvent(input$search, {
       
@@ -92,6 +110,44 @@ map_Server <- function(id, r, path) {
         showNotification("No result found", type = "error")
       
     })
+    
+    
+    # --------------------------------------------------------------------------
+    # Filters
+    # --------------------------------------------------------------------------
+    
+    # -- trigger: set filter choices
+    observeEvent(r$filter_country_choices, {
+      
+      # -- update choices
+      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices)
+      
+    })
+    
+    
+    # -- Observe: update filter
+    observeEvent(input$filter_country, {
+      
+      # -- check filter reset
+      if(identical(input$filter_country, ""))
+        r$filter_country <- NULL
+      else {
+        cat("[map] EVENT: Filter country =", input$filter_country, "\n")
+        r$filter_country <- input$filter_country}
+      
+    }, ignoreInit = TRUE)
+    
+    # -- reset filter
+    observeEvent(input$filter_reset, {
+      
+      cat("[map] EVENT: Reset filter country \n")
+      
+      # -- update filter
+      updateSelectizeInput(inputId = "filter_country", selected = character(0))
+      
+      
+    })
+    
     
   })
 }

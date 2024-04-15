@@ -30,8 +30,26 @@ search_Input <- function(id) {
   wellPanel(
     
     # search input
-    searchInput(ns("search"), label = "Search", value = "")
-    
-  )
+    searchInput(ns("search"), label = "Search", value = ""))
   
 }
+
+
+# -- filter
+country_INPUT <- function(id){
+  
+  # -- namespace
+  ns <- NS(id)
+  
+  tagList(
+  div(style="display: inline-block", actionButton(inputId = ns("filter_reset"), label = "Reset filter")),
+  div(style="display: inline-block", selectizeInput(inputId = ns("filter_country"), 
+                                                    label = "Country", 
+                                                    choices = NULL,
+                                                    options = list(placeholder = 'Please select an option below',
+                                                                   onInitialize = I('function() { this.setValue(""); }'),
+                                                                   create = TRUE)))
+  )
+
+}
+

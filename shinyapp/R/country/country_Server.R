@@ -30,15 +30,27 @@ country_Server <- function(id, r, path) {
     # -------------------------------------
     # Event observers
     # -------------------------------------
-  
-    observeEvent(countries(), {
-                 
-                 data_map <- countries_geojson[countries_geojson@data$ADMIN %in% countries(), ]
-                 
-                 r$proxymap %>% 
-                   addPolygons(data = data_map, weight = 1, color = "red", group = "countries")
-                 
-                 })
+    
+    observeEvent({
+      countries()
+      r$filter_country}, {
+        
+        selected_countries <- countries()
+        
+        if(!is.null(r$filter_country))
+          selected_countries <- selected_countries[selected_countries %in% r$filter_country]
+        
+        data_map <- countries_geojson[countries_geojson@data$ADMIN %in% selected_countries, ]
+        
+        r$proxymap %>%
+          
+          # -- cleanup
+          clearGroup("countries") %>%
+          
+          # -- add areas
+          addPolygons(data = data_map, weight = 1, color = "red", group = "countries")
+        
+      }, ignoreNULL = FALSE)
     
     
     # -- Observe checkbox
