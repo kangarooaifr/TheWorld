@@ -15,6 +15,8 @@ communication object:
 - r\$filter_country_choices: vector, country names from the (unfiltered)
   location items
 - r\$airports: data.frame, data about airports
+- r\$visited_countries: reactive, vector containing the list of visited
+  countries (been.there == TRUE)
 
 ### Event Observers
 
@@ -28,3 +30,16 @@ connectors:
 
 - r\$proxymap: to update the map with markers
 - r\$map_click: used to add new location
+
+## Countries
+
+### Connectors
+
+Countries module exposes the following connectors into the global r
+communication object:
+
+- r\$countries_iso: data.frame, ISO data about countries
+
+### Event Observers
+
+### Other dependencies

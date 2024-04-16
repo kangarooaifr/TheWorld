@@ -54,20 +54,16 @@ country_Server <- function(id, r, path) {
     cat("[countries] Read countries geojson data... \n")
     countries_geojson <- geojson_read(file.path(path$resources, filename_geojson), what = "sp")
 
-    # -- countries    
-    r_items <- "location_items"
-    countries <- reactive(unique(r[[r_items]]()[r[[r_items]]()$been.there, 'country']))
-    
     
     # -------------------------------------
     # Event observers
     # -------------------------------------
     
     observeEvent({
-      countries()
+      r$visited_countries()
       r$filter_country}, {
         
-        selected_countries <- countries()
+        selected_countries <- r$visited_countries()
         
         if(!is.null(r$filter_country))
           selected_countries <- selected_countries[selected_countries %in% r$filter_country]

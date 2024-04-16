@@ -34,7 +34,7 @@ location_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Load resources (airports)
+    # Load resources & connector: airports
     # -------------------------------------
     
     # -- File name
@@ -51,11 +51,20 @@ location_Server <- function(id, r, path) {
                              longitude = "numeric",
                              altitude = "numeric")
     
-    # -- load
+    # -- load & expose connector
     r$airports <- kfiles::read_data(file = filename,
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
+    
+    
+    # -------------------------------------
+    # Connector: visited_countries
+    # -------------------------------------
+    
+    # -- expose as reactive
+    r$visited_countries <- reactive(
+      unique(r[[r_items]]()[r[[r_items]]()$been.there, 'country']))
     
     
     # -------------------------------------
