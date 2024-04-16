@@ -18,6 +18,8 @@ route_Server <- function(id, r, path) {
     # get namespace
     ns <- session$ns
     
+    # -- id
+    group_id <- "routes"
     
     # -------------------------------------
     # Data manager (routes)
@@ -144,28 +146,28 @@ route_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- Observe checkbox
-    observeEvent(input$show_hide, {
+    observeEvent(input$hide_show, {
       
       # checkbox marked
-      if(input$show_hide){
+      if(input$hide_show){
         
-        cat("Show group: routes \n")
+        cat("Show group:", group_id, "\n")
         
         # proxy map
         r$proxymap %>%
           
           # Show group
-          showGroup('routes')
+          showGroup(group_id)
         
       }else{
         
-        cat("Hide group: routes \n")
+        cat("Hide group:", group_id, "\n")
         
         # proxy map
         r$proxymap %>%
           
           # clear group
-          hideGroup('routes')
+          hideGroup(group_id)
       }
       
     })

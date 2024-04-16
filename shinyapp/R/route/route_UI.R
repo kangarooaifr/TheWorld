@@ -31,7 +31,7 @@ route_UI <- function(id){
     actionButton(inputId = ns("show_route"), label = "Show route"),
     
     # -- show / hide
-    checkboxInput(inputId = ns("show_hide"), label = "Show / hide")
+    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show")
     
     )
   
