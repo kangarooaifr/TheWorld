@@ -8,7 +8,7 @@
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"), selected = TRUE)),
+        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
     
     # -- add dynamic section
     sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -22,7 +22,7 @@ body <- dashboardBody(
     
     tabItems(
     
-        tabItem(tabName = "dashboard",
+        tabItem(tabName = "worldmap",
                 
                 fluidRow(
                     column(width = 3,
