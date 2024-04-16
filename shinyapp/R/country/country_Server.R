@@ -139,32 +139,14 @@ country_Server <- function(id, r, path) {
       }, ignoreNULL = FALSE)
     
     
+    # -------------------------------------
+    # Hide / Show
+    # -------------------------------------
+    
     # -- Observe checkbox
-    observeEvent(input$hide_show, {
-
-      # checkbox marked
-      if(input$hide_show){
-
-        cat("Show group:", group_id, "\n")
-
-        # proxy map
-        r$proxymap %>%
-
-          # Show group
-          showGroup(group_id)
-
-      }else{
-
-        cat("Hide group:", group_id, "\n")
-
-        # proxy map
-        r$proxymap %>%
-
-          # clear group
-          hideGroup(group_id)
-      }
-
-    })
+    observeEvent(input$hide_show, 
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+    
     
   })
 }

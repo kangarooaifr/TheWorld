@@ -44,38 +44,16 @@ track_Server <- function(id, r, path) {
         addPolylines(data = track2, group = "tracks")
 
     })
-
+    
     
     # -------------------------------------
-    # Event observers
+    # Hide / Show
     # -------------------------------------
     
     # -- Observe checkbox
-    observeEvent(input$submit_tracks, {
-      
-      # checkbox marked
-      if(input$submit_tracks){
-        
-        cat("Show group: tracks \n")
-        
-        # proxy map
-        r$proxymap %>%
-          
-          # Show group
-          showGroup('tracks')
-        
-      }else{
-        
-        cat("Hide group: tracks \n")
-        
-        # proxy map
-        r$proxymap %>%
-          
-          # clear group
-          hideGroup('tracks')
-      }
-      
-    })
+    observeEvent(input$submit_tracks, 
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$submit_tracks))
+
     
   })
 }
