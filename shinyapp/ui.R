@@ -30,7 +30,7 @@ body <- dashboardBody(
                            location_panel_UI("locationmngr"),
                            route_UI("routemngr"),
                            country_UI("country"),
-                           track_UI("tracks")),
+                           track_UI("track")),
                     
                     column(width = 9,
                            country_INPUT("map"),
