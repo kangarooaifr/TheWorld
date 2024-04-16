@@ -53,14 +53,11 @@ country_Server <- function(id, r, path) {
                         "longitude" = "numeric")
     
     # -- load country ISO list
-    countries_iso <- kfiles::read_data(file = filename_iso, 
+    r$countries_iso <- kfiles::read_data(file = filename_iso, 
                                        path = path$resources,
                                        colClasses = colClasses_iso,
                                        create = FALSE)
-    
-    # -- expose
-    r$countries_iso <- countries_iso
-    
+
     
     # -------------------------------------
     # Load resources: geojson data
