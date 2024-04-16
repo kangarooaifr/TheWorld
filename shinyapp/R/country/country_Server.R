@@ -18,13 +18,41 @@ country_Server <- function(id, r, path) {
     # -- get namespace
     ns <- session$ns
 
+    # -- files
+    filename_iso <- "countries.csv"
+    filename_geojson <- "countries.geojson"
+    
     # -- ids
     group_id <- "countries"
+    
+    # -------------------------------------
+    # Load resources: iso countries
+    # -------------------------------------
+    
+    # -- colClasses
+    colClasses_iso <- c("id" = "numeric",
+                        "country.en" = "character",
+                        "2digits.code" = "character",
+                        "3digits.code" = "character",
+                        "numeric.code" = "numeric",
+                        "latitude" = "numeric",
+                        "longitude" = "numeric")
+    
+    
+    # -- load country ISO list
+    countries_iso <- kfiles::read_data(file = filename_iso, 
+                                       path = path$resources,
+                                       colClasses = colClasses_iso,
+                                       create = FALSE)
+    
+    # -- expose
+    r$countries_iso <- countries_iso
+    
     
         
     # -- load data
     cat("[countries] Read countries geojson data... \n")
-    countries_geojson <- geojson_read(file.path(path$resources, "countries.geojson"), what = "sp")
+    countries_geojson <- geojson_read(file.path(path$resources, filename_geojson), what = "sp")
 
     # -- countries    
     r_items <- "location_items"

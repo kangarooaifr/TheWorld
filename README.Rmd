@@ -31,3 +31,16 @@ Location module has observers taking dependencies on the following connectors:
 
 -   r\$proxymap: to update the map with markers
 -   r\$map_click: used to add new location
+
+## Countries
+
+### Connectors
+
+Countries module exposes the following connectors into the global r communication object:
+
+- r$countries_iso: data.frame, ISO data about countries
+
+### Event Observers
+
+### Other dependencies
+

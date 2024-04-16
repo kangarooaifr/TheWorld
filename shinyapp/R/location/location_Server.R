@@ -10,9 +10,6 @@ location_Server <- function(id, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    # -- load countries
-    countries <- read.csv(file = file.path(path$resources, "countries.csv"), encoding = "UTF-8")
-    
     # -- ids
     kitems_id <- "location"
     group_id <- "locations"
@@ -127,7 +124,7 @@ location_Server <- function(id, r, path) {
             # -- country          
             selectizeInput(inputId = ns("country"), 
                            label = "Country", 
-                           choices = countries$country.en, 
+                           choices = r$countries_iso$country.en, 
                            options = list(placeholder = 'Please select an option below',
                                           onInitialize = I('function() { this.setValue(""); }'),
                                           create = FALSE)),
