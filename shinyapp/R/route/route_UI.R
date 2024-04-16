@@ -13,7 +13,7 @@ route_UI <- function(id){
   # UI
   wellPanel(
     
-    h4("Route"),
+    h4("Routes"),
     
     # + button
     actionButton(inputId = ns("add_route"),
