@@ -117,15 +117,19 @@ country_Server <- function(id, r, path) {
         # need to wait for async data to be ready
         req(geojson_data())
 
-        # -- get visited contries
+        # -- get visited countries
         selected_countries <- r$visited_countries()
-
+        
         # -- apply filter
         if(!is.null(r$filter_country))
           selected_countries <- selected_countries[selected_countries %in% r$filter_country]
-
+        
+        # -- switch to country code
+        # WARNING! the column name is switched to X3digits.code upon reading the file
+        selected_countries <- r$countries_iso[r$countries_iso$country.en %in% selected_countries, 'X3digits.code']
+        
         # -- selected geojson to be displayed
-        selected_geojson <- geojson_data()[geojson_data()@data$ADMIN %in% selected_countries, ]
+        selected_geojson <- geojson_data()[geojson_data()@data$ISO_A3 %in% selected_countries, ]
 
         # -- update map
         r$proxymap %>%
