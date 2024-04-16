@@ -46,8 +46,8 @@ country_Server <- function(id, r, path) {
     # -- colClasses
     colClasses_iso <- c("id" = "numeric",
                         "country.en" = "character",
-                        "2digits.code" = "character",
-                        "3digits.code" = "character",
+                        "X2digits.code" = "character",
+                        "X3digits.code" = "character",
                         "numeric.code" = "numeric",
                         "latitude" = "numeric",
                         "longitude" = "numeric")
