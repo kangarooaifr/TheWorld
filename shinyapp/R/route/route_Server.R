@@ -98,7 +98,7 @@ route_Server <- function(id, r, path) {
     # -------------------------------------
 
     # -- add path to map
-    observeEvent(input$show_route, {
+    observeEvent(r[[r_items]](), {
       
       cat("[routeS] Updating route segments \n")
       
@@ -126,17 +126,16 @@ route_Server <- function(id, r, path) {
         # -- add to proxy map
         r$proxymap %>%
           
+          hideGroup(group_id) %>%
+          
           # add fight route
-          addPolylines(data = route, group = "routes", color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+          addPolylines(data = route, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
         
       }
       
       # -- apply helper to routes df
       cat("[routes] Looping over route list... \n")
       lapply(routes$id, addroute)
-      
-      # -- update hide / show
-      updateCheckboxInput(inputId = "show_hide", value = TRUE)
         
     })
     
