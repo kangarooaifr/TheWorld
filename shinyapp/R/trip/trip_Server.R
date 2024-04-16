@@ -48,10 +48,21 @@ trip_Server <- function(id, r, path) {
     # -------------------------------------
     # -- create tables flight, sea, road to instantiate in route!
     
+    # -------------------------------------
+    # Accommodation management
+    # -------------------------------------
     
-    # -- accommodation
-    # id, trip.id, location.id, date.start, date.end, checkin, checkout, breakfast, comment
-
+    # -- id
+    accomodation_kitems_id <- "accomodation"
+    
+    # -- launch kitems sub module
+    kitems::kitemsManager_Server(id = accomodation_kitems_id, r, path$data)
+    
+    # id, trip.id, location.id, checkin, checkout, breakfast, comment
+    
+    # -- to be defined: functions
+    # cache_trip_id
+    # cache_location_id
     
   })
 }

@@ -67,7 +67,15 @@ body <- dashboardBody(
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         kitems::admin_ui("tripmngr-transport"))))
+                         kitems::admin_ui("tripmngr-transport")))),
+        
+        # -- kitems admin (accomodation)
+        tabItem(tabName = "accomodation",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("tripmngr-accomodation"))))
         
     )
 )
