@@ -88,9 +88,22 @@ trip_Server <- function(id, r, path) {
           textInput(inputId = ns("select_route"), label = "Select route", value = "", width = NULL, placeholder = "Enter search string")
           
       ))
+      
+      observeEvent(input$select_route, {
+        
+        r$route_search_string <- input$select_route
+        
+      })
+      
+      observeEvent(r$route_search_result(), {
+        
+        cat("[trip] Route search result, dim =", dim(r$route_search_result()), "\n")
+        
+      })
         
 
     })
+    
     
     
     # -------------------------------------
