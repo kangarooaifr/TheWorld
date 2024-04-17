@@ -8,7 +8,9 @@
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
+        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE),
+        menuItem("Trip planner", tabName = "trip-planner", icon = icon("compass"))),
+    
     
     # -- add dynamic section
     sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -35,6 +37,16 @@ body <- dashboardBody(
                     column(width = 9,
                            country_INPUT("map"),
                            map_UI("map")))),
+        
+        # -- Trip planner
+        tabItem(tabName = "trip-planner",
+                
+                fluidRow(
+                  column(width = 3,
+                         trip_panel_UI("tripmngr")),
+                  
+                  column(width = 9,
+                         p("map here")))),
         
         
         # -- kitems admin (location)

@@ -12,7 +12,7 @@ trip_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Transport management
+    # Trip management
     # -------------------------------------
     
     # -- id
@@ -26,8 +26,36 @@ trip_Server <- function(id, r, path) {
     kitems::kitemsManager_Server(id = trip_kitems_id, r, path$data)
     
     # -- items name
+    r_items <- kitems::items_name(trip_kitems_id)
     # r_trigger_add <- kitems::trigger_add_name(id = trip_kitems_id)
     # r_trigger_delete <- kitems::trigger_delete_name(id = trip_kitems_id)
+    
+    
+    # -------------------------------------
+    # Trip selector
+    # -------------------------------------
+    
+    # -- observer:
+    # feed trip_selector when items are ready
+    observeEvent(r[[r_items]](), {
+      
+      # -- get items & prepare choices
+      trips <- r[[r_items]]()
+      choices <- trips$id
+      names(choices) <- trips$name
+      
+      # -- update input
+      updateSelectizeInput(inputId = "trip_selector", choices = choices)
+      
+    })
+    
+    
+    # -- observer:
+    observeEvent(input$trip_selector, {
+      
+      cat("[trip] Trip selector, id =", input$trip_selector, "\n")
+      
+    })
     
     
     # -------------------------------------
@@ -43,6 +71,26 @@ trip_Server <- function(id, r, path) {
     # -- to be defined: functions
     # cache_trip_id
     # cache_route_id
+    
+    
+    # -- init outputs
+    output$transport_zone <- NULL
+    
+    
+    # -- observer
+    observeEvent(input$add_transport, {
+      
+      cat("[trip] Add transport \n")
+      
+      output$transport_zone <- renderUI(
+        tagList(
+          
+          textInput(inputId = ns("select_route"), label = "Select route", value = "", width = NULL, placeholder = "Enter search string")
+          
+      ))
+        
+
+    })
     
     
     # -------------------------------------
