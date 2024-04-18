@@ -85,19 +85,34 @@ trip_Server <- function(id, r, path) {
       output$transport_zone <- renderUI(
         tagList(
           
-          textInput(inputId = ns("select_route"), label = "Select route", value = "", width = NULL, placeholder = "Enter search string")
+          radioButtons(inputId = ns("route_type"), 
+                       label = "", 
+                       choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")), 
+                       choiceValues = list("flight", "train", "sea", "road"),
+                       selected = character(0),
+                       inline = TRUE),
+          
+          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL)
           
       ))
       
-      observeEvent(input$select_route, {
+      
+      observeEvent(input$route_type, {
         
-        r$route_search_string <- input$select_route
-        
-      })
+        r$route_search_string<- input$route_type})
+      
       
       observeEvent(r$route_search_result(), {
         
         cat("[trip] Route search result, dim =", dim(r$route_search_result()), "\n")
+        
+        # -- compute choices
+        result <- r$route_search_result()
+        choices <- result$id
+        names(choices) <- paste(result$company, result$number, result$origin.iata, result$destination.iata)
+        
+        updateSelectizeInput(inputId = "select_route", choices = choices)
+        
         
       })
         
