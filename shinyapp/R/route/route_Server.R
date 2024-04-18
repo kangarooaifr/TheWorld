@@ -113,8 +113,18 @@ route_Server <- function(id, r, path) {
         cat("[route] Trigger, search string =", r$route_search_string, "\n")
         
         # -- filter items
-        r[[r_items]]() %>%
+        result <- r[[r_items]]() %>%
           filter_all(any_vars(grepl(r$route_search_string, .)))
+
+        # -- add iata codes
+        result <- merge(result, r$airports[c("id", "iata")], by.x = "origin", by.y = "id")
+        result <- merge(result, r$airports[c("id", "iata")], by.x = "destination", by.y = "id")
+        names(result)[names(result) == 'iata.x'] <- 'origin.iata'
+        names(result)[names(result) == 'iata.y'] <- 'destination.iata'
+        
+        # -- return
+        result
+        
       }
     })
     
