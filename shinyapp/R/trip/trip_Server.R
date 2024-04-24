@@ -87,13 +87,20 @@ trip_Server <- function(id, r, path) {
           
           radioButtons(inputId = ns("route_type"), 
                        label = "", 
-                       choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")), 
+                       choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")),
                        choiceValues = list("flight", "train", "sea", "road"),
-                       selected = character(0),
                        inline = TRUE),
           
-          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL)
+          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL),
           
+          dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
+          timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
+        
+          dateInput(inputId = ns("arrival_date"), label = "Arrival date", value = Sys.Date()),
+          timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
+
+          actionButton(inputId = ns("confirm_route"), label = "OK")
+                    
       ))
       
       
