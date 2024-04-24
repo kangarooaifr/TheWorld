@@ -25,6 +25,7 @@ location_Server <- function(id, r, path) {
     r_items <- kitems::items_name(id = kitems_id)
     r_data_model <- kitems::dm_name(id = kitems_id)
     r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
+    r_trigger_update <- kitems::trigger_update_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
     # -- icon set
@@ -276,7 +277,7 @@ location_Server <- function(id, r, path) {
                             label = ~city,
                             popup = ~sprintf(
                               paste0(
-                                "Name:", city,
+                                "Name:", name,
                                 br(),
                                 "lng = ", lng,
                                 br(),
@@ -286,7 +287,12 @@ location_Server <- function(id, r, path) {
                                            label =  "Delete", 
                                            onclick = sprintf(
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("button_click")))), id),
+                                             ns("button_click"))),
+                                actionLink(inputId = "been-there_%s", 
+                                           label =  "Been there", 
+                                           onclick = sprintf(
+                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("button_click")))), id, id),
                             #clusterOptions = markerClusterOptions(),
                             clusterOptions = NULL) %>%
           
@@ -313,11 +319,26 @@ location_Server <- function(id, r, path) {
     observeEvent(input$button_click, {
       
       # -- get id from input value
+      action <- unlist(strsplit(input$button_click, split = "_"))[1]
       id <- unlist(strsplit(input$button_click, split = "_"))[2]
-      cat("Marker popup click, id =", id, "\n")
+      cat("[EVENT] Marker popup click: action =", action, "/ id =", id, "\n")
+
+      # -- action: delete
+      if(action == "delete")
+        
+        # -- call trigger
+        r[[r_trigger_delete]](id)
       
-      # -- call trigger
-      r[[r_trigger_delete]](id)
+      # -- action: switch to been-there
+      else if(action == "been-there"){
+        
+        # -- update item
+        item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+        item$been.there <- TRUE
+        item$wish.list <- FALSE
+        
+        # -- call trigger
+        r[[r_trigger_update]](item)}
       
     })
     
