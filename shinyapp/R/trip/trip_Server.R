@@ -55,6 +55,9 @@ trip_Server <- function(id, r, path) {
       
       cat("[trip] Trip selector, id =", input$trip_selector, "\n")
       
+      transports <- r[[transport_r_items]]()
+      transports <- transports[transports$trip.id == input$trip_selector, ]
+      
     })
     
     
@@ -69,6 +72,7 @@ trip_Server <- function(id, r, path) {
     kitems::kitemsManager_Server(id = transport_kitems_id, r, path$data)
     
     # -- names
+    transport_r_items <- kitems::items_name(transport_kitems_id)
     transport_r_data_model <- kitems::dm_name(transport_kitems_id)
     transport_r_trigger_add <- kitems::trigger_add_name(transport_kitems_id)
     
@@ -89,7 +93,9 @@ trip_Server <- function(id, r, path) {
                        choiceValues = list("air", "rail", "sea", "road"),
                        inline = TRUE),
           
-          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL),
+          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL, 
+                         options = list(placeholder = 'Please select an option below',
+                                        onInitialize = I('function() { this.setValue(""); }'))),
           
           dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
           timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
@@ -100,7 +106,7 @@ trip_Server <- function(id, r, path) {
           timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
           selectizeInput(inputId = ns("arrival_tz"), label = "Arrival tz", choices = OlsonNames(), selected = Sys.timezone()),
           
-          textInput(inputId = ns("comment"), label = "Comment"),
+          textInput(inputId = ns("route_comment"), label = "Comment"),
 
           actionButton(inputId = ns("confirm_route"), label = "OK")
                     
@@ -147,7 +153,7 @@ trip_Server <- function(id, r, path) {
                      route.id = input$select_route,
                      departure = departure,
                      arrival = arrival,
-                     comment = input$comment)
+                     comment = input$route_comment)
     
       # -- create item
       transport <- kitems::item_create(values, data.model = r[[transport_r_data_model]]())
@@ -176,6 +182,57 @@ trip_Server <- function(id, r, path) {
     # -- to be defined: functions
     # cache_trip_id
     # cache_location_id
+    
+    # -- init output
+    output$accomodation_zone <- NULL
+    
+    # -- observer
+    observeEvent(input$add_accomodation, {
+
+      cat("[trip] Add accommodation \n")
+            
+      # -- build output
+      output$accomodation_zone <- renderUI(
+        tagList(
+          
+          # -- accommodation
+          selectizeInput(inputId = ns("select_accomodation"), label = "Accomodation", choices = NULL,
+                         options = list(placeholder = 'Please select an option below',
+                                        onInitialize = I('function() { this.setValue(""); }'))),
+          
+          # -- checkin
+          dateInput(inputId = ns("checkin_date"), label = "Checkin date", value = Sys.Date()),
+          timeInput(inputId = ns("checkin_time"), label = "Checkin time", value = Sys.time()),
+          
+          # -- checkout
+          dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
+          timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
+          
+          # -- breakfast
+          checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
+          
+          # -- comment
+          textInput(inputId = ns("accommodation_comment"), label = "Comment")))
+      
+      # -- init location search trigger
+      r$location_search_string <- 'Accomodation'
+      
+      # -- observer: search result
+      observeEvent(r$location_search_result(), {
+        
+        cat("[trip] Accomodation search result, dim =", dim(r$location_search_result()), "\n")
+        
+        # -- compute choices
+        result <- r$location_search_result()
+        choices <- result$id
+        names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+        
+        # -- update input
+        updateSelectizeInput(inputId = "select_accomodation", choices = choices)
+        
+      })
+      
+    })
     
   })
 }

@@ -38,9 +38,8 @@ trip_panel_UI <- function(id)
     actionButton(inputId = ns("add_accomodation"), label = "", icon = icon("bed")),
     
     # -- add_transport zone
-    uiOutput(ns("transport_zone"))
-    
-    
+    uiOutput(ns("transport_zone")),
+    uiOutput(ns("accomodation_zone"))
     
     )
   
