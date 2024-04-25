@@ -360,5 +360,34 @@ location_Server <- function(id, r, path) {
       
     })
     
+    
+    # -------------------------------------
+    # Search
+    # -------------------------------------
+    
+    # -- declare trigger
+    r$location_search_string <- NULL
+    
+    
+    # -- observe trigger & expose connector
+    r$location_search_result <- eventReactive(r$location_search_string, {
+      
+      # -- check for empty string (otherwise the whole df is returned)
+      if(identical(r$location_search_string, ""))
+        NULL
+      
+      else {
+        
+        cat("[location] Trigger, search string =", r$location_search_string, "\n")
+        
+        # -- filter items
+        result <- r[[r_items]]() %>%
+          filter_all(any_vars(grepl(r$location_search_string, .)))
+        
+        # -- return
+        result}
+      
+    })
+    
   })
 }
