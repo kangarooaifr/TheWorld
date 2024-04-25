@@ -31,6 +31,7 @@ location_Server <- function(id, r, path) {
     # -- icon set
     icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                              wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
+                             bed = makeAwesomeIcon(icon = 'bed', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                              port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
                              default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
     
@@ -274,9 +275,10 @@ location_Server <- function(id, r, path) {
         locations <- locations %>%
           mutate(icon = case_when(been.there ~ 'been.there',
                                   wish.list ~ 'wish.list',
-                                  type == 'Port' ~ 'port'))
+                                  type == 'Port' ~ 'port',
+                                  type == 'Accomodation' ~ 'bed'))
         
-        str(locations)
+        str(locations$icon)
         
         # -- update map (proxy)
         r$proxymap %>%
