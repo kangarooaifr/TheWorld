@@ -68,14 +68,12 @@ trip_Server <- function(id, r, path) {
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = transport_kitems_id, r, path$data)
     
-    # -- to be defined: functions
-    # cache_trip_id
-    # cache_route_id
-    
+    # -- names
+    transport_r_data_model <- kitems::dm_name(transport_kitems_id)
+    transport_r_trigger_add <- kitems::trigger_add_name(transport_kitems_id)
     
     # -- init outputs
     output$transport_zone <- NULL
-    
     
     # -- observer
     observeEvent(input$add_transport, {
@@ -95,20 +93,26 @@ trip_Server <- function(id, r, path) {
           
           dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
           timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
+          selectizeInput(inputId = ns("departure_tz"), label = "Departure tz", choices = OlsonNames(), selected = Sys.timezone()),
+          
         
           dateInput(inputId = ns("arrival_date"), label = "Arrival date", value = Sys.Date()),
           timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
+          selectizeInput(inputId = ns("arrival_tz"), label = "Arrival tz", choices = OlsonNames(), selected = Sys.timezone()),
+          
+          textInput(inputId = ns("comment"), label = "Comment"),
 
           actionButton(inputId = ns("confirm_route"), label = "OK")
                     
       ))
       
       
+      # -- observer: transport mode radio
       observeEvent(input$route_type, {
-        
         r$route_search_string <- input$route_type})
       
       
+      # -- observer: search result
       observeEvent(r$route_search_result(), {
         
         cat("[trip] Route search result, dim =", dim(r$route_search_result()), "\n")
@@ -120,12 +124,38 @@ trip_Server <- function(id, r, path) {
         
         updateSelectizeInput(inputId = "select_route", choices = choices)
         
-        
       })
         
-
     })
     
+    
+    # -- observer: confirm add route
+    observeEvent(input$confirm_route, {
+      
+      # -- clear output
+      output$transport_zone <- NULL
+      
+      # -- compute values
+      departure <- paste(input$departure_date, input$departure_time)
+      departure <- as.POSIXct(departure, tz = input$departure_tz)
+      arrival <- paste(input$arrival_date, input$arrival_time)
+      arrival <- as.POSIXct(arrival, tz = input$arrival_tz)
+      
+      # -- merge
+      values <- list(id = ktools::getTimestamp(),
+                     trip.id = input$trip_selector,
+                     route.id = input$select_route,
+                     departure = departure,
+                     arrival = arrival,
+                     comment = input$comment)
+    
+      # -- create item
+      transport <- kitems::item_create(values, data.model = r[[transport_r_data_model]]())
+
+      # -- call trigger
+      r[[transport_r_trigger_add]](transport)
+
+    })
     
     
     # -------------------------------------
