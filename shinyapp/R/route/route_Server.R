@@ -128,11 +128,23 @@ route_Server <- function(id, r, path) {
         result <- r[[r_items]]() %>%
           filter_all(any_vars(grepl(r$route_search_string, .)))
 
-        # -- add iata codes
-        result <- merge(result, r$airports[c("id", "iata")], by.x = "origin", by.y = "id")
-        result <- merge(result, r$airports[c("id", "iata")], by.x = "destination", by.y = "id")
-        names(result)[names(result) == 'iata.x'] <- 'origin.iata'
-        names(result)[names(result) == 'iata.y'] <- 'destination.iata'
+        # -- air
+        if(r$route_search_string == 'air'){
+          
+          result <- merge(result, r$airports[c("id", "iata")], by.x = "origin", by.y = "id")
+          result <- merge(result, r$airports[c("id", "iata")], by.x = "destination", by.y = "id")
+          names(result)[names(result) == 'iata.x'] <- 'origin.code'
+          names(result)[names(result) == 'iata.y'] <- 'destination.code'
+          
+          # -- sea
+        } else if(r$route_search_string == 'sea'){
+          
+          result <- merge(result, r$seaports()[c("id", "name")], by.x = "origin", by.y = "id")
+          result <- merge(result, r$seaports()[c("id", "name")], by.x = "destination", by.y = "id")
+          names(result)[names(result) == 'name.x'] <- 'origin.code'
+          names(result)[names(result) == 'name.y'] <- 'destination.code'
+          
+        }
         
         # -- return
         result
