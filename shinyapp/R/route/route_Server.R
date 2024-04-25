@@ -63,10 +63,21 @@ route_Server <- function(id, r, path) {
         )
       ))
       
-      # -- update the selectizeInput with choices (server)
-      choices <- r$airports$id
-      names(choices) <- r$airports$iata
+      # -- compute available choices:
+      if(input$transport_mode == "air"){
+        
+        choices <- r$airports$id
+        names(choices) <- r$airports$iata
+        
+      } else if(input$transport_mode == "sea"){
+        
+        choices <- r$seaports()$id
+        names(choices) <- paste(r$seaports()$city, r$seaports()$name, sep = "-")
+        
+      }
       choices <- as.list(choices)
+      
+      # -- update the selectizeInput with choices (server)
       updateSelectizeInput(session, 'select_origin', choices = choices, server = TRUE)
       updateSelectizeInput(session, 'select_destination', choices = choices, server = TRUE)
       
@@ -135,48 +146,77 @@ route_Server <- function(id, r, path) {
     # -------------------------------------
 
     # -- add path to map
-    observeEvent(r[[r_items]](), {
-      
-      cat("[routeS] Updating route segments \n")
-      
-      # -- get flight data
-      routes <- r[[r_items]]()
-      routes <- routes[routes$type == 'flight', ]
-      
-      # -- Helper: add route route to map
-      addroute <- function(routeid){
-        
-        # -- get route parameters
-        origin <- routes[routes$id == routeid, 'origin']
-        destination <- routes[routes$id == routeid, 'destination']
-        origin_name <- r$airports[r$airports$id == origin, 'name']
-        destination_name <- r$airports[r$airports$id == destination, 'name']
-        
-        cat("-- route origin", origin, "/ destination", destination, "\n")
-        
-        # -- compute great circle route
-        route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
-                                p2 = airport_coord(r$airports, id = destination), 
-                                n = 100, 
-                                addStartEnd = TRUE)
-        
-        # -- add to proxy map
-        r$proxymap %>%
+    observeEvent(
+      {r[[r_items]]()
+        input$transport_mode}, {
           
-          hideGroup(group_id) %>%
+          cat("[routeS] Updating route segments \n")
           
-          # add fight route
-          addPolylines(data = route, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
-        
-      }
-      
-      # -- apply helper to routes df
-      cat("[routes] Looping over route list... \n")
-      lapply(routes$id, addroute)
-        
-    })
+          # -- clear map (group)
+          r$proxymap %>%
+            clearGroup(group_id)
+          
+          # -- get & filter data
+          routes <- r[[r_items]]()
+          routes <- routes[routes$type == input$transport_mode, ]
+          
+          # -- Helper: add route to map
+          addroute <- function(routeid){
+            
+            # -- get route parameters
+            origin <- routes[routes$id == routeid, 'origin']
+            destination <- routes[routes$id == routeid, 'destination']
+            
+            cat("-- route origin", origin, "/ destination", destination, "\n")
+            
+            # -- mode: air
+            if(input$transport_mode == 'air'){
+              
+              # -- get names
+              origin_name <- r$airports[r$airports$id == origin, 'name']
+              destination_name <- r$airports[r$airports$id == destination, 'name']
+              
+              # -- compute great circle route
+              route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
+                                      p2 = airport_coord(r$airports, id = destination), 
+                                      n = 100, 
+                                      addStartEnd = TRUE)
+              
+              # -- mode: sea
+            } else if(input$transport_mode == 'sea'){
+              
+              # -- get names
+              origin_name <- r$seaports()[r$seaports()$id == origin, 'name']
+              destination_name <- r$seaports()[r$seaports()$id == destination, 'name']
+              
+              # -- compute route
+              route <- data.frame(lng = c(r$seaports()[r$seaports()$id == origin, 'lng'], r$seaports()[r$seaports()$id == destination, 'lng']),
+                                  lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
+              
+            }
+            
+            # -- add to proxy map
+            if(input$transport_mode == "air")
+              r$proxymap %>%
+              
+              # add fight route
+              addPolylines(data = route, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+            else if(input$transport_mode == "sea")
+              
+              r$proxymap %>%
+              
+              addPolylines(lng = route$lng, lat = route$lat, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+          }
+          
+          # -- apply helper to routes df
+          cat("[routes] Looping over route list... \n")
+          lapply(routes$id, addroute)
+          
+        })
     
-
+    
     # -------------------------------------
     # Hide / Show
     # -------------------------------------

@@ -31,7 +31,8 @@ location_Server <- function(id, r, path) {
     # -- icon set
     icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                              wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
-                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'blue'))
+                             port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
+                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
     
     
     # -------------------------------------
@@ -57,6 +58,16 @@ location_Server <- function(id, r, path) {
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
+    
+    
+    # -------------------------------------
+    # Load resources & connector: seaports
+    # -------------------------------------
+    # There is no specific file for seaports at this moment
+    # it is taken from the standard locations with type = Port
+    
+    # -- expose connector
+    r$seaports <- reactive(r[[r_items]]()[r[[r_items]]()$type == 'Port', ])
     
     
     # -------------------------------------
@@ -260,7 +271,12 @@ location_Server <- function(id, r, path) {
         lat_max <- max(locations$lat)
 
         # -- prepare marker icon
-        locations <- transform(locations, icon = ifelse(been.there, 'been.there', ifelse(wish.list, 'wish.list', 'default')))
+        locations <- locations %>%
+          mutate(icon = case_when(been.there ~ 'been.there',
+                                  wish.list ~ 'wish.list',
+                                  type == 'Port' ~ 'port'))
+        
+        str(locations)
         
         # -- update map (proxy)
         r$proxymap %>%
