@@ -88,7 +88,7 @@ trip_Server <- function(id, r, path) {
           radioButtons(inputId = ns("route_type"), 
                        label = "", 
                        choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")),
-                       choiceValues = list("flight", "train", "sea", "road"),
+                       choiceValues = list("air", "rail", "sea", "road"),
                        inline = TRUE),
           
           selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL),
@@ -106,7 +106,7 @@ trip_Server <- function(id, r, path) {
       
       observeEvent(input$route_type, {
         
-        r$route_search_string<- input$route_type})
+        r$route_search_string <- input$route_type})
       
       
       observeEvent(r$route_search_result(), {
@@ -116,7 +116,7 @@ trip_Server <- function(id, r, path) {
         # -- compute choices
         result <- r$route_search_result()
         choices <- result$id
-        names(choices) <- paste(result$company, result$number, result$origin.iata, result$destination.iata)
+        names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
         
         updateSelectizeInput(inputId = "select_route", choices = choices)
         
