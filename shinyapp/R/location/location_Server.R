@@ -278,8 +278,6 @@ location_Server <- function(id, r, path) {
                                   type == 'Port' ~ 'port',
                                   type == 'Accomodation' ~ 'bed'))
         
-        str(locations$icon)
-        
         # -- update map (proxy)
         r$proxymap %>%
           
@@ -312,11 +310,13 @@ location_Server <- function(id, r, path) {
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
                                              ns("button_click")))), id, id),
                             #clusterOptions = markerClusterOptions(),
-                            clusterOptions = NULL) %>%
-          
-          # -- set view
-          flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
-                      options = list(duration = fly_duration, padding = c(50, 50)))
+                            clusterOptions = NULL)
+        
+        # -- update map view
+        if(!r$freeze_map()){
+          r$proxymap %>%
+            flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
+                        options = list(duration = fly_duration, padding = c(50, 50)))}
       }
       
     }, ignoreNULL = FALSE)
