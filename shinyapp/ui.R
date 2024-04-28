@@ -8,9 +8,7 @@
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE),
-        menuItem("Trip planner", tabName = "trip-planner", icon = icon("compass"))),
-    
+        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
     
     # -- add dynamic section
     sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -28,26 +26,24 @@ body <- dashboardBody(
                 
                 fluidRow(
                     column(width = 3,
+                           
                            search_Input("map"),
-                           location_panel_UI("locationmngr"),
-                           route_UI("routemngr"),
-                           country_UI("country"),
-                           track_UI("track")),
+                           
+                           tabsetPanel(
+                             
+                             tabPanel("World map", 
+                                      location_panel_UI("locationmngr"),
+                                      route_UI("routemngr"),
+                                      country_UI("country"),
+                                      track_UI("track")),
+                           
+                             tabPanel("Trip planner", 
+                                      trip_panel_UI("tripmngr"),
+                                      tmp_trip_ui("tripmngr")))),
                     
                     column(width = 9,
                            country_INPUT("map"),
                            map_UI("map")))),
-        
-        # -- Trip planner
-        tabItem(tabName = "trip-planner",
-                
-                fluidRow(
-                  column(width = 3,
-                         trip_panel_UI("tripmngr")),
-                  
-                  column(width = 9,
-                         p("map here"),
-                         tmp_trip_ui("tripmngr")))),
         
         
         # -- kitems admin (location)
