@@ -290,7 +290,7 @@ location_Server <- function(id, r, path) {
                             lat = ~lat,
                             group = group_id,
                             icon = ~icons[icon],
-                            label = ~city,
+                            label = ~name,
                             popup = ~sprintf(
                               paste0(
                                 "Name:", name,
