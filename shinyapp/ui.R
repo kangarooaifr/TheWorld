@@ -46,7 +46,8 @@ body <- dashboardBody(
                          trip_panel_UI("tripmngr")),
                   
                   column(width = 9,
-                         p("map here")))),
+                         p("map here"),
+                         tmp_trip_ui("tripmngr")))),
         
         
         # -- kitems admin (location)
