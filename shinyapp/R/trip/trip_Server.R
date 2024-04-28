@@ -55,8 +55,24 @@ trip_Server <- function(id, r, path) {
       
       cat("[trip] Trip selector, id =", input$trip_selector, "\n")
       
+      # -- get transports
       transports <- r[[transport_r_items]]()
       transports <- transports[transports$trip.id == input$trip_selector, ]
+      
+      output$tmp_trip_1 <- renderPrint(transports)
+      
+      # -- get accomodations
+      accommodations <- r[[accomodation_r_items]]()
+      accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
+      
+      output$tmp_accomodation_1 <- renderPrint(accommodations)
+      
+      # -- compute values
+      date_start <- min(c(transports$departure, accommodations$checkin))
+      date_end <- max(c(transports$arrival, accommodations$checkout))
+      duration <- date_end - date_start
+      
+      output$tmp_trip_date <- renderPrint(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
       
     })
     
@@ -174,6 +190,11 @@ trip_Server <- function(id, r, path) {
     # -- id
     accomodation_kitems_id <- "accomodation"
     
+    # -- names
+    accomodation_r_items <- kitems::items_name(accomodation_kitems_id)
+    accomodation_r_trigger_add <- kitems::trigger_add_name(accomodation_kitems_id)
+    accomodation_r_data_model <- kitems::dm_name(accomodation_kitems_id)
+    
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = accomodation_kitems_id, r, path$data)
     
@@ -207,12 +228,16 @@ trip_Server <- function(id, r, path) {
           # -- checkout
           dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
           timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
+          selectizeInput(inputId = ns("accomodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
           
           # -- breakfast
           checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
           
           # -- comment
-          textInput(inputId = ns("accommodation_comment"), label = "Comment")))
+          textInput(inputId = ns("accommodation_comment"), label = "Comment"),
+          
+          # -- btn
+          actionButton(inputId = ns("confirm_accomodation"), label = "OK")))
       
       # -- init location search trigger
       r$location_search_string <- 'Accomodation'
@@ -233,6 +258,39 @@ trip_Server <- function(id, r, path) {
       })
       
     })
+    
+    
+    observeEvent(input$confirm_accomodation, {
+      
+      # -- clear output
+      output$accomodation_zone <- NULL
+      
+      # -- compute values
+      checkin <- paste(input$checkin_date, input$checkin_time)
+      checkin <- as.POSIXct(checkin, tz = input$accomodation_tz)
+      checkout <- paste(input$checkout_date, input$checkout_time)
+      checkout <- as.POSIXct(checkout, tz = input$accomodation_tz)
+      
+      # -- merge
+      values <- list(id = ktools::getTimestamp(),
+                     trip.id = input$trip_selector,
+                     location.id = input$select_accomodation,
+                     checkin = checkin,
+                     checkout = checkout,
+                     breakfast = input$breakfast,
+                     comment = input$accommodation_comment)
+  
+      
+      # -- create item
+      accomodation <- kitems::item_create(values, data.model = r[[accomodation_r_data_model]]())
+      
+      # -- call trigger
+      r[[accomodation_r_trigger_add]](accomodation)
+      
+      
+      
+    })
+    
     
   })
 }

@@ -44,3 +44,23 @@ trip_panel_UI <- function(id)
     )
   
 }
+
+
+tmp_trip_ui <- function(id){
+  
+  # -- namespace
+  ns <- NS(id)
+  
+  # --
+  tagList(
+    
+    h4("Info"),
+    verbatimTextOutput(ns("tmp_trip_date")),
+    
+    h4("Transports"),
+    verbatimTextOutput(ns("tmp_trip_1")),
+    
+    h4("Accomodation"),
+    verbatimTextOutput(ns("tmp_accomodation_1")))
+  
+}
