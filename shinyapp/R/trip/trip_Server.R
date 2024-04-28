@@ -95,39 +95,52 @@ trip_Server <- function(id, r, path) {
     # -- init outputs
     output$transport_zone <- NULL
     
+    # -- other
+    isTransportZone <- reactiveVal(FALSE)
+    
     # -- observer
     observeEvent(input$add_transport, {
       
-      cat("[trip] Add transport \n")
-      
-      output$transport_zone <- renderUI(
-        tagList(
-          
-          radioButtons(inputId = ns("route_type"), 
-                       label = "", 
-                       choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")),
-                       choiceValues = list("air", "rail", "sea", "road"),
-                       inline = TRUE),
-          
-          selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL, 
-                         options = list(placeholder = 'Please select an option below',
-                                        onInitialize = I('function() { this.setValue(""); }'))),
-          
-          dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
-          timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
-          selectizeInput(inputId = ns("departure_tz"), label = "Departure tz", choices = OlsonNames(), selected = Sys.timezone()),
-          
+      # -- hide / show
+      if(isTransportZone()){
         
-          dateInput(inputId = ns("arrival_date"), label = "Arrival date", value = Sys.Date()),
-          timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
-          selectizeInput(inputId = ns("arrival_tz"), label = "Arrival tz", choices = OlsonNames(), selected = Sys.timezone()),
-          
-          textInput(inputId = ns("route_comment"), label = "Comment"),
-
-          actionButton(inputId = ns("confirm_route"), label = "OK")
-                    
-      ))
-      
+        output$transport_zone <- NULL
+        isTransportZone(FALSE)
+        
+      } else {
+        
+        cat("[trip] Add transport \n")
+        
+        isTransportZone(TRUE)
+        
+        output$transport_zone <- renderUI(
+          tagList(
+            
+            radioButtons(inputId = ns("route_type"), 
+                         label = "", 
+                         choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")),
+                         choiceValues = list("air", "rail", "sea", "road"),
+                         inline = TRUE),
+            
+            selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'))),
+            
+            dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
+            timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
+            selectizeInput(inputId = ns("departure_tz"), label = "Departure tz", choices = OlsonNames(), selected = Sys.timezone()),
+            
+            
+            dateInput(inputId = ns("arrival_date"), label = "Arrival date", value = Sys.Date()),
+            timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
+            selectizeInput(inputId = ns("arrival_tz"), label = "Arrival tz", choices = OlsonNames(), selected = Sys.timezone()),
+            
+            textInput(inputId = ns("route_comment"), label = "Comment"),
+            
+            actionButton(inputId = ns("confirm_route"), label = "OK")))
+        
+      }
+        
       
       # -- observer: transport mode radio
       observeEvent(input$route_type, {
