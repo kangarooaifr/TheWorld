@@ -29,15 +29,15 @@ body <- dashboardBody(
                            
                            search_Input("map"),
                            
-                           tabsetPanel(
+                           tabsetPanel(id = "selected_tab",
                              
-                             tabPanel("World map", 
+                             tabPanel("World map", value = "world_map",
                                       location_panel_UI("locationmngr"),
                                       route_UI("routemngr"),
                                       country_UI("country"),
                                       track_UI("track")),
                            
-                             tabPanel("Trip planner", 
+                             tabPanel("Trip planner", value = "trip_planner",
                                       trip_panel_UI("tripmngr"),
                                       tmp_trip_ui("tripmngr")))),
                     
