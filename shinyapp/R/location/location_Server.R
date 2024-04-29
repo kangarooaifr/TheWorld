@@ -242,26 +242,39 @@ location_Server <- function(id, r, path) {
     observeEvent({
       input$display_options
       r[[r_items]]()
+      r$activity
+      selected_location()
       r$filter_country
     }, {
       
-      # -- option
-      cat("[location] Show location, option =", input$display_options, "\n")
       
-      # -- get the data & apply option
-      locations <- r[[r_items]]()
-      if(input$display_options == "been-there")
-        locations <- locations[locations$been.there, ]
-      else if(input$display_options == "wish-list")
-        locations <- locations[locations$wish.list, ]
+      if(r$activity == "world_map"){
+        
+        # -- option
+        cat("[location] Show location, option =", input$display_options, "\n")
+        
+        # -- get the data & apply option
+        locations <- r[[r_items]]()
+        if(input$display_options == "been-there")
+          locations <- locations[locations$been.there, ]
+        else if(input$display_options == "wish-list")
+          locations <- locations[locations$wish.list, ]
+        
+        cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
+        
+        # -- filter by country
+        if(!is.null(r$filter_country)){
+          locations <- locations[locations$country %in% r$filter_country, ]
+          cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
+        
+      } else {
+        
+        cat("[location] Show trip locations \n")
+        
+        locations <- selected_location()
       
-      cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
-      
-      # -- filter by country
-      if(!is.null(r$filter_country)){
-        locations <- locations[locations$country %in% r$filter_country, ]
-        cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
-      
+      }
+        
       # -- check dim
       if(dim(locations)[1] > 0){
         
@@ -386,6 +399,25 @@ location_Server <- function(id, r, path) {
         
         # -- return
         result}
+      
+    })
+    
+    
+    # -------------------------------------
+    # Select
+    # -------------------------------------
+    
+    # -- declare trigger
+    r$location_select <- NULL
+    
+    # -- observe
+    selected_location <- eventReactive(r$location_select, {
+      
+      # -- get items
+      locations <- r[[r_items]]()
+      
+      # -- apply selection
+      locations[locations$id %in% r$location_select, ]
       
     })
     
