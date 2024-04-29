@@ -223,55 +223,69 @@ trip_Server <- function(id, r, path) {
     # -- init output
     output$accomodation_zone <- NULL
     
+    # -- hide / show
+    isAccomodationZone <- reactiveVal(FALSE)
+    
     # -- observer
     observeEvent(input$add_accomodation, {
-
-      cat("[trip] Add accommodation \n")
+      
+      if(isAccomodationZone()){
+        
+        output$accomodation_zone <- NULL
+        isAccomodationZone(FALSE)
+        
+      } else {
+        
+        cat("[trip] Add accommodation \n")
+        
+        isAccomodationZone(TRUE)
+        
+        # -- build output
+        output$accomodation_zone <- renderUI(
+          tagList(
             
-      # -- build output
-      output$accomodation_zone <- renderUI(
-        tagList(
-          
-          # -- accommodation
-          selectizeInput(inputId = ns("select_accomodation"), label = "Accomodation", choices = NULL,
-                         options = list(placeholder = 'Please select an option below',
-                                        onInitialize = I('function() { this.setValue(""); }'))),
-          
-          # -- checkin
-          dateInput(inputId = ns("checkin_date"), label = "Checkin date", value = Sys.Date()),
-          timeInput(inputId = ns("checkin_time"), label = "Checkin time", value = Sys.time()),
-          
-          # -- checkout
-          dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
-          timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
-          selectizeInput(inputId = ns("accomodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
-          
-          # -- breakfast
-          checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
-          
-          # -- comment
-          textInput(inputId = ns("accommodation_comment"), label = "Comment"),
-          
-          # -- btn
-          actionButton(inputId = ns("confirm_accomodation"), label = "OK")))
-      
-      # -- init location search trigger
-      r$location_search_string <- 'Accomodation'
-      
-      # -- observer: search result
-      observeEvent(r$location_search_result(), {
+            # -- accommodation
+            selectizeInput(inputId = ns("select_accomodation"), label = "Accomodation", choices = NULL,
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'))),
+            
+            # -- checkin
+            dateInput(inputId = ns("checkin_date"), label = "Checkin date", value = Sys.Date()),
+            timeInput(inputId = ns("checkin_time"), label = "Checkin time", value = Sys.time()),
+            
+            # -- checkout
+            dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
+            timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
+            selectizeInput(inputId = ns("accomodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
+            
+            # -- breakfast
+            checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
+            
+            # -- comment
+            textInput(inputId = ns("accommodation_comment"), label = "Comment"),
+            
+            # -- btn
+            actionButton(inputId = ns("confirm_accomodation"), label = "OK")))
         
-        cat("[trip] Accomodation search result, dim =", dim(r$location_search_result()), "\n")
+        # -- init location search trigger
+        r$location_search_string <- 'Accomodation'
         
-        # -- compute choices
-        result <- r$location_search_result()
-        choices <- result$id
-        names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+        # -- observer: search result
+        observeEvent(r$location_search_result(), {
+          
+          cat("[trip] Accomodation search result, dim =", dim(r$location_search_result()), "\n")
+          
+          # -- compute choices
+          result <- r$location_search_result()
+          choices <- result$id
+          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+          
+          # -- update input
+          updateSelectizeInput(inputId = "select_accomodation", choices = choices)
+          
+        })
         
-        # -- update input
-        updateSelectizeInput(inputId = "select_accomodation", choices = choices)
-        
-      })
+      }
       
     })
     
