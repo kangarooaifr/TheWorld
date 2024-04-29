@@ -67,6 +67,9 @@ trip_Server <- function(id, r, path) {
       
       output$tmp_accomodation_1 <- renderPrint(accommodations)
       
+      r$location_select <- accommodations$location.id
+      
+      
       # -- compute values
       date_start <- min(c(transports$departure, accommodations$checkin))
       date_end <- max(c(transports$arrival, accommodations$checkout))
