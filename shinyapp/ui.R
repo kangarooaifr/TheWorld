@@ -70,6 +70,14 @@ body <- dashboardBody(
                   column(width = 12,
                          kitems::admin_ui("tripmngr-trip")))),
         
+        # -- kitems admin (step)
+        tabItem(tabName = "step",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("tripmngr-step")))),
+        
         # -- kitems admin (transport)
         tabItem(tabName = "transport",
                 

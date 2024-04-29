@@ -10,6 +10,9 @@ trip_Server <- function(id, r, path) {
     # -- get namespace
     ns <- session$ns
     
+    # -- shared input zone
+    output$shared_zone <- NULL
+    is_shared_zone <- reactiveVal("")
     
     # -------------------------------------
     # Trip management
@@ -55,6 +58,12 @@ trip_Server <- function(id, r, path) {
       
       cat("[trip] Trip selector, id =", input$trip_selector, "\n")
       
+      # -- get steps
+      steps <- r[[step_items]]()
+      steps <- steps[steps$trip.id == input$trip_selector, ]
+      
+      output$tmp_step_1 <- renderPrint(steps)
+      
       # -- get transports
       transports <- r[[transport_r_items]]()
       transports <- transports[transports$trip.id == input$trip_selector, ]
@@ -67,7 +76,7 @@ trip_Server <- function(id, r, path) {
       
       output$tmp_accomodation_1 <- renderPrint(accommodations)
       
-      r$location_select <- accommodations$location.id
+      r$location_select <- c(steps$location.id, accommodations$location.id)
       
       
       # -- compute values
@@ -76,6 +85,103 @@ trip_Server <- function(id, r, path) {
       duration <- date_end - date_start
       
       output$tmp_trip_date <- renderPrint(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
+      
+    })
+    
+    
+    # -------------------------------------
+    # Step management
+    # -------------------------------------
+    
+    # -- id
+    step_kitems_id <- "step"
+    
+    # -- launch kitems sub module
+    kitems::kitemsManager_Server(id = step_kitems_id, r, path$data)
+    
+    # -- get names
+    step_data_model <- kitems::dm_name(step_kitems_id)
+    step_items <- kitems::items_name(step_kitems_id)
+    step_trigger_add <- kitems::trigger_add_name(step_kitems_id)
+    
+    # id, trip.id, location.id, order, comment
+    
+    # -- observer
+    observeEvent(input$add_location, {
+      
+      # -- check shared zone
+      if(is_shared_zone() == "step"){
+        
+        # -- clear zone
+        output$shared_zone <- NULL
+        is_shared_zone("")
+        
+      } else {
+        
+        # -- declare cache
+        is_shared_zone("step")
+        
+        # -- output
+        output$shared_zone <- renderUI(
+          tagList(
+            
+            # -- location
+            selectizeInput(inputId = ns("select_step"), label = "Select", choices = NULL, 
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }'))),
+            
+            # -- comment
+            textInput(inputId = ns("step_comment"), label = "Comment"),
+            
+            actionButton(inputId = ns("confirm_step"), label = "OK")
+            
+          )
+        )
+        
+        # -- init location search trigger
+        r$location_search_string <- 'City'
+        
+        # -- observer: search result
+        observeEvent(r$location_search_result(), {
+          
+          cat("[trip] Location search result, dim =", dim(r$location_search_result()), "\n")
+          
+          # -- compute choices
+          result <- r$location_search_result()
+          choices <- result$id
+          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+          
+          # -- update input
+          updateSelectizeInput(inputId = "select_step", choices = choices)
+          
+        })
+        
+      }
+      
+    })
+    
+    
+    # -- observe: confirm step
+    observeEvent(input$confirm_step, {
+      
+      cat("[EVENT] Add step, selected location =", input$select_step, "\n")
+      
+      # -- clear all
+      output$shared_zone <- NULL
+      is_shared_zone("")
+      
+      # -- compute values
+      values <- list(id = ktools::getTimestamp(),
+                     trip.id = input$trip_selector,
+                     location.id = input$select_step,
+                     order = step_order(r[[step_items]]()),
+                     comment = input$step_comment)
+      
+      # -- create item
+      step <- kitems::item_create(values, data.model = r[[step_data_model]]())
+      
+      # -- call trigger
+      r[[step_trigger_add]](step)
       
     })
     
@@ -95,28 +201,25 @@ trip_Server <- function(id, r, path) {
     transport_r_data_model <- kitems::dm_name(transport_kitems_id)
     transport_r_trigger_add <- kitems::trigger_add_name(transport_kitems_id)
     
-    # -- init outputs
-    output$transport_zone <- NULL
-    
-    # -- other
-    isTransportZone <- reactiveVal(FALSE)
     
     # -- observer
     observeEvent(input$add_transport, {
       
       # -- hide / show
-      if(isTransportZone()){
+      if(is_shared_zone() == "transport"){
         
-        output$transport_zone <- NULL
-        isTransportZone(FALSE)
+        output$shared_zone <- NULL
+        is_shared_zone("")
         
       } else {
         
         cat("[trip] Add transport \n")
         
-        isTransportZone(TRUE)
+        # -- declare cache
+        is_shared_zone("transport")
         
-        output$transport_zone <- renderUI(
+        # -- output
+        output$shared_zone <- renderUI(
           tagList(
             
             radioButtons(inputId = ns("route_type"), 
@@ -170,8 +273,9 @@ trip_Server <- function(id, r, path) {
     # -- observer: confirm add route
     observeEvent(input$confirm_route, {
       
-      # -- clear output
-      output$transport_zone <- NULL
+      # -- clear
+      output$shared_zone <- NULL
+      is_shared_zone("")
       
       # -- compute values
       departure <- paste(input$departure_date, input$departure_time)
@@ -216,32 +320,24 @@ trip_Server <- function(id, r, path) {
     
     # id, trip.id, location.id, checkin, checkout, breakfast, comment
     
-    # -- to be defined: functions
-    # cache_trip_id
-    # cache_location_id
-    
-    # -- init output
-    output$accomodation_zone <- NULL
-    
-    # -- hide / show
-    isAccomodationZone <- reactiveVal(FALSE)
-    
     # -- observer
     observeEvent(input$add_accomodation, {
       
-      if(isAccomodationZone()){
+      if(is_shared_zone() == "accomodation"){
         
-        output$accomodation_zone <- NULL
-        isAccomodationZone(FALSE)
+        # -- clear all
+        output$shared_zone <- NULL
+        is_shared_zone("")
         
       } else {
         
         cat("[trip] Add accommodation \n")
         
-        isAccomodationZone(TRUE)
+        # -- declare cache
+        is_shared_zone("accomodation")
         
-        # -- build output
-        output$accomodation_zone <- renderUI(
+        # -- output
+        output$shared_zone <- renderUI(
           tagList(
             
             # -- accommodation
@@ -292,8 +388,9 @@ trip_Server <- function(id, r, path) {
     
     observeEvent(input$confirm_accomodation, {
       
-      # -- clear output
-      output$accomodation_zone <- NULL
+      # -- clear
+      output$shared_zone <- NULL
+      is_shared_zone("")
       
       # -- compute values
       checkin <- paste(input$checkin_date, input$checkin_time)

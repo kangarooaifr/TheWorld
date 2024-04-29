@@ -30,12 +30,12 @@ trip_panel_UI <- function(id)
     
     # -- Add buttons
     p("Add"),
+    actionButton(inputId = ns("add_location"), label = "", icon = icon("location-dot")),
     actionButton(inputId = ns("add_transport"), label = "", icon = icon("route")),
     actionButton(inputId = ns("add_accomodation"), label = "", icon = icon("bed")),
     
     # -- add_transport zone
-    uiOutput(ns("transport_zone")),
-    uiOutput(ns("accomodation_zone"))
+    uiOutput(ns("shared_zone"))
     
     )
   
@@ -52,6 +52,9 @@ tmp_trip_ui <- function(id){
     
     h4("Info"),
     verbatimTextOutput(ns("tmp_trip_date")),
+    
+    h4("Steps"),
+    verbatimTextOutput(ns("tmp_step_1")),
     
     h4("Transports"),
     verbatimTextOutput(ns("tmp_trip_1")),
