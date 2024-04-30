@@ -68,18 +68,21 @@ trip_Server <- function(id, r, path) {
       transports <- r[[transport_r_items]]()
       transports <- transports[transports$trip.id == input$trip_selector, ]
       
-      # -- call trigger
+      # -- call trigger (select route)
       r$route_select <- transports$route.id
       
+      # -- output
       output$tmp_trip_1 <- renderPrint(transports)
       
       # -- get accomodations
       accommodations <- r[[accomodation_r_items]]()
       accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
       
+      # -- output
       output$tmp_accomodation_1 <- renderPrint(accommodations)
       
-      r$location_select <- c(steps$location.id, accommodations$location.id)
+      # -- select locations
+      r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
       
       
       # -- compute values
@@ -89,7 +92,7 @@ trip_Server <- function(id, r, path) {
       
       output$tmp_trip_date <- renderPrint(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
       
-    })
+    }, ignoreInit = TRUE)
     
     
     # -------------------------------------
