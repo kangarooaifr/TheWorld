@@ -48,7 +48,9 @@ trip_Server <- function(id, r, path) {
       names(choices) <- trips$name
       
       # -- update input
-      updateSelectizeInput(inputId = "trip_selector", choices = choices)
+      updateSelectizeInput(inputId = "trip_selector", choices = choices,
+                           options = list(placeholder = 'Please select an option below',
+                                          onInitialize = I('function() { this.setValue(""); }')))
       
     })
     
@@ -62,7 +64,7 @@ trip_Server <- function(id, r, path) {
       steps <- r[[step_items]]()
       steps <- steps[steps$trip.id == input$trip_selector, ]
       
-      output$tmp_step_1 <- renderPrint(steps)
+      str(steps)
       
       # -- get transports
       transports <- r[[transport_r_items]]()
@@ -72,14 +74,14 @@ trip_Server <- function(id, r, path) {
       r$route_select <- transports$route.id
       
       # -- output
-      output$tmp_trip_1 <- renderPrint(transports)
+      str(transports)
       
       # -- get accomodations
       accommodations <- r[[accomodation_r_items]]()
       accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
       
       # -- output
-      output$tmp_accomodation_1 <- renderPrint(accommodations)
+      str(accommodations)
       
       # -- select locations
       r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
@@ -90,7 +92,7 @@ trip_Server <- function(id, r, path) {
       date_end <- max(c(transports$arrival, accommodations$checkout))
       duration <- date_end - date_start
       
-      output$tmp_trip_date <- renderPrint(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
+      output$trip_info <- renderUI(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
       
     }, ignoreInit = TRUE)
     

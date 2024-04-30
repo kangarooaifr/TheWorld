@@ -38,8 +38,7 @@ body <- dashboardBody(
                                       track_UI("track")),
                            
                              tabPanel("Trip planner", value = "trip_planner",
-                                      trip_panel_UI("tripmngr"),
-                                      tmp_trip_ui("tripmngr")))),
+                                      trip_panel_UI("tripmngr")))),
                     
                     column(width = 9,
                            country_INPUT("map"),

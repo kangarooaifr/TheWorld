@@ -16,7 +16,7 @@ trip_panel_UI <- function(id)
     
     # -- trip selector, create btn
     div(style="display: inline-block;width: 200px;", selectizeInput(inputId = ns("trip_selector"), label = "Select trip", choices = NULL)),
-    div(style="display: inline-block;width: 50px;",HTML("<br>")),
+    div(style="display: inline-block;width: 20px;",HTML("<br>")),
     div(style="display: inline-block;", kitems::create_BTN("tripmngr-trip")),
     
     # -- display options
@@ -24,6 +24,11 @@ trip_panel_UI <- function(id)
     
     # -- hide / show
     #checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE),
+    
+    # -- line break
+    hr(),
+    
+    uiOutput(ns("trip_info")),
     
     # -- line break
     hr(),
@@ -38,28 +43,5 @@ trip_panel_UI <- function(id)
     uiOutput(ns("shared_zone"))
     
     )
-  
-}
-
-
-tmp_trip_ui <- function(id){
-  
-  # -- namespace
-  ns <- NS(id)
-  
-  # --
-  tagList(
-    
-    h4("Info"),
-    verbatimTextOutput(ns("tmp_trip_date")),
-    
-    h4("Steps"),
-    verbatimTextOutput(ns("tmp_step_1")),
-    
-    h4("Transports"),
-    verbatimTextOutput(ns("tmp_trip_1")),
-    
-    h4("Accomodation"),
-    verbatimTextOutput(ns("tmp_accomodation_1")))
   
 }
