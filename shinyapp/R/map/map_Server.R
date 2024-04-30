@@ -51,7 +51,7 @@ map_Server <- function(id, r, path) {
       click <- input$map_click
 
       # -- print
-      cat("Point clicked: lng =", click$lng, "/ lat =", click$lat, "\n")
+      cat("[map] Point clicked: lng =", click$lng, "/ lat =", click$lat, "\n")
       
       # -- store
       r$map_click <- input$map_click
@@ -66,7 +66,7 @@ map_Server <- function(id, r, path) {
       center <- input$map_center
       
       # -- print
-      cat("Map center: lng =", center$lng, "/ lat =", center$lat, "\n")
+      cat("[map] Center: lng =", center$lng, "/ lat =", center$lat, "\n")
       
       # -- store
       r$map_click <- NULL
@@ -78,7 +78,22 @@ map_Server <- function(id, r, path) {
     # -- Observer map bounds
     observeEvent(input$map_bounds, {
       bounds <- input$map_bounds
-      cat("Map bounds: north =", bounds$north, "/ east =", bounds$east, "/ south =", bounds$south, "\ west =", bounds$west, "\n")
+      cat("[map] Bounds: north =", bounds$north, "/ east =", bounds$east, "/ south =", bounds$south, "\ west =", bounds$west, "\n")
+      
+      # -- store
+      r$map_bounds <- bounds
+      
+    })
+    
+    
+    # -- Observer map zoom
+    observeEvent(input$map_zoom, {
+      
+      zoom <- input$map_zoom
+      cat("[map] Zoom =", zoom, "\n")
+      
+      r$zoom <- zoom
+      
     })
     
     
@@ -93,7 +108,7 @@ map_Server <- function(id, r, path) {
       req(input$search)
       
       # -- print
-      cat("search input =", input$search, "\n")
+      cat("[map] search input =", input$search, "\n")
       
       # -- get search result
       # TODO: rework, this function should be part of a package
