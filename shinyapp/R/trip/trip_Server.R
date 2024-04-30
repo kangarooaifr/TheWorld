@@ -92,7 +92,11 @@ trip_Server <- function(id, r, path) {
       date_end <- max(c(transports$arrival, accommodations$checkout))
       duration <- date_end - date_start
       
-      output$trip_info <- renderUI(paste("Start:", date_start, "/ end:", date_end, "/ duration:", duration))
+      output$trip_info <- renderUI(
+        tagList(
+          p(strong('Start:'), date_start),
+          p(strong('End:'), date_end),
+          p(strong('Duration:'), duration)))
       
     }, ignoreInit = TRUE)
     
