@@ -28,6 +28,6 @@ route_UI <- function(id){
                  inline = TRUE),
 
     # -- show / hide
-    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show"))
+    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE))
   
 }

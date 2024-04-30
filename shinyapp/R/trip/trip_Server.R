@@ -68,6 +68,9 @@ trip_Server <- function(id, r, path) {
       transports <- r[[transport_r_items]]()
       transports <- transports[transports$trip.id == input$trip_selector, ]
       
+      # -- call trigger
+      r$route_select <- transports$route.id
+      
       output$tmp_trip_1 <- renderPrint(transports)
       
       # -- get accomodations
