@@ -165,7 +165,7 @@ route_Server <- function(id, r, path) {
     r$route_select <- NULL
     
     # -- observe
-    selected_route <- eventReactive(r$route_select, {
+    r$selected_route <- eventReactive(r$route_select, {
       
       cat("[TRIGGER] Select route: \n")
       
@@ -214,10 +214,10 @@ route_Server <- function(id, r, path) {
     # Update map
     # -------------------------------------
     
-    observeEvent(selected_route(), {
+    observeEvent(r$selected_route(), {
       
       # -- init
-      routes <- selected_route()
+      routes <- r$selected_route()
       cat("[route] Update map, selected routes =", length(routes$id), "\n")
       
       # -- clear map (group)
