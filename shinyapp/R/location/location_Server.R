@@ -32,6 +32,7 @@ location_Server <- function(id, r, path) {
     icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                              wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
                              bed = makeAwesomeIcon(icon = 'bed', iconColor = 'black', library = 'fa', markerColor = 'beige'),
+                             airport = makeAwesomeIcon(icon = 'plane', iconColor = 'black', library = 'fa', markerColor = 'blue'),
                              port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
                              default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
     
@@ -289,6 +290,7 @@ location_Server <- function(id, r, path) {
           mutate(icon = case_when(been.there ~ 'been.there',
                                   wish.list ~ 'wish.list',
                                   type == 'Port' ~ 'port',
+                                  type == 'Airport' ~ 'airport',
                                   type == 'Accomodation' ~ 'bed'))
         
         # -- update map (proxy)
@@ -413,11 +415,44 @@ location_Server <- function(id, r, path) {
     # -- observe
     selected_location <- eventReactive(r$location_select, {
       
+      cat("[TRIGGER] Select location: \n")
+      
       # -- get items
       locations <- r[[r_items]]()
       
       # -- apply selection
-      locations[locations$id %in% r$location_select, ]
+      locations <- locations[locations$id %in% r$location_select, ]
+      
+      # -- check output dim
+      if(dim(locations)[1] != length(r$location_select)){
+        
+        # -- check for airports
+        airports <- r$airports[r$airports$id %in% r$location_select, ]
+        
+        # -- check output
+        if(dim(airports)[1] > 0){
+          
+          # -- build values
+          tmp_locations <- data.frame(id = airports$id,
+                                      name = paste(airports$iata, airports$name),
+                                      type = 'Airport',
+                                      lng = airports$longitude,
+                                      lat = airports$latitude,
+                                      country = airports$country,
+                                      state = NA,
+                                      zip.code = NA,
+                                      city = airports$city,
+                                      address = NA,
+                                      comment = NA,
+                                      been.there = FALSE,
+                                      wish.list = FALSE)}
+        
+        # -- merge
+        locations <- rbind(locations, tmp_locations)}
+      
+      # -- return
+      cat("-- output dim =", dim(locations),"\n")
+      locations
       
     })
     
