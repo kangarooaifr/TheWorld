@@ -456,5 +456,70 @@ location_Server <- function(id, r, path) {
       
     })
     
+    
+    # -------------------------------------
+    # Temporary locations
+    # -------------------------------------
+    
+    # -- observe: zoom, bounds
+    observeEvent({
+      r$zoom
+      r$map_bounds}, {
+      
+      # -- check zoom value
+      if(r$zoom >= 8){
+        
+        cat("[location] Add temporary locations")
+        
+        # -- get airports & bounding box
+        airports <- r$airports
+        bounds <- r$map_bounds
+        
+        # -- filter by bounding box
+        airports <- airports[airports$longitude > bounds$west &
+                               airports$longitude < bounds$east &
+                               airports$latitude > bounds$south &
+                               airports$latitude < bounds$north, ]
+        cat("-- Filter by bounding box, output dim =", dim(airports), "\n")
+        
+        
+        # -- build temp locations
+        tmp_locations <- data.frame(id = airports$id,
+                                    name = paste(airports$iata, airports$name),
+                                    type = 'Airport',
+                                    lng = airports$longitude,
+                                    lat = airports$latitude,
+                                    country = airports$country,
+                                    state = NA,
+                                    zip.code = NA,
+                                    city = airports$city,
+                                    address = NA,
+                                    comment = NA,
+                                    been.there = FALSE,
+                                    wish.list = FALSE)
+        
+        
+        
+        
+        # -- add markers
+        r$proxymap %>%
+          clearGroup("temp") %>%
+          addAwesomeMarkers(data = tmp_locations,
+                            lng = ~lng,
+                            lat = ~lat,
+                            group = "temp",
+                            label = ~name)
+        
+      } else if(r$zoom == 7){
+        
+        cat("[location] Clear temporary locations \n")
+        
+        r$proxymap %>%
+          clearGroup("temp")
+        
+      }
+        
+    })
+    
   })
 }
