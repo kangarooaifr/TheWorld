@@ -168,6 +168,7 @@ route_Server <- function(id, r, path) {
     r$selected_route <- eventReactive(r$route_select, {
       
       cat("[TRIGGER] Select route: \n")
+      str(r$route_select)
       
       # -- init
       routes <- r[[r_items]]()
@@ -211,12 +212,12 @@ route_Server <- function(id, r, path) {
     
     
     # -- observe: activity tab
-    observeEvent(r$activity, {
+    observeEvent(r$activity(), {
       
-      if(r$activity == "world_map")
+      if(r$activity() == "world_map")
         r$route_select <- numeric(0)
       
-    })
+    }, ignoreInit = TRUE)
     
     
     # -------------------------------------
@@ -375,7 +376,7 @@ route_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-      hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+      hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
   })
 }

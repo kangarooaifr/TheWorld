@@ -106,11 +106,13 @@ location_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- Event: map click
-    observeEvent(r$map_click, {
+    observeEvent(r$map_click(), {
+      
+      cat("[location] Map click event received \n")
       
       # -- get values
-      lng <- r$map_click[['lng']]
-      lat <- r$map_click[['lat']]
+      lng <- r$map_click()[['lng']]
+      lat <- r$map_click()[['lat']]
       
       # -- display popup
       r$proxymap %>% 
@@ -134,8 +136,8 @@ location_Server <- function(id, r, path) {
     
             p("Coordinates:"), 
             
-            tags$ul(tags$li("long =", r$map_click[['lng']]), 
-                    tags$li("lat =", r$map_click[['lat']])),
+            tags$ul(tags$li("long =", r$map_click()[['lng']]), 
+                    tags$li("lat =", r$map_click()[['lat']])),
             
             # -- name
             textInput(inputId = ns("name"), 
@@ -221,8 +223,8 @@ location_Server <- function(id, r, path) {
       input_values <- data.frame(id = NA,
                                  name = input$name,
                                  type = input$type,
-                                 lng = r$map_click[['lng']],
-                                 lat = r$map_click[['lat']],
+                                 lng = r$map_click()[['lng']],
+                                 lat = r$map_click()[['lat']],
                                  country = input$country,
                                  state = input$state,
                                  zip.code = input$zip.code,
@@ -248,13 +250,14 @@ location_Server <- function(id, r, path) {
     observeEvent({
       input$display_options
       r[[r_items]]()
-      r$activity
+      r$activity()
       selected_location()
-      r$filter_country
+      r$filter_country()
     }, {
       
+      cat("[location] Display locations \n")
       
-      if(r$activity == "world_map"){
+      if(r$activity() == "world_map"){
         
         # -- option
         cat("[location] Show location, option =", input$display_options, "\n")
@@ -269,8 +272,8 @@ location_Server <- function(id, r, path) {
         cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
         
         # -- filter by country
-        if(!is.null(r$filter_country)){
-          locations <- locations[locations$country %in% r$filter_country, ]
+        if(!is.null(r$filter_country())){
+          locations <- locations[locations$country %in% r$filter_country(), ]
           cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
         
       } else {
@@ -328,7 +331,7 @@ location_Server <- function(id, r, path) {
                             clusterOptions = NULL)
         
         # -- update map view
-        if(!r$freeze_map()){
+        if(!r$map_freeze()){
           r$proxymap %>%
             flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
                         options = list(duration = fly_duration, padding = c(50, 50)))}
@@ -343,7 +346,7 @@ location_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
     
     # -------------------------------------
@@ -463,18 +466,20 @@ location_Server <- function(id, r, path) {
     
     # -- observe: zoom, bounds
     observeEvent({
-      r$zoom
-      r$map_bounds}, {
+      r$map_zoom()
+      r$map_bounds()}, {
       
+        cat("[location] Map zoom / bounds event received \n")
+        
       # -- check zoom value
-      if(r$zoom >= 8){
+      if(r$map_zoom() >= 8){
         
         cat("[location] Add temporary locations \n")
         
         # -- init
         airports <- r$airports
         locations <- r[[r_items]]()
-        bounds <- r$map_bounds
+        bounds <- r$map_bounds()
         
         # -- filter by bounding box
         airports <- bounding_box(airports, bounds)
@@ -522,7 +527,7 @@ location_Server <- function(id, r, path) {
                                                ns("add_to_trip")))), id),
                               clusterOptions = NULL)}
         
-      } else if(r$zoom == 7){
+      } else if(r$map_zoom() <= 7){
         
         cat("[location] Clear temporary locations \n")
         
@@ -531,7 +536,7 @@ location_Server <- function(id, r, path) {
         
       }
         
-    })
+    }, ignoreInit = TRUE)
     
   })
 }

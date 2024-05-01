@@ -60,7 +60,7 @@ track_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
 
     
   })

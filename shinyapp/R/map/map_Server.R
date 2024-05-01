@@ -61,6 +61,9 @@ map_Server <- function(id, r, path) {
     # -- Connector: mouse click
     r$map_click <- reactive({
 
+      # -- check
+      req(input$map_click)
+      
       # -- trace
       if(verbose)
         cat("[map] Point clicked: lng =", input$map_click$lng, "/ lat =", input$map_click$lat, "\n")
@@ -74,6 +77,9 @@ map_Server <- function(id, r, path) {
     # -- Connector: map center
     r$map_center <- reactive({
       
+      # -- check
+      req(input$map_center)
+      
       # -- trace
       if(verbose)
         cat("[map] Center: lng =", input$map_center$lng, "/ lat =", input$map_center$lat, "\n")
@@ -86,6 +92,9 @@ map_Server <- function(id, r, path) {
     
     # -- Connector: map bounds
     r$map_bounds <- reactive({
+      
+      # -- check
+      req(input$map_bounds)
       
       # -- trace
       if(verbose)
@@ -101,9 +110,12 @@ map_Server <- function(id, r, path) {
     # -- Connector: map zoom
     r$map_zoom <- reactive({
       
+      # -- check
+      req(input$map_zoom)
+      
       # -- trace
       if(verbose)
-        cat("[map] Zoom =", zoom, "\n")
+        cat("[map] Zoom: level =", input$map_zoom, "\n")
       
       # -- return
       input$map_zoom
@@ -161,6 +173,8 @@ map_Server <- function(id, r, path) {
     # -- Connector: country filter
     r$filter_country <- reactive({
       
+      req(input$filter_country)
+      
       # -- check filter reset
       if(identical(input$filter_country, ""))
         
@@ -171,7 +185,7 @@ map_Server <- function(id, r, path) {
         cat("[EVENT] Filter country =", input$filter_country, "\n")
         input$filter_country}
       
-    }, ignoreInit = TRUE)
+    })
     
     
     # -- Observe: reset filter btn
