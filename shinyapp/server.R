@@ -1,30 +1,49 @@
 
 
-# Shiny: server logic of the Shiny web application
+# ------------------------------------------------------------------------------
+# Server logic of the Shiny web application
+# ------------------------------------------------------------------------------
 
 # -- Define server logic
-
 shinyServer(
   function(input, output){
   
-    # declare r communication object
+    # --------------------------------------------------------------------------
+    # Communication object
+    # --------------------------------------------------------------------------
+    
+    # -- declare object
     r <- reactiveValues()
     
     # -- declare connectors
     r$activity <- NULL
     
-    # -- observe: selected tab (tabsetPanel)
-    # Can't use eventReactive (idk why)
-    observeEvent(input$selected_tab, {
+    
+    # --------------------------------------------------------------------------
+    # Selected tab
+    # --------------------------------------------------------------------------
+    
+    # -- Observe
+    r$activity <- reactive({
       
-      cat("[EVENT] Selected tab =", input$selected_tab, "\n")
-      r$activity <- input$selected_tab
+      cat("[EVENT] Selected activity =", input$selected_tab, "\n")
+      input$selected_tab
       
     })
+    
+    
+    # --------------------------------------------------------------------------
+    # Kitems menu
+    # --------------------------------------------------------------------------
     
     # -- kitems: generate dynamic sidebar
     output$menu <- renderMenu(kitems::dynamic_sidebar(r))
 
+    
+    # --------------------------------------------------------------------------
+    # Modules
+    # --------------------------------------------------------------------------
+    
     # -- the map
     map_Server(id = "map", r = r, path = path)
     

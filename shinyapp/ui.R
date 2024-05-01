@@ -1,109 +1,116 @@
 
 
-# --------------------------------------------------------------------------------
-# This is the user-interface definition of the Shiny web application
-# --------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+# User-interface definition of the Shiny web application
+# ------------------------------------------------------------------------------
 
-# -- Define Sidebar UI
-
+# -- Define sidebar
 sidebar <- dashboardSidebar(
-    sidebarMenu(
-        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
-    
-    # -- add dynamic section
-    sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
-    
-    collapsed = TRUE)
+  sidebarMenu(
+    menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
+  
+  # -- Add dynamic section
+  sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
+  
+  collapsed = TRUE)
 
 
-# -- Define Body UI
-
+# -- Define body
 body <- dashboardBody(
+  tabItems(
     
-    tabItems(
+    # --------------------------------------------------------------------------
+    # Main app
+    # --------------------------------------------------------------------------
     
-        tabItem(tabName = "worldmap",
-                
-                fluidRow(
-                    column(width = 3,
-                           
-                           search_Input("map"),
-                           
-                           tabsetPanel(id = "selected_tab",
-                             
-                             tabPanel("World map", value = "world_map",
-                                      location_panel_UI("locationmngr"),
-                                      route_UI("routemngr"),
-                                      country_UI("country"),
-                                      track_UI("track")),
-                           
-                             tabPanel("Trip planner", value = "trip_planner",
-                                      trip_panel_UI("tripmngr")))),
-                    
-                    column(width = 9,
-                           country_INPUT("map"),
-                           map_UI("map")))),
-        
-        
-        # -- kitems admin (location)
-        tabItem(tabName = "location",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("locationmngr-location")))),
-        
-        # -- kitems admin (route)
-        tabItem(tabName = "route",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("routemngr-route")))),
-        
-        # -- kitems admin (trip)
-        tabItem(tabName = "trip",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("tripmngr-trip")))),
-        
-        # -- kitems admin (step)
-        tabItem(tabName = "step",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("tripmngr-step")))),
-        
-        # -- kitems admin (transport)
-        tabItem(tabName = "transport",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("tripmngr-transport")))),
-        
-        # -- kitems admin (accomodation)
-        tabItem(tabName = "accomodation",
-                
-                # -- Admin UI
-                fluidRow(
-                  column(width = 12,
-                         kitems::admin_ui("tripmngr-accomodation"))))
-        
-    )
+    # -- World map
+    tabItem(tabName = "worldmap",
+            
+            fluidRow(
+              
+              # -- sidebar left
+              column(width = 3,
+                     
+                     # -- search
+                     search_Input("map"),
+                     
+                     # -- main
+                     tabsetPanel(id = "selected_tab",
+                              
+                                 # -- world map tab
+                                 tabPanel("World map", value = "world_map",
+                                          location_panel_UI("locationmngr"),
+                                          route_UI("routemngr"),
+                                          country_UI("country"),
+                                          track_UI("track")),
+                                 
+                                 # -- trip planner tab
+                                 tabPanel("Trip planner", value = "trip_planner",
+                                          trip_panel_UI("tripmngr")))),
+              
+              # -- main area (map)
+              column(width = 9,
+                     country_INPUT("map"),
+                     map_UI("map")))),
+    
+    # --------------------------------------------------------------------------
+    # kitems
+    # --------------------------------------------------------------------------
+    
+    # -- kitems admin (location)
+    tabItem(tabName = "location",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("locationmngr-location")))),
+    
+    # -- kitems admin (route)
+    tabItem(tabName = "route",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("routemngr-route")))),
+    
+    # -- kitems admin (trip)
+    tabItem(tabName = "trip",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("tripmngr-trip")))),
+    
+    # -- kitems admin (step)
+    tabItem(tabName = "step",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("tripmngr-step")))),
+    
+    # -- kitems admin (transport)
+    tabItem(tabName = "transport",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("tripmngr-transport")))),
+    
+    # -- kitems admin (accomodation)
+    tabItem(tabName = "accomodation",
+            
+            # -- Admin UI
+            fluidRow(
+              column(width = 12,
+                     kitems::admin_ui("tripmngr-accomodation"))))
+    
+  )
 )
 
 
 # -- Put them together into a dashboard
-
 dashboardPage(
-    
-    dashboardHeader(title = "TheWorld"),
-    sidebar,
-    body
-    
-)
-
+  dashboardHeader(title = "TheWorld"),
+  sidebar,
+  body)
