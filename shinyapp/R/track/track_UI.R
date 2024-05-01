@@ -13,9 +13,9 @@ track_UI <- function(id){
   # -- UI
   wellPanel(
     
-    # -- hide / show checkbox
-    checkboxInput(ns("hide_show"), label = "tracks", value = FALSE, width = NULL)
+    h4("Tracks"),
     
-  )
+    # -- hide / show checkbox
+    checkboxInput(ns("hide_show"), label = "tracks", value = FALSE, width = NULL))
   
 }

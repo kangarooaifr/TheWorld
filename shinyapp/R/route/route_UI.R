@@ -13,7 +13,7 @@ route_UI <- function(id){
   # UI
   wellPanel(
     
-    p("Route"),
+    h4("Routes"),
     
     # + button
     actionButton(inputId = ns("add_route"),
@@ -21,18 +21,13 @@ route_UI <- function(id){
                  icon = icon(name = "plus", lib = "font-awesome")),
     
     # -- radio btn
-    radioButtons(inputId = ns("show_route_option"), 
+    radioButtons(inputId = ns("transport_mode"), 
                  label = "", 
                  choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")), 
-                 choiceValues = list("air", "train", "sea", "road"), 
+                 choiceValues = list("air", "rail", "sea", "road"), 
                  inline = TRUE),
-    
-    # -- display btn
-    actionButton(inputId = ns("show_route"), label = "Show route"),
-    
+
     # -- show / hide
-    checkboxInput(inputId = ns("show_hide"), label = "Show / hide")
-    
-    )
+    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE))
   
 }

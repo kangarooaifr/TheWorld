@@ -8,7 +8,7 @@
 
 sidebar <- dashboardSidebar(
     sidebarMenu(
-        menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard"), selected = TRUE)),
+        menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE)),
     
     # -- add dynamic section
     sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -22,17 +22,25 @@ body <- dashboardBody(
     
     tabItems(
     
-        tabItem(tabName = "dashboard",
+        tabItem(tabName = "worldmap",
                 
                 fluidRow(
-                    column(width = 2,
+                    column(width = 3,
+                           
                            search_Input("map"),
-                           location_panel_UI("locationmngr"),
-                           route_UI("routemngr"),
-                           country_UI("country"),
-                           track_UI("tracks")),
+                           
+                           tabsetPanel(id = "selected_tab",
+                             
+                             tabPanel("World map", value = "world_map",
+                                      location_panel_UI("locationmngr"),
+                                      route_UI("routemngr"),
+                                      country_UI("country"),
+                                      track_UI("track")),
+                           
+                             tabPanel("Trip planner", value = "trip_planner",
+                                      trip_panel_UI("tripmngr")))),
                     
-                    column(width = 10,
+                    column(width = 9,
                            country_INPUT("map"),
                            map_UI("map")))),
         
@@ -59,7 +67,31 @@ body <- dashboardBody(
                 # -- Admin UI
                 fluidRow(
                   column(width = 12,
-                         kitems::admin_ui("tripmngr-trip"))))
+                         kitems::admin_ui("tripmngr-trip")))),
+        
+        # -- kitems admin (step)
+        tabItem(tabName = "step",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("tripmngr-step")))),
+        
+        # -- kitems admin (transport)
+        tabItem(tabName = "transport",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("tripmngr-transport")))),
+        
+        # -- kitems admin (accomodation)
+        tabItem(tabName = "accomodation",
+                
+                # -- Admin UI
+                fluidRow(
+                  column(width = 12,
+                         kitems::admin_ui("tripmngr-accomodation"))))
         
     )
 )

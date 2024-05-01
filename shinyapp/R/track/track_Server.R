@@ -19,6 +19,9 @@ track_Server <- function(id, r, path) {
     # get namespace
     ns <- session$ns
     
+    # -- id
+    group_id <- "tracks"
+    
     # -- prepare
     # file
     gpx_file <- file.path(path$data, "gpx/Randonn_e__04_09_2021_17_07.gpx")
@@ -41,41 +44,24 @@ track_Server <- function(id, r, path) {
       
       # add to leaflet map
       r$proxymap %>%
-        addPolylines(data = track2, group = "tracks")
+        
+        # -- hidden by default
+        hideGroup(group_id) %>%
+        
+        # -- add on map
+        addPolylines(data = track2, group = group_id)
 
     })
-
+    
     
     # -------------------------------------
-    # Event observers
+    # Hide / Show
     # -------------------------------------
     
     # -- Observe checkbox
-    observeEvent(input$submit_tracks, {
-      
-      # checkbox marked
-      if(input$submit_tracks){
-        
-        cat("Show group: tracks \n")
-        
-        # proxy map
-        r$proxymap %>%
-          
-          # Show group
-          showGroup('tracks')
-        
-      }else{
-        
-        cat("Hide group: tracks \n")
-        
-        # proxy map
-        r$proxymap %>%
-          
-          # clear group
-          hideGroup('tracks')
-      }
-      
-    })
+    observeEvent(input$hide_show, 
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+
     
   })
 }

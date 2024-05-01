@@ -10,11 +10,13 @@ location_Server <- function(id, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    # -- load countries
-    countries <- read.csv(file = file.path(path$resources, "countries.csv"), encoding = "UTF-8")
-    
-    # -- id
+    # -- ids
     kitems_id <- "location"
+    group_id <- "locations"
+    
+    # -- settings
+    fly_duration <- 1.0
+    coord_digits <- 3
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
@@ -23,13 +25,70 @@ location_Server <- function(id, r, path) {
     r_items <- kitems::items_name(id = kitems_id)
     r_data_model <- kitems::dm_name(id = kitems_id)
     r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
+    r_trigger_update <- kitems::trigger_update_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
     # -- icon set
     icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                              wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
-                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'blue'))
+                             bed = makeAwesomeIcon(icon = 'bed', iconColor = 'black', library = 'fa', markerColor = 'beige'),
+                             airport = makeAwesomeIcon(icon = 'plane', iconColor = 'black', library = 'fa', markerColor = 'blue'),
+                             port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
+                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
     
+    
+    # -------------------------------------
+    # Load resources & connector: airports
+    # -------------------------------------
+    
+    # -- File name
+    filename <- "airports.csv"
+    
+    # -- colClasses
+    colClasses_airports <- c(id = "numeric",
+                             name = "character",
+                             city = "character",
+                             country = "character",
+                             iata = "character",
+                             icao = "character",
+                             latitude = "numeric",
+                             longitude = "numeric",
+                             altitude = "numeric")
+    
+    # -- load data
+    content_df <- kfiles::read_data(file = filename,
+                                    path = path$resources, 
+                                    colClasses = colClasses_airports,
+                                    create = FALSE)
+    
+    # -- rename columns to fit with convention & expose connector
+    names(content_df)[names(content_df) == 'latitude'] <- 'lat'
+    names(content_df)[names(content_df) == 'longitude'] <- 'lng'
+    r$airports <- content_df
+    
+    
+    # -------------------------------------
+    # Load resources & connector: seaports
+    # -------------------------------------
+    # There is no specific file for seaports at this moment
+    # it is taken from the standard locations with type = Port
+    
+    # -- expose connector
+    r$seaports <- reactive(r[[r_items]]()[r[[r_items]]()$type == 'Port', ])
+    
+    
+    # -------------------------------------
+    # Connector: visited_countries
+    # -------------------------------------
+    
+    # -- expose as reactive
+    r$visited_countries <- reactive(
+      unique(r[[r_items]]()[r[[r_items]]()$been.there, 'country']))
+    
+    
+    # -------------------------------------
+    # Filter: country >>> to be moved to country module!
+    # -------------------------------------
     
     # -- update filter choices
     observeEvent(r[[r_items]](), {
@@ -42,20 +101,41 @@ location_Server <- function(id, r, path) {
     })
     
     
-    # -- Observe map click
+    # -------------------------------------
+    # [EVENT] Map click
+    # -------------------------------------
+    
+    # -- Event: map click
     observeEvent(r$map_click, {
       
-      output$location_panel <- if(is.null(r$map_click))
-        NULL
-      else 
-        renderUI(
-            
-          tagList(
-            h4("Location"),
+      # -- get values
+      lng <- r$map_click[['lng']]
+      lat <- r$map_click[['lat']]
+      
+      # -- display popup
+      r$proxymap %>% 
+        clearPopups() %>%
+        addPopups(lng, lat, 
+                  paste("Longitude:", round(lng, digits = coord_digits), br(),
+                        "Latitude:", round(lat, digits = coord_digits), 
+                        hr(),
+                        actionLink(inputId = ns("link_add"), 
+                                   label =  "add to my locations", 
+                                   icon = icon("plus"),
+                                   onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_locations")))))
+    })
+    
+    
+    # -- Event: popup link (add_to_locations)
+    observeEvent(input$add_to_locations, {
+    
+      # -- modal
+      showModal(modalDialog(
+    
             p("Coordinates:"), 
             
-            tags$ul(tags$li("long =", r$map_click[1]), 
-                    tags$li("lat =", r$map_click[2])),
+            tags$ul(tags$li("long =", r$map_click[['lng']]), 
+                    tags$li("lat =", r$map_click[['lat']])),
             
             # -- name
             textInput(inputId = ns("name"), 
@@ -72,7 +152,7 @@ location_Server <- function(id, r, path) {
             # -- country          
             selectizeInput(inputId = ns("country"), 
                            label = "Country", 
-                           choices = countries$country.en, 
+                           choices = r$countries_iso$country.en, 
                            options = list(placeholder = 'Please select an option below',
                                           onInitialize = I('function() { this.setValue(""); }'),
                                           create = FALSE)),
@@ -115,22 +195,34 @@ location_Server <- function(id, r, path) {
                           label = "Wish list", 
                           value = FALSE),
             
-            # -- action btn
-            actionButton(inputId = ns("confirm_add_location"), 
-                         label = "Create")))
+            # -- title
+            title = "Add to my locations",
+            
+            # -- actions
+            footer = tagList(
+              modalButton("Cancel"),
+              actionButton(inputId = ns("confirm_add_location"), 
+                           label = "Create"))))
       
-    }, ignoreNULL = FALSE)
+    })
     
 
-    # -- Observer add location button
+    # -- Event: btn confirm_add_location
     observeEvent(input$confirm_add_location, {
 
+      # -- close dialog
+      removeModal()
+      
+      # -- clear popup
+      r$proxymap %>% 
+        clearPopups()
+      
       # -- build values
       input_values <- data.frame(id = NA,
                                  name = input$name,
                                  type = input$type,
-                                 lng = r$map_click[1],
-                                 lat = r$map_click[2],
+                                 lng = r$map_click[['lng']],
+                                 lat = r$map_click[['lat']],
                                  country = input$country,
                                  state = input$state,
                                  zip.code = input$zip.code,
@@ -149,30 +241,46 @@ location_Server <- function(id, r, path) {
     })
     
     
-    # -- Observer show location button
+    # -------------------------------------
+    
+    # -- Observe: display button
+    # dependencies on display options, items and filter
     observeEvent({
-      input$show_location
+      input$display_options
       r[[r_items]]()
+      r$activity
+      selected_location()
       r$filter_country
     }, {
       
-      # -- option
-      cat("[location] Show location, option =", input$show_location_option, "\n")
       
-      # -- get the data & apply option
-      locations <- r[[r_items]]()
-      if(input$show_location_option == "been-there")
-        locations <- locations[locations$been.there, ]
-      else if(input$show_location_option == "wish-list")
-        locations <- locations[locations$wish.list, ]
+      if(r$activity == "world_map"){
+        
+        # -- option
+        cat("[location] Show location, option =", input$display_options, "\n")
+        
+        # -- get the data & apply option
+        locations <- r[[r_items]]()
+        if(input$display_options == "been-there")
+          locations <- locations[locations$been.there, ]
+        else if(input$display_options == "wish-list")
+          locations <- locations[locations$wish.list, ]
+        
+        cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
+        
+        # -- filter by country
+        if(!is.null(r$filter_country)){
+          locations <- locations[locations$country %in% r$filter_country, ]
+          cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
+        
+      } else {
+        
+        cat("[location] Show trip locations \n")
+        
+        locations <- selected_location()
       
-      cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
-      
-      # -- filter by country
-      if(!is.null(r$filter_country)){
-        locations <- locations[locations$country %in% r$filter_country, ]
-        cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
-      
+      }
+        
       # -- check dim
       if(dim(locations)[1] > 0){
         
@@ -182,25 +290,25 @@ location_Server <- function(id, r, path) {
         lat_min <- min(locations$lat)
         lat_max <- max(locations$lat)
 
-        # -- prepare marker icon
-        locations <- transform(locations, icon = ifelse(been.there, 'been.there', ifelse(wish.list, 'wish.list', 'default')))
+        # -- add icon column
+        locations <- location_icon(locations)
         
         # -- update map (proxy)
         r$proxymap %>%
           
           # -- cleanup
-          clearGroup("location") %>%
+          clearGroup(group_id) %>%
           
           # -- Add markers
           addAwesomeMarkers(data = locations,
                             lng = ~lng,
                             lat = ~lat,
-                            group = "location",
+                            group = group_id,
                             icon = ~icons[icon],
-                            label = ~city,
+                            label = ~name,
                             popup = ~sprintf(
                               paste0(
-                                "Name:", city,
+                                "Name:", name,
                                 br(),
                                 "lng = ", lng,
                                 br(),
@@ -210,27 +318,219 @@ location_Server <- function(id, r, path) {
                                            label =  "Delete", 
                                            onclick = sprintf(
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("button_click")))), id),
+                                             ns("button_click"))),
+                                actionLink(inputId = "been-there_%s", 
+                                           label =  "Been there", 
+                                           onclick = sprintf(
+                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("button_click")))), id, id),
                             #clusterOptions = markerClusterOptions(),
-                            clusterOptions = NULL) %>%
-          
-          # -- set view
-          flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, options = list(padding = c(50, 50)))
+                            clusterOptions = NULL)
+        
+        # -- update map view
+        if(!r$freeze_map()){
+          r$proxymap %>%
+            flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
+                        options = list(duration = fly_duration, padding = c(50, 50)))}
       }
       
     }, ignoreNULL = FALSE)
     
     
+    # -------------------------------------
+    # Hide / Show
+    # -------------------------------------
+    
+    # -- Observe checkbox
+    observeEvent(input$hide_show, 
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+    
+    
+    # -------------------------------------
+    
     # -- Observe: button click from marker popup
     observeEvent(input$button_click, {
       
       # -- get id from input value
+      action <- unlist(strsplit(input$button_click, split = "_"))[1]
       id <- unlist(strsplit(input$button_click, split = "_"))[2]
-      cat("Marker popup click, id =", id, "\n")
+      cat("[EVENT] Marker popup click: action =", action, "/ id =", id, "\n")
+
+      # -- action: delete
+      if(action == "delete")
+        
+        # -- call trigger
+        r[[r_trigger_delete]](id)
       
-      # -- call trigger
-      r[[r_trigger_delete]](id)
+      # -- action: switch to been-there
+      else if(action == "been-there"){
+        
+        # -- update item
+        item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+        item$been.there <- TRUE
+        item$wish.list <- FALSE
+        
+        # -- call trigger
+        r[[r_trigger_update]](item)}
       
+    })
+    
+    
+    # -------------------------------------
+    # Search
+    # -------------------------------------
+    
+    # -- declare trigger
+    r$location_search_string <- NULL
+    
+    
+    # -- observe trigger & expose connector
+    r$location_search_result <- eventReactive(r$location_search_string, {
+      
+      # -- check for empty string (otherwise the whole df is returned)
+      if(identical(r$location_search_string, ""))
+        NULL
+      
+      else {
+        
+        cat("[location] Trigger, search string =", r$location_search_string, "\n")
+        
+        # -- filter items
+        result <- r[[r_items]]() %>%
+          filter_all(any_vars(grepl(r$location_search_string, .)))
+        
+        # -- return
+        result}
+      
+    })
+    
+    
+    # -------------------------------------
+    # Select
+    # -------------------------------------
+    
+    # -- declare trigger
+    r$location_select <- NULL
+    
+    # -- observe
+    selected_location <- eventReactive(r$location_select, {
+      
+      cat("[TRIGGER] Select location: \n")
+      
+      # -- get items
+      locations <- r[[r_items]]()
+      
+      # -- apply selection
+      locations <- locations[locations$id %in% r$location_select, ]
+      
+      # -- check output dim
+      if(dim(locations)[1] != length(r$location_select)){
+        
+        # -- check for airports
+        airports <- r$airports[r$airports$id %in% r$location_select, ]
+        
+        # -- check output
+        if(dim(airports)[1] > 0){
+          
+          # -- build values
+          tmp_locations <- data.frame(id = airports$id,
+                                      name = paste(airports$iata, airports$name),
+                                      type = 'Airport',
+                                      lng = airports$lng,
+                                      lat = airports$lat,
+                                      country = airports$country,
+                                      state = NA,
+                                      zip.code = NA,
+                                      city = airports$city,
+                                      address = NA,
+                                      comment = NA,
+                                      been.there = FALSE,
+                                      wish.list = FALSE)}
+        
+        # -- merge
+        locations <- rbind(locations, tmp_locations)}
+      
+      # -- return
+      cat("-- output dim =", dim(locations),"\n")
+      locations
+      
+    })
+    
+    
+    # -------------------------------------
+    # Temporary locations
+    # -------------------------------------
+    
+    # -- observe: zoom, bounds
+    observeEvent({
+      r$zoom
+      r$map_bounds}, {
+      
+      # -- check zoom value
+      if(r$zoom >= 8){
+        
+        cat("[location] Add temporary locations \n")
+        
+        # -- init
+        airports <- r$airports
+        locations <- r[[r_items]]()
+        bounds <- r$map_bounds
+        
+        # -- filter by bounding box
+        airports <- bounding_box(airports, bounds)
+        locations <- bounding_box(locations, bounds)
+        
+        # -- turn airports into locations & merge
+        if(dim(airports)[1] > 0){
+          
+          
+          airports <- airport_to_location(airports)
+          locations <- rbind(locations, airports)
+          
+          # -- remove already selected locations
+          
+          }
+        
+        # -- check
+        if(dim(locations)[1] > 0){
+          
+          # -- add icon column
+          locations <- location_icon(locations)
+          
+          # -- add markers
+          r$proxymap %>%
+            clearGroup("temp") %>%
+            # -- Add markers
+            addAwesomeMarkers(data = locations,
+                              lng = ~lng,
+                              lat = ~lat,
+                              group = "temp",
+                              icon = ~icons[icon],
+                              label = ~name,
+                              popup = ~sprintf(
+                                paste0(
+                                  "Name:", name,
+                                  br(),
+                                  "lng = ", lng,
+                                  br(),
+                                  "lat = ", lat,
+                                  br(),
+                                  actionLink(inputId = "add_%s", 
+                                             label =  "Add to trip", 
+                                             onclick = sprintf(
+                                               'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                               ns("add_to_trip")))), id),
+                              clusterOptions = NULL)}
+        
+      } else if(r$zoom == 7){
+        
+        cat("[location] Clear temporary locations \n")
+        
+        r$proxymap %>%
+          clearGroup("temp")
+        
+      }
+        
     })
     
   })

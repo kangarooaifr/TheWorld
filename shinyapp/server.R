@@ -6,12 +6,22 @@
 
 shinyServer(
   function(input, output){
-    
-
+  
     # declare r communication object
     r <- reactiveValues()
     
-
+    # -- declare connectors
+    r$activity <- NULL
+    
+    # -- observe: selected tab (tabsetPanel)
+    # Can't use eventReactive (idk why)
+    observeEvent(input$selected_tab, {
+      
+      cat("[EVENT] Selected tab =", input$selected_tab, "\n")
+      r$activity <- input$selected_tab
+      
+    })
+    
     # -- kitems: generate dynamic sidebar
     output$menu <- renderMenu(kitems::dynamic_sidebar(r))
 

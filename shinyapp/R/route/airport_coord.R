@@ -13,8 +13,8 @@ airport_coord <- function(airports, id = NULL, iata = NULL){
   
   # -- get longitude / latitude
   name <- airports[airports$id == id, 'name']
-  lng <- airports[airports$id == id, 'longitude']
-  lat <- airports[airports$id == id, 'latitude']
+  lng <- airports[airports$id == id, 'lng']
+  lat <- airports[airports$id == id, 'lat']
   cat("[airport_coord]", name, "- lng =", lng, "/ lat =", lat, "\n")
   
   # -- return
