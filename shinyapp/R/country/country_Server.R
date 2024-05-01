@@ -94,12 +94,10 @@ country_Server <- function(id, r, path) {
       output$panel_ui <- renderUI({
       
         wellPanel(
-          
           h4("Countries"),
-          p("Displays visited countries.", br(), "(locations marked as *been there*)"),
           
-          # hide / show checkbox
-          checkboxInput(ns("hide_show"), label = "Hide / Show", value = FALSE))})
+          # -- checkbox input
+          checkboxInput(ns("hide_show"), label = "Show visited countries.", value = FALSE))})
       
     })
     
@@ -148,8 +146,18 @@ country_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- Observe checkbox
-    observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
+    observeEvent(input$hide_show, {
+      
+      # -- update label
+      if(input$hide_show)
+        updateCheckboxInput(inputId = "hide_show", label = "Hide visited countries.")
+      else
+        updateCheckboxInput(inputId = "hide_show", label = "Show visited countries.")
+        
+      # -- hide group                 
+      hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show)
+      
+    }, ignoreInit = TRUE)
     
     
   })
