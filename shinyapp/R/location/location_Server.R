@@ -471,6 +471,12 @@ location_Server <- function(id, r, path) {
       
         cat("[location] Map zoom / bounds event received \n")
         
+        # -------------------------------------
+        # Set the detail group to only appear when zoomed in
+        #groupOptions("detail", zoomLevels = 7:18)
+        # -------------------------------------
+        # >>> rework block !!
+        
       # -- check zoom value
       if(r$map_zoom() >= 8){
         
