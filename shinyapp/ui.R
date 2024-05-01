@@ -40,7 +40,9 @@ body <- dashboardBody(
                                  # -- world map tab
                                  tabPanel("World map", value = "world_map",
                                           location_panel_UI("locationmngr"),
-                                          route_UI("routemngr"),
+                                          # -- Commented #90
+                                          # Keep until moved to a different code location
+                                          # route_UI("routemngr"),
                                           country_UI("country"),
                                           track_UI("track")),
                                  
