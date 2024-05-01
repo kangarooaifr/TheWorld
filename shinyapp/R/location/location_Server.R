@@ -290,13 +290,8 @@ location_Server <- function(id, r, path) {
         lat_min <- min(locations$lat)
         lat_max <- max(locations$lat)
 
-        # -- prepare marker icon
-        locations <- locations %>%
-          mutate(icon = case_when(been.there ~ 'been.there',
-                                  wish.list ~ 'wish.list',
-                                  type == 'Port' ~ 'port',
-                                  type == 'Airport' ~ 'airport',
-                                  type == 'Accomodation' ~ 'bed'))
+        # -- add icon column
+        locations <- location_icon(locations)
         
         # -- update map (proxy)
         r$proxymap %>%
@@ -482,39 +477,50 @@ location_Server <- function(id, r, path) {
         bounds <- r$map_bounds
         
         # -- filter by bounding box
-        airports <- airports[airports$lng > bounds$west &
-                               airports$lng < bounds$east &
-                               airports$lat > bounds$south &
-                               airports$lat < bounds$north, ]
-        cat("-- Filter by bounding box, output dim =", dim(airports), "\n")
+        airports <- bounding_box(airports, bounds)
+        locations <- bounding_box(locations, bounds)
         
-        
-        # -- build temp locations
+        # -- turn airports into locations & merge
         if(dim(airports)[1] > 0){
           
-          tmp_locations <- data.frame(id = airports$id,
-                                      name = paste(airports$iata, airports$name),
-                                      type = 'Airport',
-                                      lng = airports$lng,
-                                      lat = airports$lat,
-                                      country = airports$country,
-                                      state = NA,
-                                      zip.code = NA,
-                                      city = airports$city,
-                                      address = NA,
-                                      comment = NA,
-                                      been.there = FALSE,
-                                      wish.list = FALSE)
+          
+          airports <- airport_to_location(airports)
+          locations <- rbind(locations, airports)
+          
+          # -- remove already selected locations
+          
+          }
+        
+        # -- check
+        if(dim(locations)[1] > 0){
+          
+          # -- add icon column
+          locations <- location_icon(locations)
           
           # -- add markers
           r$proxymap %>%
             clearGroup("temp") %>%
-            addAwesomeMarkers(data = tmp_locations,
+            # -- Add markers
+            addAwesomeMarkers(data = locations,
                               lng = ~lng,
                               lat = ~lat,
                               group = "temp",
-                              label = ~name)
-        }
+                              icon = ~icons[icon],
+                              label = ~name,
+                              popup = ~sprintf(
+                                paste0(
+                                  "Name:", name,
+                                  br(),
+                                  "lng = ", lng,
+                                  br(),
+                                  "lat = ", lat,
+                                  br(),
+                                  actionLink(inputId = "add_%s", 
+                                             label =  "Add to trip", 
+                                             onclick = sprintf(
+                                               'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                               ns("add_to_trip")))), id),
+                              clusterOptions = NULL)}
         
       } else if(r$zoom == 7){
         
