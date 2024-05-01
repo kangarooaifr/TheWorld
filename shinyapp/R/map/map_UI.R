@@ -1,4 +1,5 @@
 
+
 # -------------------------------------
 # UI items section
 # -------------------------------------
@@ -42,14 +43,14 @@ country_INPUT <- function(id){
   ns <- NS(id)
   
   tagList(
-    div(style="display: inline-block", actionButton(inputId = ns("filter_reset"), label = "Reset filter")),
+    div(style="display: inline-block", actionButton(inputId = ns("filter_country_reset"), label = "Reset filter")),
     div(style="display: inline-block", selectizeInput(inputId = ns("filter_country"), 
                                                       label = "Country", 
                                                       choices = NULL,
                                                       options = list(placeholder = 'Please select an option below',
                                                                      onInitialize = I('function() { this.setValue(""); }'),
                                                                      create = TRUE))),
-    div(style="display: inline-block", checkboxInput(inputId = ns("freeze_map"), label = icon("anchor"))))
+    div(style="display: inline-block", checkboxInput(inputId = ns("map_freeze"), label = icon("anchor"))))
 
 }
 

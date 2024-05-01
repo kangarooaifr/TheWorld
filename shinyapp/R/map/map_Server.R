@@ -7,12 +7,26 @@
 map_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
+    # -- trace level
+    verbose <- TRUE
+    
+    
     # --------------------------------------------------------------------------
     # Communication objects
     # --------------------------------------------------------------------------
     
+    # -- declare map connectors
+    r$proxymap <- NULL
+    r$map_click <- NULL
+    r$map_center <- NULL
+    r$map_bounds <- NULL
+    r$map_zoom <- NULL
+    r$map_freeze <- NULL
+    
+    # -- other connectors
+    r$filter_country_choices <- NULL
     r$filter_country <- NULL
-    r$freeze_map <- NULL
+    
     
     # --------------------------------------------------------------------------
     # The map
@@ -41,67 +55,71 @@ map_Server <- function(id, r, path) {
     
     
     # --------------------------------------------------------------------------
-    # Event observers
+    # Map observers & connectors
     # --------------------------------------------------------------------------
     
-    # -- Observe mouse clicks
-    observeEvent(input$map_click, {
+    # -- Connector: mouse click
+    r$map_click <- reactive({
 
-      # -- Get the click info
-      click <- input$map_click
-
-      # -- print
-      cat("[map] Point clicked: lng =", click$lng, "/ lat =", click$lat, "\n")
+      # -- trace
+      if(verbose)
+        cat("[map] Point clicked: lng =", input$map_click$lng, "/ lat =", input$map_click$lat, "\n")
       
-      # -- store
-      r$map_click <- input$map_click
+      # -- return
+      input$map_click
 
     })
     
     
-    # -- Observe map center
-    observeEvent(input$map_center, {
+    # -- Connector: map center
+    r$map_center <- reactive({
       
-      # -- Get the click info
-      center <- input$map_center
+      # -- trace
+      if(verbose)
+        cat("[map] Center: lng =", input$map_center$lng, "/ lat =", input$map_center$lat, "\n")
       
-      # -- print
-      cat("[map] Center: lng =", center$lng, "/ lat =", center$lat, "\n")
-      
-      # -- store
-      r$map_click <- NULL
-      r$map_center <- input$map_center
+      # -- return
+      input$map_center
       
     })
     
     
-    # -- Observer map bounds
-    observeEvent(input$map_bounds, {
-      bounds <- input$map_bounds
-      cat("[map] Bounds: north =", bounds$north, "/ east =", bounds$east, "/ south =", bounds$south, "\ west =", bounds$west, "\n")
+    # -- Connector: map bounds
+    r$map_bounds <- reactive({
       
-      # -- store
-      r$map_bounds <- bounds
+      # -- trace
+      if(verbose)
+        cat("[map] Bounds: north =", input$map_bounds$north, "/ east =", input$map_bounds$east, 
+            "/ south =", input$map_bounds$south, "\ west =", input$map_bounds$west, "\n")
+      
+      # -- return
+      input$map_bounds
       
     })
     
     
-    # -- Observer map zoom
-    observeEvent(input$map_zoom, {
+    # -- Connector: map zoom
+    r$map_zoom <- reactive({
       
-      zoom <- input$map_zoom
-      cat("[map] Zoom =", zoom, "\n")
+      # -- trace
+      if(verbose)
+        cat("[map] Zoom =", zoom, "\n")
       
-      r$zoom <- zoom
+      # -- return
+      input$map_zoom
       
     })
+    
+    
+    # -- Connector: map freeze
+    r$map_freeze <- reactive(input$map_freeze)
     
     
     # --------------------------------------------------------------------------
     # Search
     # --------------------------------------------------------------------------
     
-    # -- Observe search
+    # -- Observe: search input
     observeEvent(input$search, {
       
       # -- check
@@ -131,7 +149,7 @@ map_Server <- function(id, r, path) {
     # Filters
     # --------------------------------------------------------------------------
     
-    # -- trigger: set filter choices
+    # -- Trigger: set country filter choices
     observeEvent(r$filter_country_choices, {
       
       # -- update choices
@@ -140,37 +158,31 @@ map_Server <- function(id, r, path) {
     })
     
     
-    # -- Observe: update filter
-    observeEvent(input$filter_country, {
+    # -- Connector: country filter
+    r$filter_country <- reactive({
       
       # -- check filter reset
       if(identical(input$filter_country, ""))
-        r$filter_country <- NULL
+        
+       NULL
+      
       else {
-        cat("[map] EVENT: Filter country =", input$filter_country, "\n")
-        r$filter_country <- input$filter_country}
+        
+        cat("[EVENT] Filter country =", input$filter_country, "\n")
+        input$filter_country}
       
     }, ignoreInit = TRUE)
     
-    # -- reset filter
-    observeEvent(input$filter_reset, {
+    
+    # -- Observe: reset filter btn
+    observeEvent(input$filter_country_reset, {
       
-      cat("[map] EVENT: Reset filter country \n")
+      cat("[EVENT] Reset filter country \n")
       
       # -- update filter
       updateSelectizeInput(inputId = "filter_country", selected = character(0))
       
-      
     })
-    
-    
-    # --------------------------------------------------------------------------
-    # Freeze map
-    # --------------------------------------------------------------------------
-    
-    # -- update connector
-    r$freeze_map <- reactive(input$freeze_map)
-    
     
   })
 }
