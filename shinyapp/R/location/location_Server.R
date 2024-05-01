@@ -469,10 +469,11 @@ location_Server <- function(id, r, path) {
       # -- check zoom value
       if(r$zoom >= 8){
         
-        cat("[location] Add temporary locations")
+        cat("[location] Add temporary locations \n")
         
-        # -- get airports & bounding box
+        # -- init
         airports <- r$airports
+        locations <- r[[r_items]]()
         bounds <- r$map_bounds
         
         # -- filter by bounding box
@@ -484,31 +485,31 @@ location_Server <- function(id, r, path) {
         
         
         # -- build temp locations
-        tmp_locations <- data.frame(id = airports$id,
-                                    name = paste(airports$iata, airports$name),
-                                    type = 'Airport',
-                                    lng = airports$longitude,
-                                    lat = airports$latitude,
-                                    country = airports$country,
-                                    state = NA,
-                                    zip.code = NA,
-                                    city = airports$city,
-                                    address = NA,
-                                    comment = NA,
-                                    been.there = FALSE,
-                                    wish.list = FALSE)
-        
-        
-        
-        
-        # -- add markers
-        r$proxymap %>%
-          clearGroup("temp") %>%
-          addAwesomeMarkers(data = tmp_locations,
-                            lng = ~lng,
-                            lat = ~lat,
-                            group = "temp",
-                            label = ~name)
+        if(dim(airports)[1] > 0){
+          
+          tmp_locations <- data.frame(id = airports$id,
+                                      name = paste(airports$iata, airports$name),
+                                      type = 'Airport',
+                                      lng = airports$longitude,
+                                      lat = airports$latitude,
+                                      country = airports$country,
+                                      state = NA,
+                                      zip.code = NA,
+                                      city = airports$city,
+                                      address = NA,
+                                      comment = NA,
+                                      been.there = FALSE,
+                                      wish.list = FALSE)
+          
+          # -- add markers
+          r$proxymap %>%
+            clearGroup("temp") %>%
+            addAwesomeMarkers(data = tmp_locations,
+                              lng = ~lng,
+                              lat = ~lat,
+                              group = "temp",
+                              label = ~name)
+        }
         
       } else if(r$zoom == 7){
         
