@@ -55,11 +55,16 @@ location_Server <- function(id, r, path) {
                              longitude = "numeric",
                              altitude = "numeric")
     
-    # -- load & expose connector
-    r$airports <- kfiles::read_data(file = filename,
+    # -- load data
+    content_df <- kfiles::read_data(file = filename,
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
+    
+    # -- rename columns to fit with convention & expose connector
+    names(content_df)[names(content_df) == 'latitude'] <- 'lat'
+    names(content_df)[names(content_df) == 'longitude'] <- 'lng'
+    r$airports <- content_df
     
     
     # -------------------------------------
@@ -436,8 +441,8 @@ location_Server <- function(id, r, path) {
           tmp_locations <- data.frame(id = airports$id,
                                       name = paste(airports$iata, airports$name),
                                       type = 'Airport',
-                                      lng = airports$longitude,
-                                      lat = airports$latitude,
+                                      lng = airports$lng,
+                                      lat = airports$lat,
                                       country = airports$country,
                                       state = NA,
                                       zip.code = NA,
@@ -477,10 +482,10 @@ location_Server <- function(id, r, path) {
         bounds <- r$map_bounds
         
         # -- filter by bounding box
-        airports <- airports[airports$longitude > bounds$west &
-                               airports$longitude < bounds$east &
-                               airports$latitude > bounds$south &
-                               airports$latitude < bounds$north, ]
+        airports <- airports[airports$lng > bounds$west &
+                               airports$lng < bounds$east &
+                               airports$lat > bounds$south &
+                               airports$lat < bounds$north, ]
         cat("-- Filter by bounding box, output dim =", dim(airports), "\n")
         
         
@@ -490,8 +495,8 @@ location_Server <- function(id, r, path) {
           tmp_locations <- data.frame(id = airports$id,
                                       name = paste(airports$iata, airports$name),
                                       type = 'Airport',
-                                      lng = airports$longitude,
-                                      lat = airports$latitude,
+                                      lng = airports$lng,
+                                      lat = airports$lat,
                                       country = airports$country,
                                       state = NA,
                                       zip.code = NA,
