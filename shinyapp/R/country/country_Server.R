@@ -140,7 +140,7 @@ country_Server <- function(id, r, path) {
           # -- add areas
           addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries")
 
-      }, ignoreNULL = FALSE)
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
     
     
     # -------------------------------------
@@ -149,7 +149,7 @@ country_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
+                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
     
   })
