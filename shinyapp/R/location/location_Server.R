@@ -272,7 +272,7 @@ location_Server <- function(id, r, path) {
         cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
         
         # -- filter by country
-        if(!is.null(r$filter_country())){
+        if(nchar(r$filter_country()) != 0){
           locations <- locations[locations$country %in% r$filter_country(), ]
           cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
         
