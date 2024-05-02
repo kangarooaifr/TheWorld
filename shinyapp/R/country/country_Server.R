@@ -119,7 +119,7 @@ country_Server <- function(id, r, path) {
         selected_countries <- r$visited_countries()
         
         # -- apply filter
-        if(!is.null(r$filter_country()))
+        if(nchar(r$filter_country()) != 0)
           selected_countries <- selected_countries[selected_countries %in% r$filter_country()]
         
         # -- switch to country code
@@ -147,6 +147,8 @@ country_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, {
+      
+      cat(">>>>>>>>>>>>>>>>>>> observeEvent(input$hide_show) \n")
       
       # -- update label
       if(input$hide_show)
