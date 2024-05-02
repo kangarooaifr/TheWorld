@@ -148,8 +148,6 @@ country_Server <- function(id, r, path) {
     # -- Observe checkbox
     observeEvent(input$hide_show, {
       
-      cat(">>>>>>>>>>>>>>>>>>> observeEvent(input$hide_show) \n")
-      
       # -- update label
       if(input$hide_show)
         updateCheckboxInput(inputId = "hide_show", label = "Hide visited countries.")
