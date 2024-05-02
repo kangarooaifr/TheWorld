@@ -7,6 +7,6 @@ location_icon <- function(locations){
                             wish.list ~ 'wish.list',
                             type == 'Port' ~ 'port',
                             type == 'Airport' ~ 'airport',
-                            type == 'Accomodation' ~ 'bed'))
+                            type == 'Accommodation' ~ 'bed'))
   
 }

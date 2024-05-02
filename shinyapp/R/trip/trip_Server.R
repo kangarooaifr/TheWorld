@@ -76,8 +76,8 @@ trip_Server <- function(id, r, path) {
       # -- output
       str(transports)
       
-      # -- get accomodations
-      accommodations <- r[[accomodation_r_items]]()
+      # -- get accommodations
+      accommodations <- r[[accommodation_r_items]]()
       accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
       
       # -- output
@@ -320,22 +320,22 @@ trip_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- id
-    accomodation_kitems_id <- "accomodation"
+    accommodation_kitems_id <- "accommodation"
     
     # -- names
-    accomodation_r_items <- kitems::items_name(accomodation_kitems_id)
-    accomodation_r_trigger_add <- kitems::trigger_add_name(accomodation_kitems_id)
-    accomodation_r_data_model <- kitems::dm_name(accomodation_kitems_id)
+    accommodation_r_items <- kitems::items_name(accommodation_kitems_id)
+    accommodation_r_trigger_add <- kitems::trigger_add_name(accommodation_kitems_id)
+    accommodation_r_data_model <- kitems::dm_name(accommodation_kitems_id)
     
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = accomodation_kitems_id, r, path$data)
+    kitems::kitemsManager_Server(id = accommodation_kitems_id, r, path$data)
     
     # id, trip.id, location.id, checkin, checkout, breakfast, comment
     
     # -- observer
-    observeEvent(input$add_accomodation, {
+    observeEvent(input$add_accommodation, {
       
-      if(is_shared_zone() == "accomodation"){
+      if(is_shared_zone() == "accommodation"){
         
         # -- clear all
         output$shared_zone <- NULL
@@ -346,14 +346,14 @@ trip_Server <- function(id, r, path) {
         cat("[trip] Add accommodation \n")
         
         # -- declare cache
-        is_shared_zone("accomodation")
+        is_shared_zone("accommodation")
         
         # -- output
         output$shared_zone <- renderUI(
           tagList(
             
             # -- accommodation
-            selectizeInput(inputId = ns("select_accomodation"), label = "Accomodation", choices = NULL,
+            selectizeInput(inputId = ns("select_accommodation"), label = "Accommodation", choices = NULL,
                            options = list(placeholder = 'Please select an option below',
                                           onInitialize = I('function() { this.setValue(""); }'))),
             
@@ -364,7 +364,7 @@ trip_Server <- function(id, r, path) {
             # -- checkout
             dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
             timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
-            selectizeInput(inputId = ns("accomodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
+            selectizeInput(inputId = ns("accommodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
             
             # -- breakfast
             checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
@@ -373,15 +373,15 @@ trip_Server <- function(id, r, path) {
             textInput(inputId = ns("accommodation_comment"), label = "Comment"),
             
             # -- btn
-            actionButton(inputId = ns("confirm_accomodation"), label = "OK")))
+            actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
         # -- init location search trigger
-        r$location_search_string <- 'Accomodation'
+        r$location_search_string <- 'Accommodation'
         
         # -- observer: search result
         observeEvent(r$location_search_result(), {
           
-          cat("[trip] Accomodation search result, dim =", dim(r$location_search_result()), "\n")
+          cat("[trip] Accommodation search result, dim =", dim(r$location_search_result()), "\n")
           
           # -- compute choices
           result <- r$location_search_result()
@@ -389,7 +389,7 @@ trip_Server <- function(id, r, path) {
           names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
           # -- update input
-          updateSelectizeInput(inputId = "select_accomodation", choices = choices)
+          updateSelectizeInput(inputId = "select_accommodation", choices = choices)
           
         })
         
@@ -398,7 +398,7 @@ trip_Server <- function(id, r, path) {
     })
     
     
-    observeEvent(input$confirm_accomodation, {
+    observeEvent(input$confirm_accommodation, {
       
       # -- clear
       output$shared_zone <- NULL
@@ -406,14 +406,14 @@ trip_Server <- function(id, r, path) {
       
       # -- compute values
       checkin <- paste(input$checkin_date, input$checkin_time)
-      checkin <- as.POSIXct(checkin, tz = input$accomodation_tz)
+      checkin <- as.POSIXct(checkin, tz = input$accommodation_tz)
       checkout <- paste(input$checkout_date, input$checkout_time)
-      checkout <- as.POSIXct(checkout, tz = input$accomodation_tz)
+      checkout <- as.POSIXct(checkout, tz = input$accommodation_tz)
       
       # -- merge
       values <- list(id = ktools::getTimestamp(),
                      trip.id = input$trip_selector,
-                     location.id = input$select_accomodation,
+                     location.id = input$select_accommodation,
                      checkin = checkin,
                      checkout = checkout,
                      breakfast = input$breakfast,
@@ -421,10 +421,10 @@ trip_Server <- function(id, r, path) {
   
       
       # -- create item
-      accomodation <- kitems::item_create(values, data.model = r[[accomodation_r_data_model]]())
+      accommodation <- kitems::item_create(values, data.model = r[[accommodation_r_data_model]]())
       
       # -- call trigger
-      r[[accomodation_r_trigger_add]](accomodation)
+      r[[accommodation_r_trigger_add]](accommodation)
       
       
       
