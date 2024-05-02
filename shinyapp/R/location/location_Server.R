@@ -29,12 +29,7 @@ location_Server <- function(id, r, path) {
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
     # -- icon set
-    icons <- awesomeIconList(been.there = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'beige'),
-                             wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
-                             bed = makeAwesomeIcon(icon = 'bed', iconColor = 'black', library = 'fa', markerColor = 'beige'),
-                             airport = makeAwesomeIcon(icon = 'plane', iconColor = 'black', library = 'fa', markerColor = 'blue'),
-                             port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
-                             default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
+    icons <- location_icons()
     
     
     # -------------------------------------
