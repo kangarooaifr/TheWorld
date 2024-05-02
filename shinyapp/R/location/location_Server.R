@@ -427,23 +427,9 @@ location_Server <- function(id, r, path) {
         # -- check for airports
         airports <- r$airports[r$airports$id %in% r$location_select, ]
         
-        # -- check output
-        if(dim(airports)[1] > 0){
-          
-          # -- build values
-          tmp_locations <- data.frame(id = airports$id,
-                                      name = paste(airports$iata, airports$name),
-                                      type = 'Airport',
-                                      lng = airports$lng,
-                                      lat = airports$lat,
-                                      country = airports$country,
-                                      state = NA,
-                                      zip.code = NA,
-                                      city = airports$city,
-                                      address = NA,
-                                      comment = NA,
-                                      been.there = FALSE,
-                                      wish.list = FALSE)}
+        # -- make locations from airports
+        if(dim(airports)[1] > 0)
+          tmp_locations <- airport_to_location(airports)
         
         # -- merge
         locations <- rbind(locations, tmp_locations)}
