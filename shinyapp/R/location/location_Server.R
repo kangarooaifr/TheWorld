@@ -82,18 +82,11 @@ location_Server <- function(id, r, path) {
     
     
     # -------------------------------------
-    # Filter: country >>> to be moved to country module!
+    # Filter: country (choices)
     # -------------------------------------
     
-    # -- update filter choices
-    observeEvent(r[[r_items]](), {
-      
-      locations <- r[[r_items]]()
-      choices <- unique(locations$country)
-      
-      r$filter_country_choices <- choices
-      
-    })
+    # -- Update filter choices
+    r$filter_country_choices <- reactive(sort(unique(r[[r_items]]()$country)))
     
     
     # -------------------------------------

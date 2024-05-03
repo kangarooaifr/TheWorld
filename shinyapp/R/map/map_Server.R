@@ -162,10 +162,10 @@ map_Server <- function(id, r, path) {
     # --------------------------------------------------------------------------
     
     # -- Trigger: set country filter choices
-    observeEvent(r$filter_country_choices, {
+    observeEvent(r$filter_country_choices(), {
       
       # -- update choices
-      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices)
+      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices())
       
     })
     
