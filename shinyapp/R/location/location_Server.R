@@ -309,12 +309,12 @@ location_Server <- function(id, r, path) {
                                            label =  "Delete", 
                                            onclick = sprintf(
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("button_click"))),
+                                             ns("action_delete"))),
                                 actionLink(inputId = "been-there_%s", 
                                            label =  "Been there", 
                                            onclick = sprintf(
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("button_click")))), id, id),
+                                             ns("action_beenthere")))), id, id),
                             #clusterOptions = markerClusterOptions(),
                             clusterOptions = NULL)
         
@@ -338,31 +338,36 @@ location_Server <- function(id, r, path) {
     
     
     # -------------------------------------
+    # Actions (click from marker popup)
+    # -------------------------------------
     
-    # -- Observe: button click from marker popup
-    observeEvent(input$button_click, {
+    # -- Observe: action_delete
+    observeEvent(input$action_delete, {
+    
+      # -- extract id
+      id <- unlist(strsplit(input$action_delete, split = "_"))[2]
+      cat("[EVENT] Marker popup click: delete id =", id, "\n")
       
-      # -- get id from input value
-      action <- unlist(strsplit(input$button_click, split = "_"))[1]
-      id <- unlist(strsplit(input$button_click, split = "_"))[2]
-      cat("[EVENT] Marker popup click: action =", action, "/ id =", id, "\n")
-
-      # -- action: delete
-      if(action == "delete")
-        
-        # -- call trigger
-        r[[r_trigger_delete]](id)
+      # -- call trigger
+      r[[r_trigger_delete]](id)
       
-      # -- action: switch to been-there
-      else if(action == "been-there"){
-        
-        # -- update item
-        item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
-        item$been.there <- TRUE
-        item$wish.list <- FALSE
-        
-        # -- call trigger
-        r[[r_trigger_update]](item)}
+    })
+    
+    
+    # -- Observe: action_beenthere
+    observeEvent(input$action_beenthere, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
+      cat("[EVENT] Marker popup click: been-there id =", id, "\n")
+      
+      # -- update item
+      item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      item$been.there <- TRUE
+      item$wish.list <- FALSE
+      
+      # -- call trigger
+      r[[r_trigger_update]](item)
       
     })
     
