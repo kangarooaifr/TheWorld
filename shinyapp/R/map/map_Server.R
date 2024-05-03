@@ -10,6 +10,9 @@ map_Server <- function(id, r, path) {
     # -- trace level
     verbose <- TRUE
     
+    # -- settings
+    fly_duration <- 1.0
+    fly_padding <- 50
     
     # --------------------------------------------------------------------------
     # Communication objects
@@ -21,11 +24,13 @@ map_Server <- function(id, r, path) {
     r$map_center <- NULL
     r$map_bounds <- NULL
     r$map_zoom <- NULL
-    r$map_freeze <- NULL
     
     # -- other connectors
     r$filter_country_choices <- NULL
     r$filter_country <- NULL
+    
+    # -- map triggers
+    r$map_crop <- NULL
     
     
     # --------------------------------------------------------------------------
@@ -123,8 +128,27 @@ map_Server <- function(id, r, path) {
     })
     
     
-    # -- Connector: map freeze
-    r$map_freeze <- reactive(input$map_freeze)
+    # --------------------------------------------------------------------------
+    # Trigger: map_crop
+    # --------------------------------------------------------------------------
+    # r$map_crop = list(lng_min, lat_min, lng_max, lat_max)
+    
+    # -- observe trigger
+    observeEvent(r$map_crop, {
+      
+      # -- check setting
+      req(!input$map_freeze)
+      
+      # -- crop view
+      r$proxymap %>%
+        flyToBounds(lng1 = r$map_crop$lng_min, 
+                    lat1 = r$map_crop$lat_min, 
+                    lng2 = r$map_crop$lng_max, 
+                    lat2 = r$map_crop$lat_max, 
+                    options = list(duration = fly_duration, 
+                                   padding = c(fly_padding, fly_padding)))
+      
+    })
     
     
     # --------------------------------------------------------------------------

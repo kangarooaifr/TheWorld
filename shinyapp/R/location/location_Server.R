@@ -15,7 +15,6 @@ location_Server <- function(id, r, path) {
     group_id <- "locations"
     
     # -- settings
-    fly_duration <- 1.0
     coord_digits <- 3
     
     # -- launch kitems sub module
@@ -274,12 +273,6 @@ location_Server <- function(id, r, path) {
       # -- check dim
       if(dim(locations)[1] > 0){
         
-        # -- get bounding box (args for flyToBounds)
-        lng_min <- min(locations$lng)
-        lng_max <- max(locations$lng)
-        lat_min <- min(locations$lat)
-        lat_max <- max(locations$lat)
-
         # -- add icon column
         locations <- location_icon(locations)
         
@@ -317,11 +310,12 @@ location_Server <- function(id, r, path) {
                             #clusterOptions = markerClusterOptions(),
                             clusterOptions = NULL)
         
-        # -- update map view
-        if(!r$map_freeze()){
-          r$proxymap %>%
-            flyToBounds(lng1 = lng_min, lat1 = lat_min, lng2 = lng_max, lat2 = lat_max, 
-                        options = list(duration = fly_duration, padding = c(50, 50)))}
+        # -- call trigger (fit map to bounding box)
+        r$map_crop <- list(lng_min = min(locations$lng), 
+                           lat_min = min(locations$lat),
+                           lng_max = max(locations$lng), 
+                           lat_max = max(locations$lat))
+        
       }
       
     }, ignoreNULL = FALSE)
