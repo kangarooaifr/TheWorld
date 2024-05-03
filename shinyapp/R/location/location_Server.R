@@ -28,6 +28,11 @@ location_Server <- function(id, r, path) {
     r_trigger_update <- kitems::trigger_update_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
+    
+    # -- Internal connectors
+    selected_locations <- reactiveVal(NULL)
+    
+    
     # -- icon set
     icons <- location_icons()
     
@@ -232,46 +237,40 @@ location_Server <- function(id, r, path) {
     
     
     # -------------------------------------
+    # Activity: world map
+    # -------------------------------------
+    
+    # -- Observe: items, activity, filter (country)
+    # define selected_locations
+    obsA <- observe({
+      
+      # -- Run only when activity = world_map
+      req(r$activity() == "world_map")
+      
+      # -- init
+      cat("[location] World map, select locations: \n")
+      locations <- r[[r_items]]()
+      
+      # -- filter by country
+      if(nchar(r$filter_country()) != 0){
+        locations <- locations[locations$country %in% r$filter_country(), ]
+        cat("-- country filter, output dim =", dim(locations)[1], "obs. \n")}
+
+      # -- store
+      cat("-- selected locations, output dim =", dim(locations)[1], "obs. \n")
+      selected_locations(locations)
+      
+    })
+
+    
+    # -------------------------------------
     
     # -- Observe: display button
-    # dependencies on display options, items and filter
-    observeEvent({
-      input$display_options
-      r[[r_items]]()
-      r$activity()
-      selected_location()
-      r$filter_country()
-    }, {
+    observeEvent(selected_locations(), {
       
-      cat("[location] Display locations \n")
-      
-      if(r$activity() == "world_map"){
-        
-        # -- option
-        cat("[location] Show location, option =", input$display_options, "\n")
-        
-        # -- get the data & apply option
-        locations <- r[[r_items]]()
-        if(input$display_options == "been-there")
-          locations <- locations[locations$been.there, ]
-        else if(input$display_options == "wish-list")
-          locations <- locations[locations$wish.list, ]
-        
-        cat("-- apply type filter output dim =", dim(locations)[1], "obs. \n")
-        
-        # -- filter by country
-        if(nchar(r$filter_country()) != 0){
-          locations <- locations[locations$country %in% r$filter_country(), ]
-          cat("-- apply country filter output dim =", dim(locations)[1], "obs. \n")}
-        
-      } else {
-        
-        cat("[location] Show trip locations \n")
-        
-        locations <- selected_location()
-      
-      }
-        
+      # -- init
+      locations <- selected_locations()
+
       # -- check dim
       if(dim(locations)[1] > 0){
         
@@ -409,7 +408,7 @@ location_Server <- function(id, r, path) {
     r$location_select <- NULL
     
     # -- observe
-    selected_location <- eventReactive(r$location_select, {
+    observeEvent(r$location_select, {
       
       cat("[TRIGGER] Select location: \n")
       
@@ -434,7 +433,7 @@ location_Server <- function(id, r, path) {
       
       # -- return
       cat("-- output dim =", dim(locations),"\n")
-      locations
+      selected_locations(locations)
       
     })
     
