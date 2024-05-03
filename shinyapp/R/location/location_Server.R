@@ -297,6 +297,11 @@ location_Server <- function(id, r, path) {
                                 br(),
                                 "lat = ", lat,
                                 br(),
+                                actionLink(inputId = "update_%s", 
+                                           label =  "Update", 
+                                           onclick = sprintf(
+                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("action_update"))),
                                 actionLink(inputId = "delete_%s", 
                                            label =  "Delete", 
                                            onclick = sprintf(
@@ -306,7 +311,7 @@ location_Server <- function(id, r, path) {
                                            label =  "Been there", 
                                            onclick = sprintf(
                                              'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("action_beenthere")))), id, id),
+                                             ns("action_beenthere")))), id, id, id),
                             #clusterOptions = markerClusterOptions(),
                             clusterOptions = NULL)
         
@@ -333,6 +338,19 @@ location_Server <- function(id, r, path) {
     # -------------------------------------
     # Actions (click from marker popup)
     # -------------------------------------
+    
+    # -- Observe: action_update
+    observeEvent(input$action_update, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$action_update, split = "_"))[2]
+      cat("[EVENT] Marker popup click: update id =", id, "\n")
+      
+      # -- call trigger
+      #r[[]](id)
+      
+    })
+    
     
     # -- Observe: action_delete
     observeEvent(input$action_delete, {
