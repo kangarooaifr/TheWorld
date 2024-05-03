@@ -119,7 +119,7 @@ country_Server <- function(id, r, path) {
         selected_countries <- r$visited_countries()
         
         # -- apply filter
-        if(nchar(r$filter_country()) != 0)
+        if(!is.null(r$filter_country()))
           selected_countries <- selected_countries[selected_countries %in% r$filter_country()]
         
         # -- switch to country code

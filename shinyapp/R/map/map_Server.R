@@ -171,13 +171,8 @@ map_Server <- function(id, r, path) {
     
     
     # -- Connector: country filter
-    r$filter_country <- reactive({
-      
-      # -- init & reset = "" / test with if(nchar(r$filter_country) == 0)
-      cat("[EVENT] Filter country =", input$filter_country, "\n")
-      input$filter_country
-      
-    })
+    # init & reset = "" / test with if(nchar(r$filter_country) == 0)
+    r$filter_country <- reactive(input$filter_country)
     
     
     # -- Observe: reset filter btn
