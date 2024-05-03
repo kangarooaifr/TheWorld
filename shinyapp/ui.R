@@ -39,6 +39,7 @@ body <- dashboardBody(
                               
                                  # -- world map tab
                                  tabPanel("World map", value = "world_map",
+                                          country_INPUT("map"),
                                           location_panel_UI("locationmngr"),
                                           # -- Commented #90
                                           # Keep until moved to a different code location
@@ -55,7 +56,7 @@ body <- dashboardBody(
               
               # -- main area (map)
               column(width = 9,
-                     country_INPUT("map"),
+                     freeze_INPUT("map"),
                      map_UI("map")))),
     
     # --------------------------------------------------------------------------

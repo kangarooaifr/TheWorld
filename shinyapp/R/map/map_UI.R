@@ -42,6 +42,7 @@ country_INPUT <- function(id){
   # -- namespace
   ns <- NS(id)
   
+  # -- ui
   tagList(
     div(style="display: inline-block", actionButton(inputId = ns("filter_country_reset"), label = "Reset filter")),
     div(style="display: inline-block", selectizeInput(inputId = ns("filter_country"), 
@@ -49,8 +50,18 @@ country_INPUT <- function(id){
                                                       choices = NULL,
                                                       options = list(placeholder = 'Please select an option below',
                                                                      onInitialize = I('function() { this.setValue(""); }'),
-                                                                     create = TRUE))),
-    div(style="display: inline-block", checkboxInput(inputId = ns("map_freeze"), label = icon("anchor"))))
+                                                                     create = TRUE))))
 
 }
 
+
+# -- freeze
+freeze_INPUT <- function(id){
+  
+  # -- namespace
+  ns <- NS(id)
+  
+  # -- ui
+  div(style="display: inline-block", checkboxInput(inputId = ns("map_freeze"), label = icon("anchor")))
+  
+}
