@@ -41,7 +41,7 @@ location_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- File name
-    filename <- "airports.csv"
+    filename_airports <- "airports.csv"
     
     # -- colClasses
     colClasses_airports <- c(id = "numeric",
@@ -55,7 +55,7 @@ location_Server <- function(id, r, path) {
                              altitude = "numeric")
     
     # -- load data
-    content_df <- kfiles::read_data(file = filename,
+    content_df <- kfiles::read_data(file = filename_airports,
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
@@ -74,6 +74,36 @@ location_Server <- function(id, r, path) {
     
     # -- expose connector
     r$seaports <- reactive(r[[r_items]]()[r[[r_items]]()$type == 'Port', ])
+    
+    
+    # --------------------------------------------------------------------------
+    # Load resources & connector: railway stations
+    # --------------------------------------------------------------------------
+    # railway_stations.csv file is created out of helper function 
+    # import_railway_stations()
+    
+    # -- File name
+    filename_rail <- "railway_stations.csv"
+    
+    # -- colClasses
+    colClasses_rail <- c(id = "numeric",
+                         internal_id ="numeric",
+                         name = "character",
+                         slug = "character",
+                         uic = "numeric",
+                         lat = "numeric",
+                         lng = "numeric",
+                         parent_id = "numeric",
+                         country = "character",
+                         time_zone = "character",
+                         is_airport = "logical",
+                         iata = "character")
+    
+    # -- read data & expose connector
+    r$railway_stations <- kfiles::read_data(file = filename_rail,
+                                    path = path$resources, 
+                                    colClasses = colClasses_rail,
+                                    create = FALSE)
     
     
     # -------------------------------------
