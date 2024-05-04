@@ -504,23 +504,32 @@ location_Server <- function(id, r, path) {
         
         # -- init
         airports <- r$airports
+        railway_stations <- r$railway_stations
         locations <- r[[r_items]]()
         bounds <- r$map_bounds()
         
         # -- filter by bounding box
         airports <- bounding_box(airports, bounds)
+        railway_stations <- bounding_box(railway_stations, bounds)
         locations <- bounding_box(locations, bounds)
         
         # -- turn airports into locations & merge
         if(dim(airports)[1] > 0){
           
-          
           airports <- airport_to_location(airports)
-          locations <- rbind(locations, airports)
+          locations <- rbind(locations, airports)}
+        
+        # -- turn railway stations into locations & merge
+        if(dim(railway_stations)[1] > 0){
           
-          # -- remove already selected locations
-          
-          }
+          railway_stations <- railway_to_location(railway_stations)
+          locations <- rbind(locations, railway_stations)}
+        
+        
+        # **********************************************************************
+        # -- Should remove locations already in selected_locations
+        # **********************************************************************        
+         
         
         # -- check
         if(dim(locations)[1] > 0){

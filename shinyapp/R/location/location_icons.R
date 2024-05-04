@@ -6,6 +6,7 @@ location_icons <- function(){
                   wish.list = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'pink'),
                   bed = makeAwesomeIcon(icon = 'bed', iconColor = 'black', library = 'fa', markerColor = 'beige'),
                   airport = makeAwesomeIcon(icon = 'plane', iconColor = 'black', library = 'fa', markerColor = 'blue'),
+                  rail = makeAwesomeIcon(icon = 'train', iconColor = 'black', library = 'fa', markerColor = 'blue'),
                   port = makeAwesomeIcon(icon = 'anchor', iconColor = 'black', library = 'fa', markerColor = 'blue'),
                   default = makeAwesomeIcon(icon = 'location-dot', iconColor = 'black', library = 'fa', markerColor = 'grey'))
   
