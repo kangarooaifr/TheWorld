@@ -557,6 +557,7 @@ location_Server <- function(id, r, path) {
             bus_stations <- bus_to_location(bus_stations)
             locations <- rbind(locations, bus_stations)}}
 
+        
         # -- End get locations
         # -------------------------------------
         
@@ -568,6 +569,9 @@ location_Server <- function(id, r, path) {
           
           # -- Add icon column
           locations <- location_icon(locations)
+          
+          # -- Add popups
+          locations$popup <- contextual_popups(locations, ns)
           
           # -- Get groups
           groups <- unique(locations$type)
@@ -582,19 +586,7 @@ location_Server <- function(id, r, path) {
                               group = ~type,
                               icon = ~icons[icon],
                               label = ~name,
-                              popup = ~sprintf(
-                                paste0(
-                                  "Name:", name,
-                                  br(),
-                                  "lng = ", lng,
-                                  br(),
-                                  "lat = ", lat,
-                                  br(),
-                                  actionLink(inputId = "add_%s", 
-                                             label =  "Add to trip", 
-                                             onclick = sprintf(
-                                               'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                               ns("add_to_trip")))), id),
+                              popup = ~popup,
                               clusterOptions = NULL) %>%
             
             # -- Map overlay checkbox (hide / show groups)
