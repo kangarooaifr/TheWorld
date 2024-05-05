@@ -99,11 +99,15 @@ location_Server <- function(id, r, path) {
                          is_airport = "logical",
                          iata = "character")
     
-    # -- read data & expose connector
-    r$railway_stations <- kfiles::read_data(file = filename_rail,
+    # -- read data
+    stations <- kfiles::read_data(file = filename_rail,
                                     path = path$resources, 
                                     colClasses = colClasses_rail,
                                     create = FALSE)
+    
+    # -- filter & expose connector
+    cat("[location] Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
+    r$railway_stations <-  stations[!is.na(stations$lng), ]
     
     
     # -------------------------------------
