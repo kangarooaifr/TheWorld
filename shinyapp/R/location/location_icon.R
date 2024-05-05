@@ -8,6 +8,7 @@ location_icon <- function(locations){
                             type == 'Port' ~ 'port',
                             type == 'Airport' ~ 'airport',
                             type == 'Rail' ~ 'rail',
+                            type == 'Road' ~ 'road',
                             type == 'Accommodation' ~ 'bed'))
   
 }

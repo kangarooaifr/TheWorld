@@ -77,37 +77,39 @@ location_Server <- function(id, r, path) {
     
     
     # --------------------------------------------------------------------------
-    # Load resources & connector: railway stations
+    # Load resources & connector: stations
     # --------------------------------------------------------------------------
-    # railway_stations.csv file is created out of helper function 
-    # import_railway_stations()
+    # stations.csv file is created out of helper function 
+    # import_stations()
     
     # -- File name
-    filename_rail <- "railway_stations.csv"
+    filename_stations <- "stations.csv"
     
     # -- colClasses
-    colClasses_rail <- c(id = "numeric",
-                         internal_id ="numeric",
-                         name = "character",
-                         slug = "character",
-                         uic = "numeric",
-                         lat = "numeric",
-                         lng = "numeric",
-                         parent_id = "numeric",
-                         country = "character",
-                         time_zone = "character",
-                         is_airport = "logical",
-                         iata = "character")
+    colClasses_stations <- c(id = "numeric",
+                             internal_id ="numeric",
+                             name = "character",
+                             slug = "character",
+                             uic = "numeric",
+                             lat = "numeric",
+                             lng = "numeric",
+                             parent_id = "numeric",
+                             country = "character",
+                             time_zone = "character",
+                             is_airport = "logical",
+                             iata = "character",
+                             is_road = "logical",
+                             is_rail = "logical")
     
     # -- read data
-    stations <- kfiles::read_data(file = filename_rail,
-                                    path = path$resources, 
-                                    colClasses = colClasses_rail,
-                                    create = FALSE)
+    stations <- kfiles::read_data(file = filename_stations,
+                                  path = path$resources, 
+                                  colClasses = colClasses_stations,
+                                  create = FALSE)
     
     # -- filter & expose connector
     cat("[location] Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
-    r$railway_stations <-  stations[!is.na(stations$lng), ]
+    r$stations <-  stations[!is.na(stations$lng), ]
     
     
     # -------------------------------------
@@ -508,13 +510,15 @@ location_Server <- function(id, r, path) {
         
         # -- init
         airports <- r$airports
-        railway_stations <- r$railway_stations
+        railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
+        bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
         locations <- r[[r_items]]()
         bounds <- r$map_bounds()
         
         # -- filter by bounding box
         airports <- bounding_box(airports, bounds)
         railway_stations <- bounding_box(railway_stations, bounds)
+        bus_stations <- bounding_box(bus_stations, bounds)
         locations <- bounding_box(locations, bounds)
         
         # -- turn airports into locations & merge
@@ -528,6 +532,12 @@ location_Server <- function(id, r, path) {
           
           railway_stations <- railway_to_location(railway_stations)
           locations <- rbind(locations, railway_stations)}
+        
+        # -- turn bus stations into locations & merge
+        if(dim(bus_stations)[1] > 0){
+          
+          bus_stations <- bus_to_location(bus_stations)
+          locations <- rbind(locations, bus_stations)}
         
         # -- Remove locations already in selected_locations
         locations <- locations[!locations$id %in% selected_locations()$id, ]
