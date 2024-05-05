@@ -40,7 +40,7 @@ import_stations <- function(){
 }
 
 
-bus_stations <- function(stations){
+import_bus_stations <- function(stations){
   
   # -- list of identified keywords
   keywords <- c("autobus", "autobuses", "autobusni", "avtobusna", "autobusowy",
@@ -49,11 +49,13 @@ bus_stations <- function(stations){
                 "routiere")
   
   # -- get indexes
-  idx <- grep(paste(keywords, collapse = "|"), railway_stations$slug)
+  idx <- grep(paste(keywords, collapse = "|"), stations$slug)
   
-  # -- init & tag bus stations
+  # -- init & tag
   stations$is_road <- NA
   stations[idx, ]$is_road <- TRUE
+  stations$is_rail <- NA
+  stations[idx, ]$is_rail <- FALSE
   
   # -- return
   stations
