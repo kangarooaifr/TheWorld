@@ -525,11 +525,8 @@ location_Server <- function(id, r, path) {
           railway_stations <- railway_to_location(railway_stations)
           locations <- rbind(locations, railway_stations)}
         
-        
-        # **********************************************************************
-        # -- Should remove locations already in selected_locations
-        # **********************************************************************        
-         
+        # -- Remove locations already in selected_locations
+        locations <- locations[!locations$id %in% selected_locations()$id, ]
         
         # -- check
         if(dim(locations)[1] > 0){
