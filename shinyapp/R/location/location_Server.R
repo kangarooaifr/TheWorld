@@ -16,6 +16,9 @@ location_Server <- function(id, r, path) {
     
     # -- settings
     coord_digits <- 3
+    contextual_locations_level <- 8
+    bus_stations_level <- 13
+    railway_stations_level <- 10
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
@@ -31,6 +34,8 @@ location_Server <- function(id, r, path) {
     # -- Internal connectors
     selected_locations <- reactiveVal(NULL)
     
+    # -- Internal caches
+    cache_groups <- reactiveVal(NULL)
     
     # -- icon set
     icons <- location_icons()
@@ -486,40 +491,35 @@ location_Server <- function(id, r, path) {
     })
     
     
-    # -------------------------------------
-    # Temporary locations
-    # -------------------------------------
+    # --------------------------------------------------------------------------
+    # Contextual (temporary) locations
+    # --------------------------------------------------------------------------
+    # Note: 
+    # groupOptions() is not compatible with addLayersControl()
+    # zoom level driven behavior have to be done 'manually'
     
-    # -- observe: zoom, bounds
-    observeEvent({
-      r$map_zoom()
-      r$map_bounds()}, {
+    # -- observe: bounds
+    # Note: when zoom level is changed, bounds is updated (no need to observe)
+    observeEvent(r$map_bounds(), {
       
-        cat("[location] Map zoom / bounds event received \n")
+      # -- check zoom level
+      if(r$map_zoom() >= contextual_locations_level){
         
-        # -------------------------------------
-        # Set the detail group to only appear when zoomed in
-        #groupOptions("detail", zoomLevels = 7:18)
-        # -------------------------------------
-        # >>> rework block !!
-        
-      # -- check zoom value
-      if(r$map_zoom() >= 8){
-        
-        cat("[location] Add temporary locations \n")
+        cat("[location] Update contextual locations \n")
         
         # -- init
-        airports <- r$airports
-        railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
-        bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
-        locations <- r[[r_items]]()
         bounds <- r$map_bounds()
         
-        # -- filter by bounding box
-        airports <- bounding_box(airports, bounds)
-        railway_stations <- bounding_box(railway_stations, bounds)
-        bus_stations <- bounding_box(bus_stations, bounds)
+        # -- get locations
+        # -------------------------------------
+        locations <- r[[r_items]]()
         locations <- bounding_box(locations, bounds)
+        
+        
+        # -- get airports
+        # -------------------------------------
+        airports <- r$airports
+        airports <- bounding_box(airports, bounds)
         
         # -- turn airports into locations & merge
         if(dim(airports)[1] > 0){
@@ -527,35 +527,59 @@ location_Server <- function(id, r, path) {
           airports <- airport_to_location(airports)
           locations <- rbind(locations, airports)}
         
-        # -- turn railway stations into locations & merge
-        if(dim(railway_stations)[1] > 0){
-          
-          railway_stations <- railway_to_location(railway_stations)
-          locations <- rbind(locations, railway_stations)}
         
-        # -- turn bus stations into locations & merge
-        if(dim(bus_stations)[1] > 0){
+        # -- get railway_stations
+        # -------------------------------------
+        # Note: only if zoom level > setting
+        if(r$map_zoom() >= railway_stations_level){
           
-          bus_stations <- bus_to_location(bus_stations)
-          locations <- rbind(locations, bus_stations)}
+          railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
+          railway_stations <- bounding_box(railway_stations, bounds)
+          
+          # -- turn railway stations into locations & merge
+          if(dim(railway_stations)[1] > 0){
+            
+            railway_stations <- railway_to_location(railway_stations)
+            locations <- rbind(locations, railway_stations)}}
+        
+        
+        # -- get bus_stations
+        # -------------------------------------
+        # Note: only if zoom level > setting
+        if(r$map_zoom() >= bus_stations_level){
+          
+          bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
+          bus_stations <- bounding_box(bus_stations, bounds)
+          
+          # -- turn bus stations into locations & merge
+          if(dim(bus_stations)[1] > 0){
+            
+            bus_stations <- bus_to_location(bus_stations)
+            locations <- rbind(locations, bus_stations)}}
+
+        # -- End get locations
+        # -------------------------------------
         
         # -- Remove locations already in selected_locations
         locations <- locations[!locations$id %in% selected_locations()$id, ]
         
-        # -- check
+        # -- Check & add locations
         if(dim(locations)[1] > 0){
           
-          # -- add icon column
+          # -- Add icon column
           locations <- location_icon(locations)
+          
+          # -- Get groups
+          groups <- unique(locations$type)
           
           # -- add markers
           r$proxymap %>%
-            clearGroup("temp") %>%
+            clearGroup(cache_groups()) %>%
             # -- Add markers
             addAwesomeMarkers(data = locations,
                               lng = ~lng,
                               lat = ~lat,
-                              group = "temp",
+                              group = ~type,
                               icon = ~icons[icon],
                               label = ~name,
                               popup = ~sprintf(
@@ -571,17 +595,27 @@ location_Server <- function(id, r, path) {
                                              onclick = sprintf(
                                                'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
                                                ns("add_to_trip")))), id),
-                              clusterOptions = NULL)}
+                              clusterOptions = NULL) %>%
+            
+            # -- Map overlay checkbox (hide / show groups)
+            addLayersControl(
+              overlayGroups = groups)
+          
+          # -- store groups in cache
+          cache_groups(groups)
+          
+        }
         
-      } else if(r$map_zoom() <= 7){
+      } else {
         
-        cat("[location] Clear temporary locations \n")
+        cat("[location] Clear contuextual locations \n")
         
+        # -- clear markers
         r$proxymap %>%
-          clearGroup("temp")
+          clearGroup(cache_groups())
         
       }
-        
+      
     }, ignoreInit = TRUE)
     
   })
