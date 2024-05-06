@@ -322,8 +322,9 @@ location_Server <- function(id, r, path) {
       # -- check dim
       if(dim(locations)[1] > 0){
         
-        # -- add icon column
+        # -- add icon & popup columns
         locations <- location_icon(locations)
+        locations$popup <- location_popups(locations, type = 'selected', activity = r$activity(), ns = ns)
         
         # -- update map (proxy)
         r$proxymap %>%
@@ -338,30 +339,7 @@ location_Server <- function(id, r, path) {
                             group = group_id,
                             icon = ~icons[icon],
                             label = ~name,
-                            popup = ~sprintf(
-                              paste0(
-                                "Name:", name,
-                                br(),
-                                "lng = ", lng,
-                                br(),
-                                "lat = ", lat,
-                                br(),
-                                actionLink(inputId = "update_%s", 
-                                           label =  "Update", 
-                                           onclick = sprintf(
-                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("action_update"))),
-                                actionLink(inputId = "delete_%s", 
-                                           label =  "Delete", 
-                                           onclick = sprintf(
-                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("action_delete"))),
-                                actionLink(inputId = "been-there_%s", 
-                                           label =  "Been there", 
-                                           onclick = sprintf(
-                                             'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                                             ns("action_beenthere")))), id, id, id),
-                            #clusterOptions = markerClusterOptions(),
+                            popup = ~popup,
                             clusterOptions = NULL)
         
         # -- call trigger (fit map to bounding box)
@@ -575,11 +553,9 @@ location_Server <- function(id, r, path) {
         # -- Check & add locations
         if(dim(locations)[1] > 0){
           
-          # -- Add icon column
+          # -- Add icon & popup columns
           locations <- location_icon(locations)
-          
-          # -- Add popups
-          locations$popup <- contextual_popups(locations, ns)
+          locations$popup <- location_popups(locations, type = 'contextual', activity = r$activity(), ns)
           
           # -- Get groups
           groups <- unique(locations$type)
