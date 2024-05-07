@@ -42,6 +42,7 @@ location_popups <- function(locations, type, activity, ns){
         
       }),
     
+    # -- >>>>>>>>>>>>> fix this because not all args are used if 2nd options....
     locations$id, locations$id, locations$id)
   
 }
