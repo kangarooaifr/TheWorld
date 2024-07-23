@@ -43,7 +43,7 @@ body <- dashboardBody(
                                           location_panel_UI("locationmngr"),
                                           # -- Commented #90
                                           # Keep until moved to a different code location
-                                          # route_UI("routemngr"),
+                                          route_UI("routemngr"),
                                           country_UI("country"),
                                           # -- Commented #91
                                           # Keep until moved to a different code location
