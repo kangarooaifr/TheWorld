@@ -82,7 +82,7 @@ trip_Server <- function(id, r, path) {
       # -- compute values
       date_start <- min(c(transports$departure, accommodations$checkin))
       date_end <- max(c(transports$arrival, accommodations$checkout))
-      duration <- date_end - date_start
+      duration <- round(date_end - date_start, digits = 0)
       
       output$trip_info <- renderUI(
         tagList(
