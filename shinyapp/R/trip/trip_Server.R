@@ -64,25 +64,17 @@ trip_Server <- function(id, r, path) {
       steps <- r[[step_items]]()
       steps <- steps[steps$trip.id == input$trip_selector, ]
       
-      str(steps)
-      
       # -- get transports
       transports <- r[[transport_r_items]]()
       transports <- transports[transports$trip.id == input$trip_selector, ]
       
       # -- call trigger (select route)
       r$route_select <- transports$route.id
-      
-      # -- output
-      str(transports)
-      
+
       # -- get accommodations
       accommodations <- r[[accommodation_r_items]]()
       accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
-      
-      # -- output
-      str(accommodations)
-      
+
       # -- select locations
       r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
       
@@ -158,13 +150,17 @@ trip_Server <- function(id, r, path) {
           
           cat("[trip] Location search result, dim =", dim(r$location_search_result()), "\n")
           
-          # -- compute choices
+          # -- compute choices from search result
           result <- r$location_search_result()
-          choices <- result$id
-          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
-          # -- update input
-          updateSelectizeInput(inputId = "select_step", choices = choices)
+          # -- check result size to avoid crash
+          if(dim(result)[1] > 0){
+          
+            choices <- result$id
+            names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+            
+            # -- update input
+            updateSelectizeInput(inputId = "select_step", choices = choices)}
           
         })
         
@@ -376,7 +372,7 @@ trip_Server <- function(id, r, path) {
             actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
         # -- init location search trigger
-        r$location_search_string <- 'Accommodation'
+        r$location_search_string <- 'accommodation'
         
         # -- observer: search result
         observeEvent(r$location_search_result(), {
@@ -385,11 +381,15 @@ trip_Server <- function(id, r, path) {
           
           # -- compute choices
           result <- r$location_search_result()
-          choices <- result$id
-          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
-          # -- update input
-          updateSelectizeInput(inputId = "select_accommodation", choices = choices)
+          # -- check search result size to avoid crash
+          if(dim(result)[1] > 0){
+            
+            choices <- result$id
+            names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
+            
+            # -- update input
+            updateSelectizeInput(inputId = "select_accommodation", choices = choices)}
           
         })
         
