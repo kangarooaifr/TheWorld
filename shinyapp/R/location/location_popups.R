@@ -54,14 +54,16 @@ location_popups <- function(locations, type, activity, ns){
           # -- remove from trip
           actionLink(inputId = "remove_%s",
                      label =  "Remove from trip", 
-                     onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("remove_from_trip")))
+                     onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                       ns("remove_from_trip")))
         
         else
           
           # -- add to trip
           actionLink(inputId = "add_%s",
                      label =  "Add to trip", 
-                     onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_trip")))),
+                     onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                       ns("add_to_trip")))),
       
       locations$id)
     
