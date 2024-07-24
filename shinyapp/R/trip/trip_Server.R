@@ -223,8 +223,12 @@ trip_Server <- function(id, r, path) {
       
       cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
       
+      # -- get step id from location.id
+      id <- r[[step_items]]()[r[[step_items]]()$location.id == r$trigger_remove_step, ]$id
+      str(id)
+      
       # -- call trigger
-      r[[step_trigger_delete]](r$trigger_remove_step)
+      r[[step_trigger_delete]](id)
       
     })
     
