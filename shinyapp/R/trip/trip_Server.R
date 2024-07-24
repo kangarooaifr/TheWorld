@@ -107,8 +107,11 @@ trip_Server <- function(id, r, path) {
     step_data_model <- kitems::dm_name(step_kitems_id)
     step_items <- kitems::items_name(step_kitems_id)
     step_trigger_add <- kitems::trigger_add_name(step_kitems_id)
+    step_trigger_delete <- kitems::trigger_delete_name(step_kitems_id)
     
-    # id, trip.id, location.id, order, comment
+    # -- define triggers
+    r$trigger_add_step <- NULL
+    r$trigger_remove_step <- NULL
     
     # -- observer
     observeEvent(input$add_location, {
@@ -143,7 +146,7 @@ trip_Server <- function(id, r, path) {
         )
         
         # -- init location search trigger
-        r$location_search_string <- 'City'
+        r$location_search_string <- 'city'
         
         # -- observer: search result
         observeEvent(r$location_search_result(), {
@@ -190,6 +193,38 @@ trip_Server <- function(id, r, path) {
       
       # -- call trigger
       r[[step_trigger_add]](step)
+      
+    })
+    
+    
+    # -- observe: trigger_add_step
+    observeEvent(r$trigger_add_step, {
+
+      cat("[TRIGGER] Add step to trip, input location =", r$trigger_add_step$id, "\n")
+
+      # -- compute values
+      values <- list(id = ktools::getTimestamp(),
+                     trip.id = input$trip_selector,
+                     location.id = r$trigger_add_step$id,
+                     order = step_order(r[[step_items]]()),
+                     comment = NULL)
+      
+      # -- create item
+      step <- kitems::item_create(values, data.model = r[[step_data_model]]())
+      
+      # -- call trigger
+      r[[step_trigger_add]](step)
+      
+    })
+    
+    
+    # -- observe: trigger_add_step
+    observeEvent(r$trigger_remove_step, {
+      
+      cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
+      
+      # -- call trigger
+      r[[step_trigger_delete]](r$trigger_remove_step)
       
     })
     
