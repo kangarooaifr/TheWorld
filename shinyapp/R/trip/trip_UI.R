@@ -30,6 +30,10 @@ trip_panel_UI <- function(id)
     
     uiOutput(ns("trip_info")),
     
+    hr(),
+    
+    uiOutput(ns("trip_transport")),
+    
     # -- line break
     hr(),
     

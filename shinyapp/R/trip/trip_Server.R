@@ -109,7 +109,8 @@ trip_Server <- function(id, r, path) {
     # -- call trigger (select route)
     observe(
       r$route_select <- selected_transports()$route.id) %>%
-      bindEvent(selected_transports())
+      bindEvent(selected_transports(),
+                ignoreInit = TRUE)
     
     
     # -- call trigger (select locations)
@@ -126,15 +127,67 @@ trip_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- routes
-    observe({
+    output$trip_transport <- renderUI({
       
       cat("[trip] Update trip info \n")
       
-      #selected_transports()
-      #r$selected_route()
+      id <- selected_transports()$id[[1]]
+      cat("id ==", id, "\n")
       
-    }) %>% bindEvent(selected_transports())
+      # -- return
+      tagList(
+        p(strong('Departure:'), selected_transports()[selected_transports()$id == id, ]$departure),
+        p(strong('Arrival:'), selected_transports()[selected_transports()$id == id, ]$arrival),
+        
+        p(strong('Company:'), r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$company),
+        p(strong('Flight #:'), r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$number),
+        
+        p(strong('Origin:'),
+          HTML(
+            sprintf(
+              paste0(
+                
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                             ns("fly_to_location")))),
+              
+              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lng,
+              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lat)),
+        ),
+        
+        p(strong('Destination:'),
+          HTML(
+            sprintf(
+              paste0(
+                
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                             ns("fly_to_location")))),
+              
+              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lng,
+              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lat)),
+          
+        ))
+      
+    }) %>% bindEvent(list(selected_transports(), r$selected_route(), r$selected_locations),
+                     ignoreInit = TRUE)
     
+    
+    # -- Observe: fly_to_location
+    observeEvent(input$fly_to_location, {
+      
+      # -- extract values
+      lng <- unlist(strsplit(input$fly_to_location, split = "_"))[2]
+      lat <- unlist(strsplit(input$fly_to_location, split = "_"))[3]
+      cat("[EVENT] ActionLink click: fly_to_location lng =", lng, ", lat =", lat, "\n")
+      
+      r$map_flyto <- list(lng = lng, lat = lat)
+      
+    })
     
     
     # -- output: trip_info
