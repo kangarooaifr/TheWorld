@@ -13,6 +13,7 @@ map_Server <- function(id, r, path) {
     # -- settings
     fly_duration <- 1.0
     fly_padding <- 50
+    fly_zoom <- 11
     
     # --------------------------------------------------------------------------
     # Communication objects
@@ -31,6 +32,7 @@ map_Server <- function(id, r, path) {
     
     # -- map triggers
     r$map_crop <- NULL
+    r$map_flyto <- NULL
     
     
     # --------------------------------------------------------------------------
@@ -147,6 +149,28 @@ map_Server <- function(id, r, path) {
                     lat2 = r$map_crop$lat_max, 
                     options = list(duration = fly_duration, 
                                    padding = c(fly_padding, fly_padding)))
+      
+    })
+    
+    
+    # --------------------------------------------------------------------------
+    # Trigger: map_flyto
+    # --------------------------------------------------------------------------
+    # r$map_flyto = list(lng, lat)
+    
+    # -- observe trigger
+    observeEvent(r$map_flyto, {
+      
+      # -- check setting
+      req(!input$map_freeze)
+      
+      # -- crop view
+      r$proxymap %>%
+        flyTo(lng = r$map_flyto$lng, 
+              lat = r$map_flyto$lat,
+              zoom = fly_zoom,
+              options = list(duration = fly_duration, 
+                             padding = c(fly_padding, fly_padding)))
       
     })
     
