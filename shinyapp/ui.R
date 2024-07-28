@@ -29,7 +29,7 @@ body <- dashboardBody(
             fluidRow(
               
               # -- sidebar left
-              column(width = 2,
+              column(width = 3,
                      
                      # -- search
                      search_Input("map"),
@@ -55,12 +55,9 @@ body <- dashboardBody(
                                           trip_panel_UI("tripmngr")))),
               
               # -- main area (map)
-              column(width = 8,
+              column(width = 9,
                      freeze_INPUT("map"),
-                     map_UI("map")),
-              
-              column(width = 2,
-                     ))),
+                     map_UI("map")))),
     
     # --------------------------------------------------------------------------
     # kitems
