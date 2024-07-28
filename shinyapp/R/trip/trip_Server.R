@@ -185,6 +185,7 @@ trip_Server <- function(id, r, path) {
       lat <- unlist(strsplit(input$fly_to_location, split = "_"))[3]
       cat("[EVENT] ActionLink click: fly_to_location lng =", lng, ", lat =", lat, "\n")
       
+      # -- call trigger
       r$map_flyto <- list(lng = lng, lat = lat)
       
     })
