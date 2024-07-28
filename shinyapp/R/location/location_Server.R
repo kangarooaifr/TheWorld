@@ -31,8 +31,8 @@ location_Server <- function(id, r, path) {
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
     
     
-    # -- Internal connectors
-    selected_locations <- reactiveVal(NULL)
+    # -- External connectors
+    r$selected_locations <- NULL
     
     # -- Internal caches
     cache_groups <- reactiveVal(NULL)
@@ -289,7 +289,7 @@ location_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- Observe: items, activity, filter (country)
-    # define selected_locations
+    # define r$selected_locations
     obsA <- observe({
       
       # -- Run only when activity = world_map
@@ -306,7 +306,7 @@ location_Server <- function(id, r, path) {
 
       # -- store
       cat("-- selected locations, output dim =", dim(locations)[1], "obs. \n")
-      selected_locations(locations)
+      r$selected_locations <- locations
       
     })
 
@@ -314,10 +314,10 @@ location_Server <- function(id, r, path) {
     # -------------------------------------
     
     # -- Observe: display button
-    observeEvent(selected_locations(), {
+    observeEvent(r$selected_locations, {
       
       # -- init
-      locations <- selected_locations()
+      locations <- r$selected_locations
 
       # -- check dim
       if(dim(locations)[1] > 0){
@@ -501,7 +501,7 @@ location_Server <- function(id, r, path) {
       
       # -- return
       cat("-- output dim =", dim(locations),"\n")
-      selected_locations(locations)
+      r$selected_locations <- locations
       
     })
     
@@ -576,8 +576,8 @@ location_Server <- function(id, r, path) {
         # -- End get locations
         # -------------------------------------
         
-        # -- Remove locations already in selected_locations
-        locations <- locations[!locations$id %in% selected_locations()$id, ]
+        # -- Remove locations already in r$selected_locations
+        locations <- locations[!locations$id %in% r$selected_locations$id, ]
         
         # -- Check & add locations
         if(dim(locations)[1] > 0){
