@@ -121,6 +121,22 @@ trip_Server <- function(id, r, path) {
       bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
     
     
+    # -------------------------------------
+    # trip info outputs
+    # -------------------------------------
+    
+    # -- routes
+    observe({
+      
+      cat("[trip] Update trip info \n")
+      
+      #selected_transports()
+      #r$selected_route()
+      
+    }) %>% bindEvent(selected_transports())
+    
+    
+    
     # -- output: trip_info
     output$trip_info <- renderUI({
       
