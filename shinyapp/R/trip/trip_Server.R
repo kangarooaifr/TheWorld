@@ -55,42 +55,86 @@ trip_Server <- function(id, r, path) {
     })
     
     
-    # -- observer:
-    observeEvent(input$trip_selector, {
-      
-      cat("[trip] Trip selector, id =", input$trip_selector, "\n")
-      
-      # -- get steps
-      steps <- r[[step_items]]()
-      steps <- steps[steps$trip.id == input$trip_selector, ]
-      
-      # -- get transports
-      transports <- r[[transport_r_items]]()
-      transports <- transports[transports$trip.id == input$trip_selector, ]
-      
-      # -- call trigger (select route)
-      r$route_select <- transports$route.id
-
-      # -- get accommodations
-      accommodations <- r[[accommodation_r_items]]()
-      accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
-
-      # -- select locations
-      r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
-      
+    # # -- observer:
+    # observeEvent(input$trip_selector, {
+    #   
+    #   cat("[trip] Trip selector, id =", input$trip_selector, "\n")
+    #   
+    #   # -- get steps
+    #   steps <- r[[step_items]]()
+    #   steps <- steps[steps$trip.id == input$trip_selector, ]
+    #   
+    #   # -- get transports
+    #   transports <- r[[transport_r_items]]()
+    #   transports <- transports[transports$trip.id == input$trip_selector, ]
+    #   
+    #   # -- call trigger (select route)
+    #   r$route_select <- transports$route.id
+    # 
+    #   # -- get accommodations
+    #   accommodations <- r[[accommodation_r_items]]()
+    #   accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
+    # 
+    #   # -- select locations
+    #   r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
+    #   
+    #   
+    #   # -- compute values
+    #   date_start <- min(c(transports$departure, accommodations$checkin))
+    #   date_end <- max(c(transports$arrival, accommodations$checkout))
+    #   duration <- round(date_end - date_start, digits = 0)
+    #   
+    #   output$trip_info <- renderUI(
+    #     tagList(
+    #       p(strong('Start:'), date_start),
+    #       p(strong('End:'), date_end),
+    #       p(strong('Duration:'), duration)))
+    #   
+    # }, ignoreInit = TRUE)
+    
+    
+    # -------------------------------------
+    # select trip items
+    # -------------------------------------
+    
+    # -- steps
+    selected_steps <- reactive(r[[step_items]]()[r[[step_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- transports
+    selected_transports <- reactive(r[[transport_r_items]]()[r[[transport_r_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- accommodations
+    selected_accommodations <- reactive(r[[accommodation_r_items]]()[r[[accommodation_r_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- call trigger (select route)
+    observe(
+      r$route_select <- selected_transports()$route.id) %>%
+      bindEvent(selected_transports())
+    
+    
+    # -- call trigger (select locations)
+    observe(
+      r$location_select <- c(selected_steps()$location.id, 
+                             selected_accommodations()$location.id, 
+                             r$selected_route()$origin, 
+                             r$selected_route()$destination)) %>%
+      bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
+    
+    
+    # -- output: trip_info
+    output$trip_info <- renderUI({
       
       # -- compute values
-      date_start <- min(c(transports$departure, accommodations$checkin))
-      date_end <- max(c(transports$arrival, accommodations$checkout))
+      date_start <- min(c(selected_transports()$departure, selected_accommodations()$checkin))
+      date_end <- max(c(selected_transports()$arrival, selected_accommodations()$checkout))
       duration <- round(date_end - date_start, digits = 0)
       
-      output$trip_info <- renderUI(
-        tagList(
-          p(strong('Start:'), date_start),
-          p(strong('End:'), date_end),
-          p(strong('Duration:'), duration)))
-      
-    }, ignoreInit = TRUE)
+      # -- return
+      tagList(
+        p(strong('Start:'), date_start),
+        p(strong('End:'), date_end),
+        p(strong('Duration:'), duration))})
+    
     
     
     # -------------------------------------
