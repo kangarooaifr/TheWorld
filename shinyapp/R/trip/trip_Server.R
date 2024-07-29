@@ -122,6 +122,27 @@ trip_Server <- function(id, r, path) {
       bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
     
     
+    # -- compute timeline table
+    # takes into account transports & accommodations (because steps have no date/time)
+    timeline_table <- reactive({
+      
+      cat("[trip] Compute timeline table \n")
+      
+      # -- transports
+      transports <- selected_transports()[c('id', 'departure', 'arrival')]
+      colnames(transports) <- c('id', 'start', 'end')
+      
+      # -- accommodations
+      accomodations <- selected_accommodations()[c('id', 'checkin', 'checkout')]
+      colnames(accomodations) <- c('id', 'start', 'end')
+      
+      # -- return
+      rbind(transports, accomodations)
+      
+    }) %>% bindEvent(list(selected_transports(), selected_accommodations()),
+                     ignoreInit = TRUE)
+    
+    
     # -------------------------------------
     # trip info outputs
     # -------------------------------------
