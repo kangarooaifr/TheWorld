@@ -25,14 +25,17 @@ trip_panel_UI <- function(id)
     # -- hide / show
     #checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE),
     
-    # -- line break
+    # -- general info
     hr(),
-    
     uiOutput(ns("trip_info")),
     
+    # -- transport
     hr(),
-    
     uiOutput(ns("trip_transport")),
+    
+    # -- accommodation
+    hr(),
+    uiOutput(ns("trip_accommodation")),
     
     # -- line break
     hr(),

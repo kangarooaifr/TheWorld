@@ -206,6 +206,38 @@ trip_Server <- function(id, r, path) {
         p(strong('Duration:'), duration))})
     
     
+    # -- accommodations
+    output$trip_accommodation <- renderUI({
+      
+      cat("[trip] Update accommodation info \n")
+      
+      id <- selected_accommodations()$id[[1]]
+      cat("id ==", id, "\n")
+      
+      # -- return
+      tagList(
+        
+        p(strong('Name:'),
+          HTML(
+            sprintf(
+              paste0(
+
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("fly_to_location")))),
+
+              r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$lat))),
+        
+        p(strong('Check-in:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkin),
+        p(strong('Check-out:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkout))
+      
+    }) %>% bindEvent(list(selected_transports(), r$selected_route(), r$selected_locations),
+                     ignoreInit = TRUE)
+    
+    
     
     # -------------------------------------
     # Step management
