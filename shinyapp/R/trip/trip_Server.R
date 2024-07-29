@@ -199,7 +199,7 @@ trip_Server <- function(id, r, path) {
       date_end <- max(c(selected_transports()$arrival, selected_accommodations()$checkout))
       duration <- round(date_end - date_start, digits = 0)
       
-      # -- return
+      # -- return tag
       tagList(
         p(strong('Start:'), date_start),
         p(strong('End:'), date_end),
