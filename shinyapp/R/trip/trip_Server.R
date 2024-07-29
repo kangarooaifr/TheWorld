@@ -203,7 +203,9 @@ trip_Server <- function(id, r, path) {
       tagList(
         p(strong('Start:'), date_start),
         p(strong('End:'), date_end),
-        p(strong('Duration:'), duration))})
+        p(strong('Duration:'), duration),
+        
+        sliderInput("timeline", label = "Timeline", min = as.Date(date_start), max = as.Date(date_end), value = Sys.Date()))})
     
     
     # -- accommodations
