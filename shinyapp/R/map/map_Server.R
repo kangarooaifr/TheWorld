@@ -13,7 +13,7 @@ map_Server <- function(id, r, path) {
     # -- settings
     fly_duration <- 1.0
     fly_padding <- 50
-    fly_zoom <- 11
+    fly_zoom <- 12
     
     # --------------------------------------------------------------------------
     # Communication objects
@@ -171,6 +171,9 @@ map_Server <- function(id, r, path) {
               zoom = fly_zoom,
               options = list(duration = fly_duration, 
                              padding = c(fly_padding, fly_padding)))
+      
+      # -- unset trigger (otherwise you can't call again with same value)
+      r$map_flyto <- NULL
       
     })
     
