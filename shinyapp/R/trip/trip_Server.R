@@ -140,7 +140,7 @@ trip_Server <- function(id, r, path) {
       rbind(transports, accomodations)
       
     }) %>% bindEvent(list(selected_transports(), selected_accommodations()),
-                     ignoreInit = TRUE)
+                     ignoreInit = FALSE)
     
     
     # -------------------------------------
@@ -226,9 +226,23 @@ trip_Server <- function(id, r, path) {
         p(strong('End:'), date_end),
         p(strong('Duration:'), duration),
         
-        sliderInput("timeline", label = "Timeline", 
+        sliderInput(ns("timeline"), label = "Timeline", 
                     min = as.Date(date_start), max = as.Date(date_end), value = Sys.Date(),
-                    animate = TRUE))})
+                    animate = TRUE))}) %>% bindEvent(list(selected_transports(), selected_accommodations()), ignoreInit = TRUE)
+    
+    # -- observer: timeline
+    observe({
+      
+      cat("[trip] New timeline value =", input$timeline, "\n")
+      
+      # -- slice timeline table
+      slice <- timeline_table()[as.Date(timeline_table()$start) == input$timeline | as.Date(timeline_table()$end) == input$timeline, ]
+      
+      str(slice)
+      
+    }) %>% bindEvent(input$timeline, ignoreInit = TRUE)
+    
+    
     
     
     # -- accommodations
