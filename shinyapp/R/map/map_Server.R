@@ -4,16 +4,21 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-map_Server <- function(id, r, path) {
+map_Server <- function(id, r, verbose = TRUE) {
   moduleServer(id, function(input, output, session) {
     
-    # -- trace level
-    verbose <- TRUE
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
     
-    # -- settings
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    
+    # -- fly to settings
     fly_duration <- 1.0
     fly_padding <- 50
     fly_zoom <- 12
+    
     
     # --------------------------------------------------------------------------
     # Communication objects
@@ -73,7 +78,7 @@ map_Server <- function(id, r, path) {
       
       # -- trace
       if(verbose)
-        cat("[map] Point clicked: lng =", input$map_click$lng, "/ lat =", input$map_click$lat, "\n")
+        cat(MODULE, "Point clicked: lng =", input$map_click$lng, "/ lat =", input$map_click$lat, "\n")
       
       # -- return
       input$map_click
@@ -89,7 +94,7 @@ map_Server <- function(id, r, path) {
       
       # -- trace
       if(verbose)
-        cat("[map] Center: lng =", input$map_center$lng, "/ lat =", input$map_center$lat, "\n")
+        cat(MODULE, "Center: lng =", input$map_center$lng, "/ lat =", input$map_center$lat, "\n")
       
       # -- return
       input$map_center
@@ -105,7 +110,7 @@ map_Server <- function(id, r, path) {
       
       # -- trace
       if(verbose)
-        cat("[map] Bounds: north =", input$map_bounds$north, "/ east =", input$map_bounds$east, 
+        cat(MODULE, "Bounds: north =", input$map_bounds$north, "/ east =", input$map_bounds$east, 
             "/ south =", input$map_bounds$south, "\ west =", input$map_bounds$west, "\n")
       
       # -- return
@@ -122,7 +127,7 @@ map_Server <- function(id, r, path) {
       
       # -- trace
       if(verbose)
-        cat("[map] Zoom: level =", input$map_zoom, "\n")
+        cat(MODULE, "Zoom: level =", input$map_zoom, "\n")
       
       # -- return
       input$map_zoom
@@ -189,7 +194,7 @@ map_Server <- function(id, r, path) {
       req(input$search)
       
       # -- print
-      cat("[map] search input =", input$search, "\n")
+      cat(MODULE, "search input =", input$search, "\n")
       
       # -- get search result
       # TODO: rework, this function should be part of a package
@@ -229,7 +234,7 @@ map_Server <- function(id, r, path) {
     # -- Observe: reset filter btn
     observeEvent(input$filter_country_reset, {
       
-      cat("[EVENT] Reset filter country \n")
+      cat(MODULE, "[TRIGGER] Reset filter country \n")
       
       # -- update filter
       updateSelectizeInput(inputId = "filter_country", selected = character(0))
