@@ -17,6 +17,12 @@ sidebar <- dashboardSidebar(
 
 # -- Define body
 body <- dashboardBody(
+  
+  # -- include custom CSS
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")),
+  
+  # -- body
   tabItems(
     
     # --------------------------------------------------------------------------

@@ -277,6 +277,14 @@ trip_Server <- function(id, r, path) {
                      ignoreInit = TRUE)
     
     
+    # -- style test
+    output$mywidget <- renderUI(
+      
+      div(
+        p("some text goes here.")
+      ) %>% tagAppendAttributes(class = "my_row_class") 
+    
+    )
     
     # -------------------------------------
     # Step management
