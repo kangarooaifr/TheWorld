@@ -48,7 +48,7 @@ shinyServer(
     map_Server(id = "map", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path, map_proxy = 'map_proxy')
+    location_Server(id = "locationmngr", r = r, path = path, map_proxy = 'map_proxy', map_click = 'map_click')
     
     # -- countries
     country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy')

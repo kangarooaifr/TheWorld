@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy) {
+location_Server <- function(id, r, path, map_proxy, map_click) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -147,13 +147,13 @@ location_Server <- function(id, r, path, map_proxy) {
     # -------------------------------------
     
     # -- Event: map click
-    observeEvent(r$map_click(), {
+    observeEvent(r[[map_click]](), {
       
       cat("[location] Map click event received \n")
       
       # -- get values
-      lng <- r$map_click()[['lng']]
-      lat <- r$map_click()[['lat']]
+      lng <- r[[map_click]]()[['lng']]
+      lat <- r[[map_click]]()[['lat']]
       
       # -- display popup
       r[[map_proxy]] %>% 
@@ -177,8 +177,8 @@ location_Server <- function(id, r, path, map_proxy) {
     
             p("Coordinates:"), 
             
-            tags$ul(tags$li("long =", r$map_click()[['lng']]), 
-                    tags$li("lat =", r$map_click()[['lat']])),
+            tags$ul(tags$li("long =", r[[map_click]]()[['lng']]), 
+                    tags$li("lat =", r[[map_click]]()[['lat']])),
             
             # -- name
             textInput(inputId = ns("name"), 
@@ -264,8 +264,8 @@ location_Server <- function(id, r, path, map_proxy) {
       input_values <- data.frame(id = NA,
                                  name = input$name,
                                  type = input$type,
-                                 lng = r$map_click()[['lng']],
-                                 lat = r$map_click()[['lat']],
+                                 lng = r[[map_click]]()[['lng']],
+                                 lat = r[[map_click]]()[['lat']],
                                  country = input$country,
                                  state = input$state,
                                  zip.code = input$zip.code,
