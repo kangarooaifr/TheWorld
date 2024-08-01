@@ -24,8 +24,14 @@ map_Server <- function(id, r, verbose = TRUE) {
     # Communication objects
     # --------------------------------------------------------------------------
     
+    # -- declare names
+    map_proxy <- paste0(id, "_proxy")
+    
     # -- declare map connectors
-    r$proxymap <- NULL
+    r[[map_proxy]] <- NULL
+    
+    # -- declare map connectors
+    # r$proxymap <- NULL
     r$map_click <- NULL
     r$map_center <- NULL
     r$map_bounds <- NULL
@@ -63,7 +69,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     })
     
     # -- Declare proxy for the map
-    r$proxymap <- leafletProxy('map')
+    r[[map_proxy]] <- leafletProxy('map')
     
     
     # --------------------------------------------------------------------------
@@ -147,7 +153,7 @@ map_Server <- function(id, r, verbose = TRUE) {
       req(!input$map_freeze)
       
       # -- crop view
-      r$proxymap %>%
+      r[[map_proxy]] %>%
         flyToBounds(lng1 = r$map_crop$lng_min, 
                     lat1 = r$map_crop$lat_min, 
                     lng2 = r$map_crop$lng_max, 
@@ -170,7 +176,7 @@ map_Server <- function(id, r, verbose = TRUE) {
       req(!input$map_freeze)
       
       # -- crop view
-      r$proxymap %>%
+      r[[map_proxy]] %>%
         flyTo(lng = r$map_flyto$lng, 
               lat = r$map_flyto$lat,
               zoom = fly_zoom,
