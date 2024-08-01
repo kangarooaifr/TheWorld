@@ -42,7 +42,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Other dependencies
 
-- r$proxymap: used to display boundaries (addPolygons) on the map
+- proxymap: used to display boundaries (addPolygons) on the map
 
 
 ## Routes
@@ -58,7 +58,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #### Other dependencies
 
 - r$airports: used to set origin / destination of flight routes
-- r$proxymap: used to display routes (addPolylines) on the map
+- proxymap: used to display routes (addPolylines) on the map
 
 
 ## Tracks
@@ -73,5 +73,5 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Other dependencies
 
-- r$proxymap: used to display tracks (addPolylines) on the map
+- proxymap: used to display tracks (addPolylines) on the map
 
