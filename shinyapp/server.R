@@ -63,7 +63,7 @@ shinyServer(
     track_Server(id = "track", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path)
+    trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')
     
     
     # --------------------------------------------------------------------------

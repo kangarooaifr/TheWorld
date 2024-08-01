@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path) {
+trip_Server <- function(id, r, path, map_flyto) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -207,7 +207,7 @@ trip_Server <- function(id, r, path) {
       cat("[EVENT] ActionLink click: fly_to_location lng =", lng, ", lat =", lat, "\n")
       
       # -- call trigger
-      r$map_flyto <- list(lng = lng, lat = lat)
+      r[[map_flyto]] <- list(lng = lng, lat = lat)
       
     })
     

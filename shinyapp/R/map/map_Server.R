@@ -31,6 +31,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
     map_crop <- paste0(id, "_crop")
+    map_flyto <- paste0(id, "_flyto")
     
     # -- declare input names
     filter_country <- paste0(id, "_country")
@@ -46,10 +47,8 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- declare triggers
     r[[filter_country_choices]] <- NULL
-    
-    # -- declare triggers
     r[[map_crop]] <- NULL
-    r$map_flyto <- NULL
+    r[[map_flyto]] <- NULL
     
     
     # --------------------------------------------------------------------------
@@ -173,24 +172,24 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     # Trigger: map_flyto
     # --------------------------------------------------------------------------
-    # r$map_flyto = list(lng, lat)
+    # r[[map_flyto]] = list(lng, lat)
     
     # -- observe trigger
-    observeEvent(r$map_flyto, {
+    observeEvent(r[[map_flyto]], {
       
       # -- check setting
       req(!input$map_freeze)
       
       # -- crop view
       r[[map_proxy]] %>%
-        flyTo(lng = r$map_flyto$lng, 
-              lat = r$map_flyto$lat,
+        flyTo(lng = r[[map_flyto]]$lng, 
+              lat = r[[map_flyto]]$lat,
               zoom = fly_zoom,
               options = list(duration = fly_duration, 
                              padding = c(fly_padding, fly_padding)))
       
       # -- unset trigger (otherwise you can't call again with same value)
-      r$map_flyto <- NULL
+      r[[map_flyto]] <- NULL
       
     })
     
