@@ -48,16 +48,16 @@ shinyServer(
     map_Server(id = "map", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path)
+    location_Server(id = "locationmngr", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- countries
-    country_Server(id = "country", r = r, path = path)
+    country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- transports
-    route_Server(id = "routemngr", r = r, path = path)
+    route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- tracks
-    track_Server(id = "track", r = r, path = path)
+    track_Server(id = "track", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- trips
     trip_Server(id = "tripmngr", r = r, path = path)

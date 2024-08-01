@@ -13,7 +13,7 @@ library(leaflet)
 # Server logic
 # -------------------------------------
 
-track_Server <- function(id, r, path) {
+track_Server <- function(id, r, path, map_proxy) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace
@@ -43,7 +43,7 @@ track_Server <- function(id, r, path) {
         st_sf()
       
       # add to leaflet map
-      r$proxymap %>%
+      r[[map_proxy]] %>%
         
         # -- hidden by default
         hideGroup(group_id) %>%
@@ -60,7 +60,7 @@ track_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
+                 hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
 
     
   })

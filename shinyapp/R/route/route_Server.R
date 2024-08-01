@@ -13,7 +13,7 @@ library(dplyr)
 # Module Server logic
 # ------------------------------------------------------------------------------
 
-route_Server <- function(id, r, path) {
+route_Server <- function(id, r, path, map_proxy) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace
@@ -231,7 +231,7 @@ route_Server <- function(id, r, path) {
       cat("[route] Update map, selected routes =", length(routes$id), "\n")
       
       # -- clear map (group)
-      r$proxymap %>%
+      r[[map_proxy]] %>%
         clearGroup(group_id)
       
       # -- check (otherwise unselect, so clearGroup is enough)
@@ -262,7 +262,7 @@ route_Server <- function(id, r, path) {
                                     addStartEnd = TRUE)
             
             # -- add fight route
-            r$proxymap %>%
+            r[[map_proxy]] %>%
               addPolylines(data = route, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
             
             
@@ -278,7 +278,7 @@ route_Server <- function(id, r, path) {
                                 lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
             
             # -- add sea route
-            r$proxymap %>%
+            r[[map_proxy]] %>%
               addPolylines(lng = route$lng, lat = route$lat, group = group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
             
           }
@@ -376,7 +376,7 @@ route_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-      hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
+      hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
   })
 }

@@ -14,7 +14,7 @@ library(future)
 # Server logic
 # -------------------------------------
 
-country_Server <- function(id, r, path) {
+country_Server <- function(id, r, path, map_proxy) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -26,7 +26,7 @@ country_Server <- function(id, r, path) {
     
     # -- ids
     group_id <- "countries"
-    
+
     
     # -------------------------------------
     # Init
@@ -130,7 +130,7 @@ country_Server <- function(id, r, path) {
         selected_geojson <- geojson_data()[geojson_data()@data$ISO_A3 %in% selected_countries, ]
 
         # -- update map
-        r$proxymap %>%
+        r[[map_proxy]] %>%
 
           # -- cleanup
           clearGroup("countries") %>%
@@ -155,7 +155,7 @@ country_Server <- function(id, r, path) {
         updateCheckboxInput(inputId = "hide_show", label = "Show visited countries.")
         
       # -- hide group                 
-      hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show)
+      hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show)
       
     }, ignoreInit = TRUE)
     

@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path) {
+location_Server <- function(id, r, path, map_proxy) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -156,7 +156,7 @@ location_Server <- function(id, r, path) {
       lat <- r$map_click()[['lat']]
       
       # -- display popup
-      r$proxymap %>% 
+      r[[map_proxy]] %>% 
         clearPopups() %>%
         addPopups(lng, lat, 
                   paste("Longitude:", round(lng, digits = coord_digits), br(),
@@ -257,7 +257,7 @@ location_Server <- function(id, r, path) {
       removeModal()
       
       # -- clear popup
-      r$proxymap %>% 
+      r[[map_proxy]] %>% 
         clearPopups()
       
       # -- build values
@@ -327,7 +327,7 @@ location_Server <- function(id, r, path) {
         locations$popup <- location_popups(locations, type = 'selected', activity = r$activity(), ns = ns)
         
         # -- update map (proxy)
-        r$proxymap %>%
+        r[[map_proxy]] %>%
           
           # -- cleanup
           clearGroup(group_id) %>%
@@ -359,7 +359,7 @@ location_Server <- function(id, r, path) {
     
     # -- Observe checkbox
     observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show), ignoreInit = TRUE)
+                 hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
     
     # -------------------------------------
@@ -590,7 +590,7 @@ location_Server <- function(id, r, path) {
           groups <- unique(locations$type)
           
           # -- add markers
-          r$proxymap %>%
+          r[[map_proxy]] %>%
             clearGroup(cache_groups()) %>%
             # -- Add markers
             addAwesomeMarkers(data = locations,
@@ -616,7 +616,7 @@ location_Server <- function(id, r, path) {
         cat("[location] Clear contuextual locations \n")
         
         # -- clear markers
-        r$proxymap %>%
+        r[[map_proxy]] %>%
           clearGroup(cache_groups())
         
       }
