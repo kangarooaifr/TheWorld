@@ -27,13 +27,14 @@ map_Server <- function(id, r, verbose = TRUE) {
     # -- declare names
     map_proxy <- paste0(id, "_proxy")
     map_click <- paste0(id, "_click")
+    map_center <- paste0(id, "_center")
     
     # -- declare map connectors
     r[[map_proxy]] <- NULL
     r[[map_click]] <- NULL
+    r[[map_center]] <- NULL
     
     # -- declare map connectors
-    r$map_center <- NULL
     r$map_bounds <- NULL
     r$map_zoom <- NULL
     
@@ -93,7 +94,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map center
-    r$map_center <- reactive({
+    r[[map_center]] <- reactive({
       
       # -- check
       req(input$map_center)
