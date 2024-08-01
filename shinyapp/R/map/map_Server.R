@@ -31,6 +31,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
     filter_country_choices <- paste0(id, "_country_choices")
+    filter_country <- paste0(id, "_country")
     
     # -- declare connectors
     r[[map_proxy]] <- NULL
@@ -38,12 +39,10 @@ map_Server <- function(id, r, verbose = TRUE) {
     r[[map_center]] <- NULL
     r[[map_bounds]] <- NULL
     r[[map_zoom]] <- NULL
+    r[[filter_country]] <- NULL
     
     # -- declare triggers
     r[[filter_country_choices]] <- NULL
-    
-    # -- other connectors
-    r$filter_country <- NULL
     
     # -- declare triggers
     r$map_crop <- NULL
@@ -237,8 +236,8 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: country filter
-    # init & reset = "" / test with if(nchar(r$filter_country) == 0)
-    r$filter_country <- reactive(input$filter_country)
+    # init & reset = "" / test with if(nchar(r[[filter_country]]) == 0)
+    r[[filter_country]] <- reactive(input$filter_country)
     
     
     # -- Observe: reset filter btn

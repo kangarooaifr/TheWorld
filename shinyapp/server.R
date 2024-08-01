@@ -50,10 +50,10 @@ shinyServer(
     # -- locations
     location_Server(id = "locationmngr", r = r, path = path, 
                     map_proxy = 'map_proxy', map_click = 'map_click', map_bounds = 'map_bounds', map_zoom = 'map_zoom',
-                    filter_country_choices = 'map_country_choices')
+                    filter_country_choices = 'map_country_choices', filter_country = 'map_country')
     
     # -- countries
-    country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy')
+    country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy', filter_country = 'map_country')
     
     # -- transports
     route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')

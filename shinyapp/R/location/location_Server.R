@@ -4,7 +4,8 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, filter_country_choices) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, 
+                            filter_country_choices, filter_country) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -300,9 +301,9 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
       locations <- r[[r_items]]()
       
       # -- filter by country
-      if(!is.null(r$filter_country())){
-        locations <- locations[locations$country %in% r$filter_country(), ]
-        cat("-- apply country filter, value =", r$filter_country(), "\n")}
+      if(!is.null(r[[filter_country]]())){
+        locations <- locations[locations$country %in% r[[filter_country]](), ]
+        cat("-- apply country filter, value =", r[[filter_country]](), "\n")}
 
       # -- store
       cat("-- selected locations, output dim =", dim(locations)[1], "obs. \n")

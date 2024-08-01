@@ -14,7 +14,7 @@ library(future)
 # Server logic
 # -------------------------------------
 
-country_Server <- function(id, r, path, map_proxy) {
+country_Server <- function(id, r, path, map_proxy, filter_country) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -109,7 +109,7 @@ country_Server <- function(id, r, path, map_proxy) {
     observeEvent({
       geojson_data()
       r$visited_countries()
-      r$filter_country()}, {
+      r[[filter_country]]()}, {
 
         # -- because ignoreNULL = FALSE
         # need to wait for async data to be ready
@@ -119,8 +119,8 @@ country_Server <- function(id, r, path, map_proxy) {
         selected_countries <- r$visited_countries()
         
         # -- apply filter
-        if(!is.null(r$filter_country()))
-          selected_countries <- selected_countries[selected_countries %in% r$filter_country()]
+        if(!is.null(r[[filter_country]]()))
+          selected_countries <- selected_countries[selected_countries %in% r[[filter_country]]()]
         
         # -- switch to country code
         # WARNING! the column name is switched to X3digits.code upon reading the file

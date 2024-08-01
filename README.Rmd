@@ -38,7 +38,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #### Event Observers
 
 - r$visited_countries: event updates country boundaries
-- r$filter_country: event applies filter on the selected countries
+- r[[filter_country]]: event applies filter on the selected countries
 
 #### Other dependencies
 
