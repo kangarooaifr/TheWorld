@@ -28,14 +28,15 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_proxy <- paste0(id, "_proxy")
     map_click <- paste0(id, "_click")
     map_center <- paste0(id, "_center")
+    map_bounds <- paste0(id, "_bounds")
     
     # -- declare map connectors
     r[[map_proxy]] <- NULL
     r[[map_click]] <- NULL
     r[[map_center]] <- NULL
+    r[[map_bounds]] <- NULL
     
     # -- declare map connectors
-    r$map_bounds <- NULL
     r$map_zoom <- NULL
     
     # -- other connectors
@@ -110,7 +111,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map bounds
-    r$map_bounds <- reactive({
+    r[[map_bounds]] <- reactive({
       
       # -- check
       req(input$map_bounds)

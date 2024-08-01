@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -515,7 +515,7 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     
     # -- observe: bounds
     # Note: when zoom level is changed, bounds is updated (no need to observe)
-    observeEvent(r$map_bounds(), {
+    observeEvent(r[[map_bounds]](), {
       
       # -- check zoom level
       if(r$map_zoom() >= contextual_locations_level){
@@ -523,7 +523,7 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
         cat("[location] Update contextual locations \n")
         
         # -- init
-        bounds <- r$map_bounds()
+        bounds <- r[[map_bounds]]()
         
         # -- get locations
         # -------------------------------------
