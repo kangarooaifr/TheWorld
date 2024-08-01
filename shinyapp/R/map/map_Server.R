@@ -24,14 +24,17 @@ map_Server <- function(id, r, verbose = TRUE) {
     # Communication objects
     # --------------------------------------------------------------------------
     
-    # -- declare names
+    # -- declare map names
     map_proxy <- paste0(id, "_proxy")
     map_click <- paste0(id, "_click")
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
-    filter_country_choices <- paste0(id, "_country_choices")
+    map_crop <- paste0(id, "_crop")
+    
+    # -- declare input names
     filter_country <- paste0(id, "_country")
+    filter_country_choices <- paste0(id, "_country_choices")
     
     # -- declare connectors
     r[[map_proxy]] <- NULL
@@ -45,7 +48,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     r[[filter_country_choices]] <- NULL
     
     # -- declare triggers
-    r$map_crop <- NULL
+    r[[map_crop]] <- NULL
     r$map_flyto <- NULL
     
     
@@ -147,20 +150,20 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     # Trigger: map_crop
     # --------------------------------------------------------------------------
-    # r$map_crop = list(lng_min, lat_min, lng_max, lat_max)
+    # r[[map_crop]] = list(lng_min, lat_min, lng_max, lat_max)
     
     # -- observe trigger
-    observeEvent(r$map_crop, {
+    observeEvent(r[[map_crop]], {
       
       # -- check setting
       req(!input$map_freeze)
       
       # -- crop view
       r[[map_proxy]] %>%
-        flyToBounds(lng1 = r$map_crop$lng_min, 
-                    lat1 = r$map_crop$lat_min, 
-                    lng2 = r$map_crop$lng_max, 
-                    lat2 = r$map_crop$lat_max, 
+        flyToBounds(lng1 = r[[map_crop]]$lng_min, 
+                    lat1 = r[[map_crop]]$lat_min, 
+                    lng2 = r[[map_crop]]$lng_max, 
+                    lat2 = r[[map_crop]]$lat_max, 
                     options = list(duration = fly_duration, 
                                    padding = c(fly_padding, fly_padding)))
       

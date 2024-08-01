@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, 
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, map_crop,
                             filter_country_choices, filter_country) {
   moduleServer(id, function(input, output, session) {
     
@@ -344,10 +344,10 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
                             clusterOptions = NULL)
         
         # -- call trigger (fit map to bounding box)
-        r$map_crop <- list(lng_min = min(locations$lng), 
-                           lat_min = min(locations$lat),
-                           lng_max = max(locations$lng), 
-                           lat_max = max(locations$lat))
+        r[[map_crop]] <- list(lng_min = min(locations$lng), 
+                              lat_min = min(locations$lat),
+                              lng_max = max(locations$lng), 
+                              lat_max = max(locations$lat))
         
       }
       
