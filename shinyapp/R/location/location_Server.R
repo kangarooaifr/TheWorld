@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, filter_country_choices) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -139,7 +139,7 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
     # -------------------------------------
     
     # -- Update filter choices
-    r$filter_country_choices <- reactive(sort(unique(r[[r_items]]()$country)))
+    r[[filter_country_choices]] <- reactive(sort(unique(r[[r_items]]()$country)))
     
     
     # -------------------------------------

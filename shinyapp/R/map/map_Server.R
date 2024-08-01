@@ -30,19 +30,22 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
+    filter_country_choices <- paste0(id, "_country_choices")
     
-    # -- declare map connectors
+    # -- declare connectors
     r[[map_proxy]] <- NULL
     r[[map_click]] <- NULL
     r[[map_center]] <- NULL
     r[[map_bounds]] <- NULL
     r[[map_zoom]] <- NULL
     
+    # -- declare triggers
+    r[[filter_country_choices]] <- NULL
+    
     # -- other connectors
-    r$filter_country_choices <- NULL
     r$filter_country <- NULL
     
-    # -- map triggers
+    # -- declare triggers
     r$map_crop <- NULL
     r$map_flyto <- NULL
     
@@ -225,10 +228,10 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- Trigger: set country filter choices
-    observeEvent(r$filter_country_choices(), {
+    observeEvent(r[[filter_country_choices]](), {
       
       # -- update choices
-      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices())
+      updateSelectizeInput(inputId = "filter_country", choices = r[[filter_country_choices]]())
       
     })
     
