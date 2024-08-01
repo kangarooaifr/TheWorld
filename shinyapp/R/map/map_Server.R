@@ -29,15 +29,14 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_click <- paste0(id, "_click")
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
+    map_zoom <- paste0(id, "_zoom")
     
     # -- declare map connectors
     r[[map_proxy]] <- NULL
     r[[map_click]] <- NULL
     r[[map_center]] <- NULL
     r[[map_bounds]] <- NULL
-    
-    # -- declare map connectors
-    r$map_zoom <- NULL
+    r[[map_zoom]] <- NULL
     
     # -- other connectors
     r$filter_country_choices <- NULL
@@ -128,7 +127,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map zoom
-    r$map_zoom <- reactive({
+    r[[map_zoom]] <- reactive({
       
       # -- check
       req(input$map_zoom)

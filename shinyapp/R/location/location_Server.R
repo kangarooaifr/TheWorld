@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -518,7 +518,7 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds) {
     observeEvent(r[[map_bounds]](), {
       
       # -- check zoom level
-      if(r$map_zoom() >= contextual_locations_level){
+      if(r[[map_zoom]]() >= contextual_locations_level){
         
         cat("[location] Update contextual locations \n")
         
@@ -546,7 +546,7 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds) {
         # -- get railway_stations
         # -------------------------------------
         # Note: only if zoom level > setting
-        if(r$map_zoom() >= railway_stations_level){
+        if(r[[map_zoom]]() >= railway_stations_level){
           
           railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
           railway_stations <- bounding_box(railway_stations, bounds)
@@ -561,7 +561,7 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds) {
         # -- get bus_stations
         # -------------------------------------
         # Note: only if zoom level > setting
-        if(r$map_zoom() >= bus_stations_level){
+        if(r[[map_zoom]]() >= bus_stations_level){
           
           bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
           bus_stations <- bounding_box(bus_stations, bounds)
