@@ -13,6 +13,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- trace
     MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting map module server... \n")
     
     # -- fly to settings
     fly_duration <- 1.0
@@ -46,7 +47,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     r[[filter_country]] <- NULL
     
     # -- declare triggers
-    r[[filter_country_choices]] <- NULL
+    r[[filter_country_choices]] <- reactiveVal(NULL) # to avoid crash if not set in another module
     r[[map_crop]] <- NULL
     r[[map_flyto]] <- NULL
     
@@ -57,6 +58,8 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- Declare the map output
     output$map <- renderLeaflet({
+      
+      cat(MODULE, "Generate leaflet output \n")
       
       leaflet() %>%
         
@@ -69,7 +72,7 @@ map_Server <- function(id, r, verbose = TRUE) {
         
         # -- Add National Geographic
         # TODO: set as optional parameters when calling module
-        #addProviderTiles(providers$Stamen.Watercolor)
+        # addProviderTiles(providers$Stamen.Watercolor)
       
     })
     
@@ -157,6 +160,10 @@ map_Server <- function(id, r, verbose = TRUE) {
       # -- check setting
       req(!input$map_freeze)
       
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Trigger map_crop, applying flyToBounds \n")
+      
       # -- crop view
       r[[map_proxy]] %>%
         flyToBounds(lng1 = r[[map_crop]]$lng_min, 
@@ -179,6 +186,10 @@ map_Server <- function(id, r, verbose = TRUE) {
       
       # -- check setting
       req(!input$map_freeze)
+      
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Trigger map_flyto, applying flyTo \n")
       
       # -- crop view
       r[[map_proxy]] %>%
