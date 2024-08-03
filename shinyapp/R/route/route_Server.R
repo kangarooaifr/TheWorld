@@ -213,10 +213,10 @@ route_Server <- function(id, r, path, map_proxy) {
     
     # -- observe: activity tab
     observeEvent(r$activity(), {
-      
+
       if(r$activity() == "world_map")
         r$route_select <- numeric(0)
-      
+
     }, ignoreInit = TRUE)
     
     

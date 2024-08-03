@@ -6,9 +6,9 @@
 
 # -- Define sidebar
 sidebar <- dashboardSidebar(
-  sidebarMenu(
-    menuItem("World map", tabName = "worldmap", icon = icon("earth-americas"), selected = TRUE),
-    menuItem("Trip planner", tabName = "tripplanner", icon = icon("earth-americas"))),
+  sidebarMenu(id = "selected_tab",
+    menuItem("World map", tabName = "world_map", icon = icon("earth-americas"), selected = TRUE),
+    menuItem("Trip planner", tabName = "trip_planner", icon = icon("earth-americas"))),
   
   # -- Add dynamic section
   sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -31,7 +31,7 @@ body <- dashboardBody(
     # --------------------------------------------------------------------------
     
     # -- World map
-    tabItem(tabName = "worldmap",
+    tabItem(tabName = "world_map",
             
             fluidRow(
               
@@ -41,25 +41,11 @@ body <- dashboardBody(
                      # -- search
                      search_Input("map"),
                      
-                     # -- main
-                     tabsetPanel(id = "selected_tab",
-                              
-                                 # -- world map tab
-                                 tabPanel("World map", value = "world_map",
-                                          country_INPUT("map"),
-                                          location_panel_UI("locationmngr"),
-                                          # -- Commented #90
-                                          # Keep until moved to a different code location
-                                          route_UI("routemngr"),
-                                          country_UI("country"),
-                                          # -- Commented #91
-                                          # Keep until moved to a different code location
-                                          # track_UI("track")
-                                          ),
-                                 
-                                 # -- trip planner tab
-                                 tabPanel("Trip planner", value = "trip_planner",
-                                          trip_panel_UI("tripmngr")))),
+                     # -- locations & countries
+                     country_INPUT("map"),
+                     location_panel_UI("locationmngr"),
+                     country_UI("country")),
+                     
               
               # -- main area (map)
               column(width = 9,
@@ -72,7 +58,7 @@ body <- dashboardBody(
     # --------------------------------------------------------------------------
     
     # -- main
-    tabItem(tabName = "tripplanner",
+    tabItem(tabName = "trip_planner",
             
             fluidRow(
               
@@ -80,7 +66,13 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     search_Input("xxx")),
+                     search_Input("xxx"),
+                     trip_panel_UI("tripmngr"),
+                     
+                     #route_UI("routemngr"),
+                     # track_UI("track")
+                     ),
+              
                      
               # -- main area (xxx)
               column(width = 9,
