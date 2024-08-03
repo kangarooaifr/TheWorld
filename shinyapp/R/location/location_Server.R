@@ -300,6 +300,9 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
       cat("[location] World map, select locations: \n")
       locations <- r[[r_items]]()
       
+      # -- keep only type = city
+      locations <- locations[locations$type == "city", ]
+      
       # -- filter by country
       if(!is.null(r[[filter_country]]())){
         locations <- locations[locations$country %in% r[[filter_country]](), ]
@@ -439,6 +442,13 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
       
     })
 
+    
+    # -------------------------------------
+    # save for later
+    # To dynamically switch from a tabItem to another:
+    # updateTabItems(session, "inTabset", selected = "widgets")
+    # -------------------------------------
+    
     
     # -------------------------------------
     # Search
