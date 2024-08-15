@@ -16,9 +16,9 @@ map_Server <- function(id, r, verbose = TRUE) {
     cat(MODULE, "Starting map module server... \n")
     
     # -- fly to settings
-    fly_duration <- 1.0
-    fly_padding <- 50
-    fly_zoom <- 12
+    fly_duration <<- 1.0
+    fly_padding <<- 50
+    fly_zoom <<- 12
     
     
     # --------------------------------------------------------------------------
@@ -31,7 +31,6 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
-    map_crop <- paste0(id, "_crop")
     map_flyto <- paste0(id, "_flyto")
     
     # -- declare connectors
@@ -42,7 +41,6 @@ map_Server <- function(id, r, verbose = TRUE) {
     r[[map_zoom]] <- NULL
     
     # -- declare triggers
-    r[[map_crop]] <- NULL
     r[[map_flyto]] <- NULL
     
     
@@ -139,33 +137,6 @@ map_Server <- function(id, r, verbose = TRUE) {
       
       # -- return
       input$map_zoom
-      
-    })
-    
-    
-    # --------------------------------------------------------------------------
-    # Trigger: map_crop
-    # --------------------------------------------------------------------------
-    # r[[map_crop]] = list(lng_min, lat_min, lng_max, lat_max)
-    
-    # -- observe trigger
-    observeEvent(r[[map_crop]], {
-
-      # -- check setting
-      req(!input$map_freeze)
-      
-      # -- trace
-      if(verbose)
-        cat(MODULE, "Trigger map_crop, applying flyToBounds \n")
-      
-      # -- crop view
-      r[[map_proxy]] %>%
-        flyToBounds(lng1 = r[[map_crop]]$lng_min, 
-                    lat1 = r[[map_crop]]$lat_min, 
-                    lng2 = r[[map_crop]]$lng_max, 
-                    lat2 = r[[map_crop]]$lat_max, 
-                    options = list(duration = fly_duration, 
-                                   padding = c(fly_padding, fly_padding)))
       
     })
     

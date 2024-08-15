@@ -103,6 +103,15 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
       # -- display on map
       add_markers(locations, map_proxy = r[[map_proxy]], group_id = "cities", icons = icons)
       
+      # -- crop map around markers
+      map_crop(map_proxy = r[[map_proxy]], 
+               lng1 = min(locations$lng), 
+               lat1 = min(locations$lat), 
+               lng2 = max(locations$lng),
+               lat2 = max(locations$lat), 
+               fly_duration, 
+               fly_padding)
+      
     }) %>% bindEvent(filtered_locations())
       
 
