@@ -8,7 +8,6 @@ country_INPUT <- function(id){
   
   # -- ui
   tagList(
-    #div(style="display: inline-block", actionButton(inputId = ns("filter_country_reset"), label = "Reset filter")),
     div(style="display: inline-block", selectizeInput(inputId = ns("filter_country"), 
                                                       label = "Country", 
                                                       choices = NULL,
