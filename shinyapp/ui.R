@@ -39,18 +39,18 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     search_Input("map"),
+                     search_Input("world"),
                      
                      # -- locations & countries
-                     country_INPUT("map"),
+                     country_INPUT("worldmap"),
                      location_panel_UI("locationmngr"),
                      country_UI("country")),
                      
               
               # -- main area (map)
               column(width = 9,
-                     freeze_INPUT("map"),
-                     map_UI("map")))),
+                     freeze_INPUT("world"),
+                     map_UI("world")))),
     
     
     # --------------------------------------------------------------------------
