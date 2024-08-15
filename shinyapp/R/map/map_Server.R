@@ -34,20 +34,14 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_crop <- paste0(id, "_crop")
     map_flyto <- paste0(id, "_flyto")
     
-    # -- declare input names
-    filter_country <- paste0(id, "_country")
-    filter_country_choices <- paste0(id, "_country_choices")
-    
     # -- declare connectors
     r[[map_proxy]] <- NULL
     r[[map_click]] <- NULL
     r[[map_center]] <- NULL
     r[[map_bounds]] <- NULL
     r[[map_zoom]] <- NULL
-    r[[filter_country]] <- NULL
     
     # -- declare triggers
-    r[[filter_country_choices]] <- reactiveVal(NULL) # to avoid crash if not set in another module
     r[[map_crop]] <- NULL
     r[[map_flyto]] <- NULL
     
@@ -156,7 +150,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- observe trigger
     observeEvent(r[[map_crop]], {
-      
+
       # -- check setting
       req(!input$map_freeze)
       
@@ -234,34 +228,6 @@ map_Server <- function(id, r, verbose = TRUE) {
       
     })
     
-    
-    # --------------------------------------------------------------------------
-    # Filters
-    # --------------------------------------------------------------------------
-    
-    # -- Trigger: set country filter choices
-    observeEvent(r[[filter_country_choices]](), {
-      
-      # -- update choices
-      updateSelectizeInput(inputId = "filter_country", choices = r[[filter_country_choices]]())
-      
-    })
-    
-    
-    # -- Connector: country filter
-    # init & reset = "" / test with if(nchar(r[[filter_country]]) == 0)
-    r[[filter_country]] <- reactive(input$filter_country)
-    
-    
-    # -- Observe: reset filter btn
-    observeEvent(input$filter_country_reset, {
-      
-      cat(MODULE, "[TRIGGER] Reset filter country \n")
-      
-      # -- update filter
-      updateSelectizeInput(inputId = "filter_country", selected = character(0))
-      
-    })
-    
+
   })
 }
