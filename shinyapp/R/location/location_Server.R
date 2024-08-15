@@ -505,7 +505,7 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
           
           # -- Add icon & popup columns
           locations <- location_icon(locations)
-          locations$popup <- location_popups(locations, type = 'contextual', activity = r$activity(), ns)
+          locations$popup <- location_popups(locations, type = 'contextual', activity = 'world_map', ns)
           
           # -- Get groups
           groups <- unique(locations$type)

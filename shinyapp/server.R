@@ -15,21 +15,18 @@ shinyServer(
     # -- declare object
     r <- reactiveValues()
     
-    # -- declare connectors
-    r$activity <- NULL
-    
     
     # --------------------------------------------------------------------------
     # Selected tab
     # --------------------------------------------------------------------------
     
     # -- Observe
-    r$activity <- reactive({
-      
-      cat("[EVENT] Selected activity =", input$selected_tab, "\n")
-      input$selected_tab
-      
-    })
+    # r$activity <- reactive({
+    #   
+    #   cat("[EVENT] Selected activity =", input$selected_tab, "\n")
+    #   input$selected_tab
+    #   
+    # })
     
     
     # --------------------------------------------------------------------------
@@ -45,26 +42,28 @@ shinyServer(
     # --------------------------------------------------------------------------
     
     # -- the map
-    map_Server(id = "map", r = r, verbose = TRUE)
-    map_Server(id = "xxx", r = r, verbose = TRUE)
+    map_Server(id = "world", r = r, verbose = TRUE)
+    map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
     location_Server(id = "locationmngr", r = r, path = path,
-                    map_proxy = 'map_proxy', map_click = 'map_click', map_bounds = 'map_bounds', map_zoom = 'map_zoom',
-                    map_crop = 'map_crop',
-                    filter_country_choices = 'map_country_choices', filter_country = 'map_country')
+                    map_proxy = 'world_proxy', map_click = 'world_click', map_bounds = 'world_bounds', map_zoom = 'world_zoom',
+                    map_crop = 'world_crop')
     
     # -- countries
-    country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy', filter_country = 'map_country')
+    #country_Server(id = "country", r = r, path = path, map_proxy = 'map_proxy', filter_country = 'map_country')
     
     # -- transports
-    route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')
+    #route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- tracks
-    track_Server(id = "track", r = r, path = path, map_proxy = 'map_proxy')
+    #track_Server(id = "track", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')
+    #trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')
+    
+    # -- worldmap
+    worldmap_Server(id = "worldmap", r = r, location_id = "location", map_proxy = 'world_proxy')
     
     
     # --------------------------------------------------------------------------
