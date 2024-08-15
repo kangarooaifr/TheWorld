@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, map_crop) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
