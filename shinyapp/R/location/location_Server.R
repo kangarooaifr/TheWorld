@@ -4,8 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, map_crop,
-                            filter_country_choices, filter_country) {
+location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_zoom, map_crop) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -37,9 +36,6 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
     
     # -- Internal caches
     cache_groups <- reactiveVal(NULL)
-    
-    # -- icon set
-    icons <- location_icons()
     
     
     # -------------------------------------
@@ -124,23 +120,6 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
     # -- filter & expose connector
     cat("[location] Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
     r$stations <-  stations[!is.na(stations$lng), ]
-    
-    
-    # -------------------------------------
-    # Connector: visited_countries
-    # -------------------------------------
-    
-    # -- expose as reactive
-    r$visited_countries <- reactive(
-      unique(r[[r_items]]()[r[[r_items]]()$been.there, 'country']))
-    
-    
-    # -------------------------------------
-    # Filter: country (choices)
-    # -------------------------------------
-    
-    # -- Update filter choices
-    r[[filter_country_choices]] <- reactive(sort(unique(r[[r_items]]()$country)))
     
     
     # -------------------------------------
@@ -283,78 +262,9 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
       r[[r_trigger_add]](item)
       
     })
-    
-    
-    # -------------------------------------
-    # Activity: world map
-    # -------------------------------------
-    
-    # -- Observe: items, activity, filter (country)
-    # define r$selected_locations
-    obsA <- observe({
-      
-      # -- Run only when activity = world_map
-      req(r$activity() == "world_map")
-      
-      # -- init
-      cat("[location] World map, select locations: \n")
-      locations <- r[[r_items]]()
-      
-      # -- keep only type = city
-      locations <- locations[locations$type == "city", ]
-      
-      # -- filter by country
-      if(!is.null(r[[filter_country]]())){
-        locations <- locations[locations$country %in% r[[filter_country]](), ]
-        cat("-- apply country filter, value =", r[[filter_country]](), "\n")}
-
-      # -- store
-      cat("-- selected locations, output dim =", dim(locations)[1], "obs. \n")
-      r$selected_locations <- locations
-      
-    })
 
     
-    # -------------------------------------
     
-    # -- Observe: display button
-    observeEvent(r$selected_locations, {
-      
-      # -- init
-      locations <- r$selected_locations
-
-      # -- check dim
-      if(dim(locations)[1] > 0){
-        
-        # -- add icon & popup columns
-        locations <- location_icon(locations)
-        locations$popup <- location_popups(locations, type = 'selected', activity = r$activity(), ns = ns)
-        
-        # -- update map (proxy)
-        r[[map_proxy]] %>%
-          
-          # -- cleanup
-          clearGroup(group_id) %>%
-          
-          # -- Add markers
-          addAwesomeMarkers(data = locations,
-                            lng = ~lng,
-                            lat = ~lat,
-                            group = group_id,
-                            icon = ~icons[icon],
-                            label = ~name,
-                            popup = ~popup,
-                            clusterOptions = NULL)
-        
-        # -- call trigger (fit map to bounding box)
-        r[[map_crop]] <- list(lng_min = min(locations$lng), 
-                              lat_min = min(locations$lat),
-                              lng_max = max(locations$lng), 
-                              lat_max = max(locations$lat))
-        
-      }
-      
-    }, ignoreNULL = FALSE)
     
     
     # -------------------------------------
