@@ -15,7 +15,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #### Connectors
 
--   r\$filter_country_choices: vector, country names from the (unfiltered) location items
 -   r\$airports: data.frame, data about airports
 -   r\$visited_countries: reactive, vector containing the list of visited countries (been.there == TRUE)
 
