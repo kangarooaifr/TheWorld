@@ -117,10 +117,16 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
                                   colClasses = colClasses_stations,
                                   create = FALSE)
     
-    # -- filter & expose connector
+    # -- filter out locations without gps coordinate (lng)
     cat("[location] Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
-    r$stations <-  stations[!is.na(stations$lng), ]
+    stations <-  stations[!is.na(stations$lng), ]
     
+    # -- expose railway stations
+    r$railway_stations <- stations[!stations$is_rail %in% FALSE, ]
+    
+    # -- expose bus stations
+    r$bus_stations <- stations[stations$is_road %in% TRUE, ]
+
     
     # -------------------------------------
     # [EVENT] Map click
@@ -436,113 +442,113 @@ location_Server <- function(id, r, path, map_proxy, map_click, map_bounds, map_z
     
     # -- observe: bounds
     # Note: when zoom level is changed, bounds is updated (no need to observe)
-    observeEvent(r[[map_bounds]](), {
-      
-      # -- check zoom level
-      if(r[[map_zoom]]() >= contextual_locations_level){
-        
-        cat("[location] Update contextual locations \n")
-        
-        # -- init
-        bounds <- r[[map_bounds]]()
-        
-        # -- get locations
-        # -------------------------------------
-        locations <- r[[r_items]]()
-        locations <- bounding_box(locations, bounds)
-        
-        
-        # -- get airports
-        # -------------------------------------
-        airports <- r$airports
-        airports <- bounding_box(airports, bounds)
-        
-        # -- turn airports into locations & merge
-        if(dim(airports)[1] > 0){
-          
-          airports <- airport_to_location(airports)
-          locations <- rbind(locations, airports)}
-        
-        
-        # -- get railway_stations
-        # -------------------------------------
-        # Note: only if zoom level > setting
-        if(r[[map_zoom]]() >= railway_stations_level){
-          
-          railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
-          railway_stations <- bounding_box(railway_stations, bounds)
-          
-          # -- turn railway stations into locations & merge
-          if(dim(railway_stations)[1] > 0){
-            
-            railway_stations <- railway_to_location(railway_stations)
-            locations <- rbind(locations, railway_stations)}}
-        
-        
-        # -- get bus_stations
-        # -------------------------------------
-        # Note: only if zoom level > setting
-        if(r[[map_zoom]]() >= bus_stations_level){
-          
-          bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
-          bus_stations <- bounding_box(bus_stations, bounds)
-          
-          # -- turn bus stations into locations & merge
-          if(dim(bus_stations)[1] > 0){
-            
-            bus_stations <- bus_to_location(bus_stations)
-            locations <- rbind(locations, bus_stations)}}
-
-        
-        # -- End get locations
-        # -------------------------------------
-        
-        # -- Remove locations already in r$selected_locations
-        locations <- locations[!locations$id %in% r$selected_locations$id, ]
-        
-        # -- Check & add locations
-        if(dim(locations)[1] > 0){
-          
-          # -- Add icon & popup columns
-          locations <- location_icon(locations)
-          locations$popup <- location_popups(locations, type = 'contextual', activity = 'world_map', ns)
-          
-          # -- Get groups
-          groups <- unique(locations$type)
-          
-          # -- add markers
-          r[[map_proxy]] %>%
-            clearGroup(cache_groups()) %>%
-            # -- Add markers
-            addAwesomeMarkers(data = locations,
-                              lng = ~lng,
-                              lat = ~lat,
-                              group = ~type,
-                              icon = ~icons[icon],
-                              label = ~name,
-                              popup = ~popup,
-                              clusterOptions = NULL) %>%
-            
-            # -- Map overlay checkbox (hide / show groups)
-            addLayersControl(
-              overlayGroups = groups)
-          
-          # -- store groups in cache
-          cache_groups(groups)
-          
-        }
-        
-      } else {
-        
-        cat("[location] Clear contuextual locations \n")
-        
-        # -- clear markers
-        r[[map_proxy]] %>%
-          clearGroup(cache_groups())
-        
-      }
-      
-    }, ignoreInit = TRUE)
+    # observeEvent(r[[map_bounds]](), {
+    #   
+    #   # -- check zoom level
+    #   if(r[[map_zoom]]() >= contextual_locations_level){
+    #     
+    #     cat("[location] Update contextual locations \n")
+    #     
+    #     # -- init
+    #     bounds <- r[[map_bounds]]()
+    #     
+    #     # -- get locations
+    #     # -------------------------------------
+    #     locations <- r[[r_items]]()
+    #     locations <- bounding_box(locations, bounds)
+    #     
+    #     
+    #     # -- get airports
+    #     # -------------------------------------
+    #     airports <- r$airports
+    #     airports <- bounding_box(airports, bounds)
+    #     
+    #     # -- turn airports into locations & merge
+    #     if(dim(airports)[1] > 0){
+    #       
+    #       airports <- airport_to_location(airports)
+    #       locations <- rbind(locations, airports)}
+    #     
+    #     
+    #     # -- get railway_stations
+    #     # -------------------------------------
+    #     # Note: only if zoom level > setting
+    #     if(r[[map_zoom]]() >= railway_stations_level){
+    #       
+    #       railway_stations <- r$stations[!r$stations$is_rail %in% FALSE, ]
+    #       railway_stations <- bounding_box(railway_stations, bounds)
+    #       
+    #       # -- turn railway stations into locations & merge
+    #       if(dim(railway_stations)[1] > 0){
+    #         
+    #         railway_stations <- railway_to_location(railway_stations)
+    #         locations <- rbind(locations, railway_stations)}}
+    #     
+    #     
+    #     # -- get bus_stations
+    #     # -------------------------------------
+    #     # Note: only if zoom level > setting
+    #     if(r[[map_zoom]]() >= bus_stations_level){
+    #       
+    #       bus_stations <- r$stations[r$stations$is_road %in% TRUE, ]
+    #       bus_stations <- bounding_box(bus_stations, bounds)
+    #       
+    #       # -- turn bus stations into locations & merge
+    #       if(dim(bus_stations)[1] > 0){
+    #         
+    #         bus_stations <- bus_to_location(bus_stations)
+    #         locations <- rbind(locations, bus_stations)}}
+    # 
+    #     
+    #     # -- End get locations
+    #     # -------------------------------------
+    #     
+    #     # -- Remove locations already in r$selected_locations
+    #     locations <- locations[!locations$id %in% r$selected_locations$id, ]
+    #     
+    #     # -- Check & add locations
+    #     if(dim(locations)[1] > 0){
+    #       
+    #       # -- Add icon & popup columns
+    #       locations <- location_icon(locations)
+    #       locations$popup <- location_popups(locations, type = 'contextual', activity = 'world_map', ns)
+    #       
+    #       # -- Get groups
+    #       groups <- unique(locations$type)
+    #       
+    #       # -- add markers
+    #       r[[map_proxy]] %>%
+    #         clearGroup(cache_groups()) %>%
+    #         # -- Add markers
+    #         addAwesomeMarkers(data = locations,
+    #                           lng = ~lng,
+    #                           lat = ~lat,
+    #                           group = ~type,
+    #                           icon = ~icons[icon],
+    #                           label = ~name,
+    #                           popup = ~popup,
+    #                           clusterOptions = NULL) %>%
+    #         
+    #         # -- Map overlay checkbox (hide / show groups)
+    #         addLayersControl(
+    #           overlayGroups = groups)
+    #       
+    #       # -- store groups in cache
+    #       cache_groups(groups)
+    #       
+    #     }
+    #     
+    #   } else {
+    #     
+    #     cat("[location] Clear contuextual locations \n")
+    #     
+    #     # -- clear markers
+    #     r[[map_proxy]] %>%
+    #       clearGroup(cache_groups())
+    #     
+    #   }
+    #   
+    # }, ignoreInit = TRUE)
     
   })
 }
