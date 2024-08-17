@@ -13,6 +13,11 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
     # -- trace
     MODULE <- paste0("[", id, "]")
     
+    # -- settings
+    contextual_locations_level <- 8
+    bus_stations_level <- 13
+    railway_stations_level <- 10
+    
     # -- items name
     r_location_items <- kitems::items_name(id = location_id)
     
@@ -21,6 +26,10 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
     filter_country <- paste0(id, "_country")
      
     r[[filter_country]] <- reactive(NULL)
+    
+    # -- map
+    map_bounds <- paste0("world", "_bounds")
+    map_zoom <- paste0("world", "_zoom")
     
     
     # -- marker icons
@@ -114,6 +123,56 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
       
     }) %>% bindEvent(filtered_locations())
       
+  
+    # --------------------------------------------------------------------------
+    # Listener: map_bounds
+    # --------------------------------------------------------------------------
+    
+    observe({
+
+      # -- check zoom level
+      if(r[[map_zoom]]() >= contextual_locations_level){
+
+        # -- init
+        railway_stations <- NULL
+        bus_stations <- NULL
+
+        # -- check setting
+        if(r[[map_zoom]]() >= railway_stations_level)
+          railway_stations <- r$railway_stations
+
+        # -- check setting
+        if(r[[map_zoom]]() >= bus_stations_level)
+          bus_stations <- r$bus_stations
+
+        # -- get contextual locations
+        locations <- contextual_locations(locations =  r[[r_location_items]](),
+                                          airports = r$airports,
+                                          railway_stations = railway_stations,
+                                          bus_stations = bus_stations,
+                                          bounds = r[[map_bounds]]())
+
+        # -- Remove locations already in filtered_locations
+        locations <- locations[!locations$id %in% filtered_locations()$id, ]
+        
+        # -- check dim
+        if(nrow(locations) > 0){
+          
+          # -- add icon & popup columns
+          locations <- location_icon(locations)
+          locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
+          
+          # -- display on map
+          add_markers(locations, map_proxy = r[[map_proxy]], group_id = "context", icons = icons)}
+
+      } else {
+
+        r[[map_proxy]] %>%
+          clearGroup("context")
+
+      }
+
+    }) %>% bindEvent(r[[map_bounds]]())
 
     
   })
