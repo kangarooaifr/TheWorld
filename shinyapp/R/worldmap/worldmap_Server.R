@@ -125,7 +125,7 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
       
   
     # --------------------------------------------------------------------------
-    # Listener: map_bounds
+    # Contextual locations (observe map_bounds)
     # --------------------------------------------------------------------------
     
     observe({
