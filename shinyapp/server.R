@@ -62,7 +62,7 @@ shinyServer(
     #trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')
     
     # -- worldmap
-    worldmap_Server(id = "worldmap", r = r, location_id = "location", map_proxy = 'world_proxy')
+    worldmap_Server(id = "worldmap", r = r, location_id = "location", map_id = "world")
     
     
     # --------------------------------------------------------------------------

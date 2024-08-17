@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, r, location_id, map_proxy) {
+worldmap_Server <- function(id, r, location_id, map_id) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -28,8 +28,9 @@ worldmap_Server <- function(id, r, location_id, map_proxy) {
     r[[filter_country]] <- reactive(NULL)
     
     # -- map
-    map_bounds <- paste0("world", "_bounds")
-    map_zoom <- paste0("world", "_zoom")
+    map_proxy <- paste0(map_id, "_proxy")
+    map_bounds <- paste0(map_id, "_bounds")
+    map_zoom <- paste0(map_id, "_zoom")
     
     
     # -- marker icons
