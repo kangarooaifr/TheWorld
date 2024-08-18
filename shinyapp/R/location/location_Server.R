@@ -16,10 +16,7 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     
     # -- settings
     coord_digits <- 3
-    contextual_locations_level <- 8
-    bus_stations_level <- 13
-    railway_stations_level <- 10
-    
+
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
     
