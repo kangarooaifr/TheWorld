@@ -111,7 +111,7 @@ worldmap_Server <- function(id, r, location_id, map_id) {
       locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
       
       # -- display on map
-      add_markers(locations, map_proxy = r[[map_proxy]], group_id = "cities", icons = icons)
+      add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
       
       # -- crop map around markers
       map_crop(map_proxy = r[[map_proxy]], 
@@ -163,8 +163,11 @@ worldmap_Server <- function(id, r, location_id, map_id) {
           locations <- location_icon(locations)
           locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
           
+          # -- Get groups
+          groups <- unique(locations$type)
+          
           # -- display on map
-          add_markers(locations, map_proxy = r[[map_proxy]], group_id = "context", icons = icons)}
+          add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)}
 
       } else {
 

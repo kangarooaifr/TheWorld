@@ -1,7 +1,7 @@
 
 
 # -- function definition
-add_markers <- function(locations, map_proxy, group_id, icons){
+add_markers <- function(locations, map_proxy, icons){
   
   cat("[wm_add_markers] Add markers to map \n")
   
@@ -9,20 +9,26 @@ add_markers <- function(locations, map_proxy, group_id, icons){
   if(dim(locations)[1] == 0)
     return(NULL)
   
+  # -- groups
+  groups <- unique(locations$type)
+  
   # -- update map (proxy)
   map_proxy %>%
     
     # -- cleanup
-    clearGroup(group_id) %>%
+    clearGroup(groups) %>%
     
     # -- Add markers
     addAwesomeMarkers(data = locations,
                       lng = ~lng,
                       lat = ~lat,
-                      group = group_id,
+                      group = ~type,
                       icon = ~icons[icon],
                       label = ~name,
                       popup = ~popup,
-                      clusterOptions = NULL)
+                      clusterOptions = NULL) %>%
+    
+    # -- Map overlay checkbox (hide / show groups)
+    addLayersControl(overlayGroups = groups)
   
 }
