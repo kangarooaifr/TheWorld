@@ -8,20 +8,15 @@ add_markers <- function(locations, map_proxy, icons){
   # -- check dim
   if(dim(locations)[1] == 0)
     return(NULL)
-  
-  # -- groups
-  groups <- unique(locations$type)
-  
+
   # -- update map (proxy)
   map_proxy %>%
-    
-    # -- cleanup
-    clearGroup(groups) %>%
     
     # -- Add markers
     addAwesomeMarkers(data = locations,
                       lng = ~lng,
                       lat = ~lat,
+                      layerId = ~as.character(id),
                       group = ~type,
                       icon = ~icons[icon],
                       label = ~name,
@@ -29,6 +24,6 @@ add_markers <- function(locations, map_proxy, icons){
                       clusterOptions = NULL) %>%
     
     # -- Map overlay checkbox (hide / show groups)
-    addLayersControl(overlayGroups = groups)
+    addLayersControl(overlayGroups = unique(locations$type))
   
 }

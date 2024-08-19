@@ -21,6 +21,8 @@ worldmap_Server <- function(id, r, location_id, map_id) {
     # -- items name
     r_location_items <- kitems::items_name(id = location_id)
     
+    # -- cache
+    cache_contextual <- reactiveVal(NULL)
     
     # -- declare input names
     filter_country <- paste0(id, "_country")
@@ -156,24 +158,39 @@ worldmap_Server <- function(id, r, location_id, map_id) {
         # -- Remove locations already in filtered_locations
         locations <- locations[!locations$id %in% filtered_locations()$id, ]
         
+        # -- Extract locations to remove & add
+        locations_to_remove <- cache_contextual()[!cache_contextual() %in% locations$id]
+        locations_to_add <- locations[!locations$id %in% cache_contextual(), ]
+        
+        # -- store in cache
+        cache_contextual(locations$id)
+        
+        # -- remove locations
+        if(!identical(locations_to_remove, numeric(0))){
+          
+          cat(MODULE, "Remove markers from map, nb =", length(locations_to_remove), "\n")
+          removeMarker(r[[map_proxy]], layerId = as.character(locations_to_remove))}
+        
         # -- check dim
-        if(nrow(locations) > 0){
+        if(nrow(locations_to_add) > 0){
+          
+          cat(MODULE, "Add markers on map, nb =", nrow(locations_to_add), "\n")
           
           # -- add icon & popup columns
-          locations <- location_icon(locations)
-          locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
-          
-          # -- Get groups
-          groups <- unique(locations$type)
+          locations_to_add <- location_icon(locations_to_add)
+          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns)
           
           # -- display on map
-          add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)}
+          add_markers(locations_to_add, map_proxy = r[[map_proxy]], icons = icons)}
 
       } else {
-
-        r[[map_proxy]] %>%
-          clearGroup("context")
-
+        
+        if(length(cache_contextual()) > 0){
+          
+          cat(MODULE, "Clear contextual locations \n")
+          removeMarker(r[[map_proxy]], layerId = as.character(cache_contextual()))
+          cache_contextual(NULL)}
+        
       }
 
     }) %>% bindEvent(r[[map_bounds]]())
