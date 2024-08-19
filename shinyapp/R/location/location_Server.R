@@ -12,8 +12,7 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     
     # -- ids
     kitems_id <- "location"
-    group_id <- "locations"
-    
+
     # -- settings
     coord_digits <- 3
 
@@ -266,18 +265,6 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
       
     })
 
-    
-    
-    
-    
-    # -------------------------------------
-    # Hide / Show
-    # -------------------------------------
-    
-    # -- Observe checkbox
-    observeEvent(input$hide_show, 
-                 hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
-    
     
     # -------------------------------------
     # Actions (click from marker popup)
