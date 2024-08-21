@@ -22,7 +22,7 @@ add_markers <- function(locations, map_proxy, icons){
                       label = ~name,
                       popup = ~popup,
                       #clusterOptions = markerClusterOptions()
-                      clusterId = ~country
+                      #clusterId = ~country
                       ) %>%
     
     # -- Map overlay checkbox (hide / show groups)
