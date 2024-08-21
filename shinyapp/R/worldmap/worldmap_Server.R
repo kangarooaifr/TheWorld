@@ -108,21 +108,27 @@ worldmap_Server <- function(id, r, location_id, map_id) {
       
       locations <- filtered_locations()
       
-      # -- add icon & popup columns
-      locations <- location_icon(locations)
-      locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
+      # -- remove markers
+      clearGroup(r[[map_proxy]], group = 'city')
       
-      # -- display on map
-      add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
-      
-      # -- crop map around markers
-      map_crop(map_proxy = r[[map_proxy]], 
-               lng1 = min(locations$lng), 
-               lat1 = min(locations$lat), 
-               lng2 = max(locations$lng),
-               lat2 = max(locations$lat), 
-               fly_duration, 
-               fly_padding)
+      # -- check dim #
+      if(nrow(locations) != 0){
+        
+        # -- add icon & popup columns
+        locations <- location_icon(locations)
+        locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
+        
+        # -- display on map
+        add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
+        
+        # -- crop map around markers
+        map_crop(map_proxy = r[[map_proxy]], 
+                 lng1 = min(locations$lng), 
+                 lat1 = min(locations$lat), 
+                 lng2 = max(locations$lng),
+                 lat2 = max(locations$lat), 
+                 fly_duration, 
+                 fly_padding)}
       
     }) %>% bindEvent(filtered_locations())
       
