@@ -75,7 +75,7 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
       cat(MODULE, "Update locations from items \n")
 
       # -- compute value
-      x <- r[[r_location_items]]()[r[[r_location_items]]()$type == 'city', ]
+      x <- r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$been.there, ]
       cat("-- output dim =", dim(x)[1], "obs. \n")
       
       # -- return
