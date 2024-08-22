@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, r, location_id, map_id) {
+worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -116,7 +116,7 @@ worldmap_Server <- function(id, r, location_id, map_id) {
         
         # -- add icon & popup columns
         locations <- location_icon(locations)
-        locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns)
+        locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
         
         # -- display on map
         add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
@@ -184,7 +184,7 @@ worldmap_Server <- function(id, r, location_id, map_id) {
           
           # -- add icon & popup columns
           locations_to_add <- location_icon(locations_to_add)
-          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns)
+          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
           
           # -- display on map
           add_markers(locations_to_add, map_proxy = r[[map_proxy]], icons = icons)}
