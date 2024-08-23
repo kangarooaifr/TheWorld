@@ -43,7 +43,7 @@ body <- dashboardBody(
                      
                      # -- locations & countries
                      country_INPUT("worldmap"),
-                     location_panel_UI("locationmngr"),
+                     location_INPUT("worldmap"),
                      country_UI("country")),
                      
               
