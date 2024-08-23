@@ -73,11 +73,16 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
     locations <- reactive({
       
       cat(MODULE, "Update locations from items \n")
-
-      # -- compute value
-      x <- r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$been.there, ]
-      cat("-- output dim =", dim(x)[1], "obs. \n")
       
+      # -- get locations (depending on selected option)
+      x <- switch (input$display_options,
+                   'been-there' = r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$been.there, ],
+                   'wish-list'  = r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$wish.list, ],
+                   r[[r_location_items]]()[r[[r_location_items]]()$type == 'city', ])
+      
+      # -- check
+      cat("-- output dim =", dim(x)[1], "obs. \n")
+    
       # -- return
       x
       
