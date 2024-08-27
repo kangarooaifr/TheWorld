@@ -52,11 +52,11 @@ shinyServer(
     # -- countries
     country_Server(id = "country", r = r, path = path, map_proxy = 'world_proxy', filter_country = 'map_country')
     
+    # -- tracks
+    track_Server(id = "track", r = r, path = path, map_proxy = 'world_proxy')
+    
     # -- transports
     #route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')
-    
-    # -- tracks
-    #track_Server(id = "track", r = r, path = path, map_proxy = 'map_proxy')
     
     # -- trips
     #trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')

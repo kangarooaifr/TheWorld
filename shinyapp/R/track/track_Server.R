@@ -16,11 +16,15 @@ library(leaflet)
 track_Server <- function(id, r, path, map_proxy) {
   moduleServer(id, function(input, output, session) {
     
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
+    
     # get namespace
     ns <- session$ns
     
-    # -- id
-    group_id <- "tracks"
+    # -- declare
+    r$track <- NULL
     
     # -- prepare
     # file
@@ -36,32 +40,18 @@ track_Server <- function(id, r, path, map_proxy) {
     
     observeEvent(track1(), {
       
+      cat(MODULE, "Display tracks on map \n")
+      
       # Convert track
       track2 <- track1() %>%
         st_combine() %>%
         st_cast(to = "LINESTRING") %>%
         st_sf()
       
-      # add to leaflet map
-      r[[map_proxy]] %>%
-        
-        # -- hidden by default
-        hideGroup(group_id) %>%
-        
-        # -- add on map
-        addPolylines(data = track2, group = group_id)
-
+      # -- expose
+      r$track <- track2
+      
     })
-    
-    
-    # -------------------------------------
-    # Hide / Show
-    # -------------------------------------
-    
-    # -- Observe checkbox
-    observeEvent(input$hide_show, 
-                 hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
-
     
   })
 }

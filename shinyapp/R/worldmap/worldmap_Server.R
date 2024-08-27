@@ -255,5 +255,27 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
         
       }, ignoreNULL = FALSE, ignoreInit = TRUE)
     
+    
+    # -------------------------------------
+    # track
+    # -------------------------------------
+    
+    observe({
+      
+      # add to leaflet map
+      r[[map_proxy]] %>%
+        
+        # -- hidden by default
+        hideGroup('track') %>%
+        
+        # -- add on map
+        addPolylines(data = r$track, group = 'track') %>%
+        
+        # -- Map overlay checkbox (hide / show groups)
+        addLayersControl(overlayGroups = "track")
+        
+    }) %>% bindEvent(r$track)
+    
+    
   })
 }
