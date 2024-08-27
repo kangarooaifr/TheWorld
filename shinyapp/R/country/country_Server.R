@@ -68,6 +68,7 @@ country_Server <- function(id, r, path, map_proxy, filter_country) {
     
     # -- init
     geojson_data <- reactiveVal()
+    r$geojson_data <- NULL
     
     # -- async read data
     cat("[countries] Asynchronous -- start reading countries geojson data... \n")
@@ -90,75 +91,10 @@ country_Server <- function(id, r, path, map_proxy, filter_country) {
       # -- notify user
       showNotification("Country boundaries are now available", type = c("message"))
       
-      # -- update ui
-      output$panel_ui <- renderUI({
-      
-        wellPanel(
-          h4("Countries"),
-          
-          # -- checkbox input
-          checkboxInput(ns("hide_show"), label = "Show visited countries.", value = FALSE))})
+      # -- expose
+      r$geojson_data <- geojson_data()
       
     })
-    
-    
-    # -------------------------------------
-    # Event observers
-    # -------------------------------------
-    
-    observeEvent({
-      geojson_data()
-      r$visited_countries()
-      r[[filter_country]]()}, {
-
-        # -- because ignoreNULL = FALSE
-        # need to wait for async data to be ready
-        req(geojson_data())
-
-        # -- get visited countries
-        selected_countries <- r$visited_countries()
-        
-        # -- apply filter
-        if(!is.null(r[[filter_country]]()))
-          selected_countries <- selected_countries[selected_countries %in% r[[filter_country]]()]
-        
-        # -- switch to country code
-        # WARNING! the column name is switched to X3digits.code upon reading the file
-        selected_countries <- r$countries_iso[r$countries_iso$country.en %in% selected_countries, 'X3digits.code']
-        
-        # -- selected geojson to be displayed
-        selected_geojson <- geojson_data()[geojson_data()@data$ISO_A3 %in% selected_countries, ]
-
-        # -- update map
-        r[[map_proxy]] %>%
-
-          # -- cleanup
-          clearGroup("countries") %>%
-
-          # -- add areas
-          addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries")
-
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
-    
-    
-    # -------------------------------------
-    # Hide / Show
-    # -------------------------------------
-    
-    # -- Observe checkbox
-    observeEvent(input$hide_show, {
-      
-      # -- update label
-      if(input$hide_show)
-        updateCheckboxInput(inputId = "hide_show", label = "Hide visited countries.")
-      else
-        updateCheckboxInput(inputId = "hide_show", label = "Show visited countries.")
-        
-      # -- hide group                 
-      hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show)
-      
-    }, ignoreInit = TRUE)
-    
     
   })
 }

@@ -44,8 +44,8 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
     # -------------------------------------
     
     # -- expose as reactive
-    # r$visited_countries <- reactive(
-    #   unique(r[[r_location_items]]()[r[[r_location_items]]()$been.there, 'country']))
+    visited_countries <- reactive(
+      unique(r[[r_location_items]]()[r[[r_location_items]]()$been.there, 'country']))
   
     
     # --------------------------------------------------------------------------
@@ -206,6 +206,54 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
 
     }) %>% bindEvent(r[[map_bounds]]())
 
+    
+    # -------------------------------------
+    # Country area
+    # -------------------------------------
+    
+    observeEvent({
+      r$geojson_data
+      visited_countries()
+      r[[filter_country]]()}, {
+        
+        # -- because ignoreNULL = FALSE
+        # need to wait for async data to be ready
+        req(r$geojson_data)
+        
+        # -- get visited countries
+        selected_countries <- visited_countries()
+        
+        # -- apply filter
+        if(!is.null(r[[filter_country]]()))
+          selected_countries <- selected_countries[selected_countries %in% r[[filter_country]]()]
+        
+        # -- switch to country code
+        # WARNING! the column name is switched to X3digits.code upon reading the file
+        selected_countries <- r$countries_iso[r$countries_iso$country.en %in% selected_countries, 'X3digits.code']
+        
+        # -- selected geojson to be displayed
+        selected_geojson <- r$geojson_data[r$geojson_data@data$ISO_A3 %in% selected_countries, ]
+        
+        # -- update map
+        r[[map_proxy]] %>%
+          
+          # -- cleanup
+          clearGroup("countries") %>%
+          
+          # -- add areas
+          addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries") %>%
+        
+          # -- Map overlay checkbox (hide / show groups)
+          addLayersControl(overlayGroups = "countries")
+        
+        # -- update ui
+        output$panel_ui <- renderUI({
+          
+          wellPanel(
+            h4("Countries"),
+            p("Show visited countries."))})
+        
+      }, ignoreNULL = FALSE, ignoreInit = TRUE)
     
   })
 }

@@ -40,3 +40,20 @@ location_INPUT <- function(id)
     radioButtons(inputId = ns("display_options"), label = "", choiceNames = list(icon("circle-check"), icon("heart"), icon("location-dot")), choiceValues = list("been-there", "wish-list", "all"), inline = TRUE))
   
 }
+
+
+# -------------------------------------
+# Country area
+# -------------------------------------
+
+# -- Where gone checkbox
+country_UI <- function(id){
+  
+  # namespace
+  ns <- NS(id)
+  
+  # -- ui
+  uiOutput(ns("panel_ui"))
+  
+}
+
