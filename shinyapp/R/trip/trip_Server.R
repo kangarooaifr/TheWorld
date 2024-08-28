@@ -372,27 +372,17 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
           )
         )
         
-        # -- init location search trigger
-        r$location_search_string <- 'city'
+        # -- location search
+        result <- search_item(r, id = "location", search_string = 'city')
         
-        # -- observer: search result
-        observeEvent(r$location_search_result(), {
+        # -- check result size to avoid crash
+        if(dim(result)[1] > 0){
           
-          cat("[trip] Location search result, dim =", dim(r$location_search_result()), "\n")
+          choices <- result$id
+          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
-          # -- compute choices from search result
-          result <- r$location_search_result()
-          
-          # -- check result size to avoid crash
-          if(dim(result)[1] > 0){
-          
-            choices <- result$id
-            names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
-            
-            # -- update input
-            updateSelectizeInput(inputId = "select_step", choices = choices)}
-          
-        })
+          # -- update input
+          updateSelectizeInput(inputId = "select_step", choices = choices)}
         
       }
       
@@ -637,27 +627,17 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
             # -- btn
             actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
-        # -- init location search trigger
-        r$location_search_string <- 'accommodation'
+        # -- location search
+        result <- search_item(r, id = "location", search_string = 'accommodation')
         
-        # -- observer: search result
-        observeEvent(r$location_search_result(), {
+        # -- check search result size to avoid crash
+        if(dim(result)[1] > 0){
           
-          cat("[trip] Accommodation search result, dim =", dim(r$location_search_result()), "\n")
+          choices <- result$id
+          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
-          # -- compute choices
-          result <- r$location_search_result()
-          
-          # -- check search result size to avoid crash
-          if(dim(result)[1] > 0){
-            
-            choices <- result$id
-            names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
-            
-            # -- update input
-            updateSelectizeInput(inputId = "select_accommodation", choices = choices)}
-          
-        })
+          # -- update input
+          updateSelectizeInput(inputId = "select_accommodation", choices = choices)}
         
       }
       
