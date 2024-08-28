@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path, map_flyto) {
+trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -13,6 +13,9 @@ trip_Server <- function(id, r, path, map_flyto) {
     # -- shared input zone
     output$shared_zone <- NULL
     is_shared_zone <- reactiveVal("")
+    
+    # -- marker icons
+    icons <- location_icons()
     
     # -------------------------------------
     # Trip management
@@ -120,6 +123,37 @@ trip_Server <- function(id, r, path, map_flyto) {
                              r$selected_route()$origin, 
                              r$selected_route()$destination)) %>%
       bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
+    
+    
+    # -- display locations
+    observe({
+      
+      locations <- r$selected_locations
+      
+      # -- remove markers
+      clearMarkers(r[[map_proxy]])
+      
+      # -- check dim #
+      if(nrow(locations) != 0){
+        
+        # -- add icon & popup columns
+        locations <- location_icon(locations)
+        locations$popup <- location_popups(locations, type = 'selected', activity = 'trip_planner', ns = ns, location_ns = location_ns)
+        
+        # -- display on map
+        add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
+        
+        # -- crop map around markers
+        map_crop(map_proxy = r[[map_proxy]], 
+                 lng1 = min(locations$lng), 
+                 lat1 = min(locations$lat), 
+                 lng2 = max(locations$lng),
+                 lat2 = max(locations$lat), 
+                 fly_duration, 
+                 fly_padding)}
+      
+    }) %>% bindEvent(r$selected_locations)
+    
     
     
     # -- compute timeline table
