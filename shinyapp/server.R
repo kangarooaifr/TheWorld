@@ -56,10 +56,10 @@ shinyServer(
     track_Server(id = "track", r = r, path = path, map_proxy = 'world_proxy')
     
     # -- transports
-    #route_Server(id = "routemngr", r = r, path = path, map_proxy = 'map_proxy')
+    route_Server(id = "routemngr", r = r, path = path, map_proxy = 'trip_proxy')
     
     # -- trips
-    #trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'map_flyto')
+    trip_Server(id = "tripmngr", r = r, path = path, map_flyto = 'trip_flyto')
     
     # -- worldmap
     worldmap_Server(id = "worldmap", r = r, location_id = "location", location_ns = "locationmngr", map_id = "world")

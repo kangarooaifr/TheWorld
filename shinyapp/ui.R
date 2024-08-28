@@ -66,7 +66,7 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     search_Input("xxx"),
+                     search_Input("trip"),
                      trip_panel_UI("tripmngr"),
                      
                      #route_UI("routemngr"),
@@ -74,10 +74,10 @@ body <- dashboardBody(
                      ),
               
                      
-              # -- main area (xxx)
+              # -- main area (trip)
               column(width = 9,
-                     freeze_INPUT("xxx"),
-                     map_UI("xxx")))),
+                     freeze_INPUT("trip"),
+                     map_UI("trip")))),
     
     
     # --------------------------------------------------------------------------
