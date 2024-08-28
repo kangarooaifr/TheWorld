@@ -58,44 +58,6 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
     })
     
     
-    # # -- observer:
-    # observeEvent(input$trip_selector, {
-    #   
-    #   cat("[trip] Trip selector, id =", input$trip_selector, "\n")
-    #   
-    #   # -- get steps
-    #   steps <- r[[step_items]]()
-    #   steps <- steps[steps$trip.id == input$trip_selector, ]
-    #   
-    #   # -- get transports
-    #   transports <- r[[transport_r_items]]()
-    #   transports <- transports[transports$trip.id == input$trip_selector, ]
-    #   
-    #   # -- call trigger (select route)
-    #   r$route_select <- transports$route.id
-    # 
-    #   # -- get accommodations
-    #   accommodations <- r[[accommodation_r_items]]()
-    #   accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
-    # 
-    #   # -- select locations
-    #   r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
-    #   
-    #   
-    #   # -- compute values
-    #   date_start <- min(c(transports$departure, accommodations$checkin))
-    #   date_end <- max(c(transports$arrival, accommodations$checkout))
-    #   duration <- round(date_end - date_start, digits = 0)
-    #   
-    #   output$trip_info <- renderUI(
-    #     tagList(
-    #       p(strong('Start:'), date_start),
-    #       p(strong('End:'), date_end),
-    #       p(strong('Duration:'), duration)))
-    #   
-    # }, ignoreInit = TRUE)
-    
-    
     # -------------------------------------
     # select trip items
     # -------------------------------------
@@ -117,18 +79,18 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
     
     
     # -- call trigger (select locations)
-    observe(
-      r$location_select <- c(selected_steps()$location.id, 
-                             selected_accommodations()$location.id, 
-                             r$selected_route()$origin, 
-                             r$selected_route()$destination)) %>%
+    selected_locations <- reactive(
+      location_select(r, id = "location", location_id = c(selected_steps()$location.id, 
+                                             selected_accommodations()$location.id, 
+                                             r$selected_route()$origin, 
+                                             r$selected_route()$destination))) %>% 
       bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
     
     
     # -- display locations
     observe({
       
-      locations <- r$selected_locations
+      locations <- selected_locations()
       
       # -- remove markers
       clearMarkers(r[[map_proxy]])
@@ -152,7 +114,7 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
                  fly_duration, 
                  fly_padding)}
       
-    }) %>% bindEvent(r$selected_locations)
+    }) %>% bindEvent(selected_locations())
     
     
     

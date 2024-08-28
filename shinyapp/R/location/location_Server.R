@@ -25,14 +25,7 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
     r_trigger_update <- kitems::trigger_update_name(id = kitems_id)
     r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
-    
-    
-    # -- External connectors
-    r$selected_locations <- NULL
-    
-    # -- Internal caches
-    cache_groups <- reactiveVal(NULL)
-    
+
     
     # -------------------------------------
     # Load resources & connector: airports
@@ -349,43 +342,6 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     # updateTabItems(session, "inTabset", selected = "widgets")
     # -------------------------------------
 
-    
-    # -------------------------------------
-    # Select
-    # -------------------------------------
-    
-    # -- declare trigger
-    r$location_select <- NULL
-    
-    # -- observe
-    observeEvent(r$location_select, {
-      
-      cat("[TRIGGER] Select location: \n")
-      
-      # -- get items
-      locations <- r[[r_items]]()
-      
-      # -- apply selection
-      locations <- locations[locations$id %in% r$location_select, ]
-      
-      # -- check output dim
-      if(dim(locations)[1] != length(r$location_select)){
-        
-        # -- check for airports
-        airports <- r$airports[r$airports$id %in% r$location_select, ]
-        
-        # -- make locations from airports
-        if(dim(airports)[1] > 0)
-          tmp_locations <- airport_to_location(airports)
-        
-        # -- merge
-        locations <- rbind(locations, tmp_locations)}
-      
-      # -- return
-      cat("-- output dim =", dim(locations),"\n")
-      r$selected_locations <- locations
-      
-    })
     
   })
 }
