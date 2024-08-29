@@ -19,9 +19,6 @@ route_Server <- function(id, r, path, map_proxy) {
     # get namespace
     ns <- session$ns
     
-    # -- id
-    group_id <- "routes"
-    
     # -------------------------------------
     # Data manager (routes)
     # -------------------------------------
@@ -103,15 +100,6 @@ route_Server <- function(id, r, path, map_proxy) {
       })
       
     })
-    
-  
-    # -------------------------------------
-    # Hide / Show
-    # -------------------------------------
-    
-    # -- Observe checkbox
-    observeEvent(input$hide_show, 
-      hide_show(proxy = r[[map_proxy]], id = group_id, show = input$hide_show), ignoreInit = TRUE)
     
   })
 }

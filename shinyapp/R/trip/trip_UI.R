@@ -22,9 +22,6 @@ trip_panel_UI <- function(id)
     # -- display options
     #radioButtons(inputId = ns("display_options"), label = "", choiceNames = list(icon("compass-drafting"), icon("circle-check"), icon("layer-group")), choiceValues = list("plan", "done", "all"), inline = TRUE),
     
-    # -- hide / show
-    #checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE),
-    
     # -- general info
     hr(),
     uiOutput(ns("trip_info")),

@@ -25,9 +25,6 @@ route_UI <- function(id){
                  label = "", 
                  choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")), 
                  choiceValues = list("air", "rail", "sea", "road"), 
-                 inline = TRUE),
+                 inline = TRUE))
 
-    # -- show / hide
-    checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE))
-  
 }
