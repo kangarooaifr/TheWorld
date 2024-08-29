@@ -13,7 +13,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- trace
     MODULE <- paste0("[", id, "]")
-    cat(MODULE, "Starting map module server... \n")
+    cat(MODULE, "Starting module server... \n")
     
     # -- fly to settings
     fly_duration <<- 1.0
@@ -22,16 +22,21 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # --------------------------------------------------------------------------
-    # Communication objects
+    # Names
     # --------------------------------------------------------------------------
     
-    # -- declare map names
+    # -- declare names
     map_proxy <- paste0(id, "_proxy")
     map_click <- paste0(id, "_click")
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
     map_flyto <- paste0(id, "_flyto")
+    
+    
+    # --------------------------------------------------------------------------
+    # Communication objects
+    # --------------------------------------------------------------------------
     
     # -- declare connectors
     r[[map_proxy]] <- NULL
@@ -68,13 +73,14 @@ map_Server <- function(id, r, verbose = TRUE) {
       
     })
     
-    # -- Declare proxy for the map
-    r[[map_proxy]] <- leafletProxy('map')
-    
     
     # --------------------------------------------------------------------------
     # Map observers & connectors
     # --------------------------------------------------------------------------
+    
+    # -- Connector: map proxy
+    r[[map_proxy]] <- leafletProxy('map')
+    
     
     # -- Connector: mouse click
     r[[map_click]] <- reactive({

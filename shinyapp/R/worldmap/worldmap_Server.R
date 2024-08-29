@@ -4,14 +4,19 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
+worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
   moduleServer(id, function(input, output, session) {
     
-    # -- get namespace
-    ns <- session$ns
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
     
     # -- trace
     MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
+    
+    # -- get namespace
+    ns <- session$ns
     
     # -- settings
     contextual_locations_level <- 8
@@ -20,11 +25,12 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     
     coord_digits <- 3
     
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+
     # -- items name
     r_location_items <- kitems::items_name(id = locationId)
-    
-    # -- cache
-    cache_contextual <- reactiveVal(NULL)
     
     # -- map
     map_proxy <- paste0(mapId, "_proxy")
@@ -32,20 +38,27 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     map_zoom <- paste0(mapId, "_zoom")
     
     
+    # --------------------------------------------------------------------------
+    # Init
+    # --------------------------------------------------------------------------
+    
+    # -- cache
+    cache_contextual <- reactiveVal(NULL)
+    
     # -- marker icons
     icons <- location_icons()
 
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Register observer (map_click)
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
     
         
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Connector: visited_countries
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- expose as reactive
     visited_countries <- reactive(
@@ -112,7 +125,11 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     })
     
     
-    # -- display
+    # --------------------------------------------------------------------------
+    # Display locations
+    # --------------------------------------------------------------------------
+    
+    # -- Event: filtered_locations
     observe({
       
       locations <- filtered_locations()
@@ -211,9 +228,9 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     }) %>% bindEvent(r[[map_bounds]]())
 
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Country area
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     observeEvent({
       r$geojson_data
@@ -260,9 +277,9 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
       }, ignoreNULL = FALSE, ignoreInit = TRUE)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # track
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     observe({
       

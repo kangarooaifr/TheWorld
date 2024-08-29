@@ -4,11 +4,40 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
+trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path) {
   moduleServer(id, function(input, output, session) {
+    
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
     
     # -- get namespace
     ns <- session$ns
+    
+    # -- settings
+    coord_digits <- 3
+    
+    
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+    
+    # -- map names
+    map_proxy <- paste0(mapId, "_proxy")
+    map_flyto <- paste0(mapId, "_flyto")
+
+    # -- get names
+    route_items <- kitems::items_name(routeId)
+    route_group_id <- 'route'
+    
+    
+    # --------------------------------------------------------------------------
+    # Init
+    # --------------------------------------------------------------------------
     
     # -- shared input zone
     output$shared_zone <- NULL
@@ -18,48 +47,30 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     icons <- location_icons()
     
     
-    # -- settings
-    coord_digits <- 3
-    
-    # -- map names
-    map_proxy <- paste0(mapId, "_proxy")
-    map_flyto <- paste0(mapId, "_flyto")
-    
-    
-    # -- get names
-    route_items <- kitems::items_name(routeId)
-    route_group_id <- 'route'
-    
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Register observer (map_click)
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Trip management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     trip_kitems_id <- "trip"
-    
-    # id, name, status, description, comment
-    # status = draft, planned, inwork, done
-    # date.start, date.end, cities, countries >> computed from other tables based on trip.id
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = trip_kitems_id, r, path$data)
     
     # -- items name
     r_items <- kitems::items_name(trip_kitems_id)
-    # r_trigger_add <- kitems::trigger_add_name(id = trip_kitems_id)
-    # r_trigger_delete <- kitems::trigger_delete_name(id = trip_kitems_id)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Trip selector
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- observer:
     # feed trip_selector when items are ready
@@ -78,9 +89,9 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     })
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # select trip items
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- steps
     selected_steps <- reactive(r[[step_items]]()[r[[step_items]]()$trip.id == input$trip_selector, ])
@@ -105,16 +116,16 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
       route_select(routes = r[[route_items]](), query = selected_transports()$route.id))
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Display trip items on map
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- display routes
     observeEvent(selected_route(), {
       
       # -- init
       routes <- selected_route()
-      cat("[trip] Update map, selected routes =", length(routes$id), "\n")
+      cat(MODULE, "Update map, selected routes =", length(routes$id), "\n")
       
       # -- clear map (group)
       r[[map_proxy]] %>%
@@ -172,7 +183,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
         }
         
         # -- apply helper to routes df
-        cat("[trip] Looping over route list... \n")
+        cat(MODULE, "Looping over route list... \n")
         lapply(routes$id, addroute)
         
       }
@@ -215,7 +226,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     # takes into account transports & accommodations (because steps have no date/time)
     timeline_table <- reactive({
       
-      cat("[trip] Compute timeline table \n")
+      cat(MODULE, "Compute timeline table \n")
       
       # -- transports
       transports <- selected_transports()[c('id', 'departure', 'arrival')]
@@ -232,14 +243,14 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
                      ignoreInit = FALSE)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # trip info outputs
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- routes
     output$trip_transport <- renderUI({
       
-      cat("[trip] Update trip info \n")
+      cat(MODULE, "Update trip info \n")
       
       id <- selected_transports()$id[[1]]
       cat("id ==", id, "\n")
@@ -322,7 +333,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     # -- observer: timeline
     observe({
       
-      cat("[trip] New timeline value =", input$timeline, "\n")
+      cat(MODULE, "New timeline value =", input$timeline, "\n")
       
       # -- slice timeline table
       slice <- timeline_table()[as.Date(timeline_table()$start) == input$timeline | as.Date(timeline_table()$end) == input$timeline, ]
@@ -337,7 +348,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     # -- accommodations
     output$trip_accommodation <- renderUI({
       
-      cat("[trip] Update accommodation info \n")
+      cat(MODULE, "Update accommodation info \n")
       
       id <- selected_accommodations()$id[[1]]
       cat("id ==", id, "\n")
@@ -375,9 +386,9 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     
     )
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Step management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     step_kitems_id <- "step"
@@ -428,7 +439,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
         )
         
         # -- location search
-        result <- search_item(r, id = locationId, search_string = 'city')
+        result <- search_item(r, id = locationId, pattern = 'city')
         
         # -- check result size to avoid crash
         if(dim(result)[1] > 0){
@@ -534,9 +545,9 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     })
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Transport management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     transport_kitems_id <- "transport"
@@ -561,7 +572,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
         
       } else {
         
-        cat("[trip] Add transport \n")
+        cat(MODULE, "Add transport \n")
         
         # -- declare cache
         is_shared_zone("transport")
@@ -599,7 +610,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
       # -- observer: transport mode radio
       observeEvent(input$route_type, {
         
-        cat("[trip] Event route_type input \n")
+        cat(MODULE, "Event route_type input \n")
 
         # -- search route
         result <- route_search(routes = r[[route_items]](), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
@@ -649,12 +660,12 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     })
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # -- create tables flight, sea, road to instantiate in route!
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Accommodation management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     accommodation_kitems_id <- "accommodation"
@@ -680,7 +691,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
         
       } else {
         
-        cat("[trip] Add accommodation \n")
+        cat(MODULE, "Add accommodation \n")
         
         # -- declare cache
         is_shared_zone("accommodation")
@@ -713,7 +724,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
             actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
         # -- location search
-        result <- search_item(r, id = locationId, search_string = 'accommodation')
+        result <- search_item(r, id = locationId, pattern = 'accommodation')
         
         # -- check search result size to avoid crash
         if(dim(result)[1] > 0){

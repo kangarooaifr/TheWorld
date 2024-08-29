@@ -17,6 +17,14 @@ shinyServer(
     
     
     # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+    
+    locationId <- "location"
+    locationMngrId <- "locationmngr"
+    routeId <- "route"
+    
+    # --------------------------------------------------------------------------
     # Selected tab
     # --------------------------------------------------------------------------
     
@@ -27,6 +35,12 @@ shinyServer(
     #   input$selected_tab
     #   
     # })
+    
+    # -------------------------------------
+    # save for later
+    # To dynamically switch from a tabItem to another:
+    # updateTabItems(session, "inTabset", selected = "widgets")
+    # -------------------------------------
     
     
     # --------------------------------------------------------------------------
@@ -46,16 +60,16 @@ shinyServer(
     map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path)
+    location_Server(id = locationMngrId, locationId, r, path)
     
     # -- countries
-    country_Server(id = "country", r = r, path = path)
+    country_Server(id = "country", r, path)
     
     # -- tracks
-    track_Server(id = "track", r = r, path = path)
+    track_Server(id = "track", r, path)
     
     # -- transports
-    route_Server(id = "routemngr", r = r, path = path)
+    route_Server(id = "routemngr", routeId, r, path)
     
     
     # --------------------------------------------------------------------------
@@ -63,10 +77,10 @@ shinyServer(
     # --------------------------------------------------------------------------
 
     # -- worldmap
-    worldmap_Server(id = "worldmap", r = r, mapId = "world", locationId = "location", location_ns = "locationmngr")
+    worldmap_Server(id = "worldmap", mapId = "world", locationId, location_ns = locationMngrId, r)
         
     # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path, mapId = "trip", locationId = "location", location_ns = "locationmngr", routeId = "route")
+    trip_Server(id = "tripmngr", mapId = "trip", locationId, location_ns = locationMngrId, routeId, r, path)
 
     
     # --------------------------------------------------------------------------

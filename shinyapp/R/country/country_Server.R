@@ -10,27 +10,41 @@ library(promises)
 library(future)
 
 
-# -------------------------------------
+# ------------------------------------------------------------------------------
 # Server logic
-# -------------------------------------
+# ------------------------------------------------------------------------------
 
 country_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
-    # -- get namespace
-    ns <- session$ns
-
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
+    
     # -- files
     filename_iso <- "countries.csv"
     filename_geojson <- "countries.geojson"
-    
-    # -- ids
-    group_id <- "countries"
 
     
-    # -------------------------------------
-    # Init
-    # -------------------------------------
+    # --------------------------------------------------------------------------
+    # Communication objects
+    # --------------------------------------------------------------------------
+    
+    # -- geojson
+    geojson_data <- reactiveVal()
+    r$geojson_data <- NULL
+    
+    # -- country
+    r$countries_iso <- NULL
+    
+    
+    # --------------------------------------------------------------------------
+    # Output
+    # --------------------------------------------------------------------------
     
     # -- Panel (waiting for file to be loaded)
     output$panel_ui <- renderUI(
@@ -39,9 +53,9 @@ country_Server <- function(id, r, path) {
         p("Loading country boundaries in progres...")))
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Load resources: iso countries
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- colClasses
     colClasses_iso <- c("id" = "numeric",
@@ -59,19 +73,15 @@ country_Server <- function(id, r, path) {
                                        create = FALSE)
 
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Load resources: geojson data
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- set async strategy
     plan(multisession)
     
-    # -- init
-    geojson_data <- reactiveVal()
-    r$geojson_data <- NULL
-    
     # -- async read data
-    cat("[countries] Asynchronous -- start reading countries geojson data... \n")
+    cat(MODULE, "Asynchronous -- start reading countries geojson data... \n")
     future(
       geojson_read(file.path(path$resources, filename_geojson), what = "sp")
     ) %...>%
@@ -86,7 +96,7 @@ country_Server <- function(id, r, path) {
     # -- observe when geojson_data is ready
     observeEvent(geojson_data(), {
       
-      cat("[countries] Asynchronous -- read countries geojson data done. \n")
+      cat(MODULE, "Asynchronous -- read countries geojson data done. \n")
       
       # -- notify user
       showNotification("Country boundaries are now available", type = c("message"))

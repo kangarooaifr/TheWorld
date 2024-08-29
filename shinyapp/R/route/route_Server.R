@@ -13,33 +13,44 @@ library(dplyr)
 # Module Server logic
 # ------------------------------------------------------------------------------
 
-route_Server <- function(id, r, path) {
+route_Server <- function(id, routeId, r, path) {
   moduleServer(id, function(input, output, session) {
+    
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
     
     # get namespace
     ns <- session$ns
     
-    # -------------------------------------
-    # Data manager (routes)
-    # -------------------------------------
     
-    # -- module id
-    kitems_id <- "route"
-    
-    # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = kitems_id, r, path$data)
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
     
     # -- items name
-    r_items <- kitems::items_name(id = kitems_id)
-    r_data_model <- kitems::dm_name(id = kitems_id)
-    r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
-    r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
-    r_trigger_create <- kitems::trigger_create_name(id = kitems_id)
+    r_items <- kitems::items_name(id = routeId)
+    r_data_model <- kitems::dm_name(id = routeId)
+    r_trigger_add <- kitems::trigger_add_name(id = routeId)
+    r_trigger_delete <- kitems::trigger_delete_name(id = routeId)
+    r_trigger_create <- kitems::trigger_create_name(id = routeId)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
+    # Data manager
+    # --------------------------------------------------------------------------
+
+    # -- launch kitems sub module
+    kitems::kitemsManager_Server(id = routeId, r, path$data)
+    
+    
+    # --------------------------------------------------------------------------
     # Add route
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     observeEvent(input$add_route, {
       
@@ -103,4 +114,3 @@ route_Server <- function(id, r, path) {
     
   })
 }
-

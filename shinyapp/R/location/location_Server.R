@@ -4,29 +4,39 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, r, path) {
+location_Server <- function(id, locationId, r, path) {
   moduleServer(id, function(input, output, session) {
+    
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
     
     # -- get namespace
     ns <- session$ns
     
-    # -- ids
-    kitems_id <- "location"
+    # -- items name
+    r_items <- kitems::items_name(id = locationId)
+    r_data_model <- kitems::dm_name(id = locationId)
+    r_trigger_add <- kitems::trigger_add_name(id = locationId)
+    r_trigger_update <- kitems::trigger_update_name(id = locationId)
+    r_trigger_delete <- kitems::trigger_delete_name(id = locationId)
+    
+    
+    # --------------------------------------------------------------------------
+    # Data manager
+    # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = kitems_id, r, path$data)
+    kitems::kitemsManager_Server(id = locationId, r, path$data)
     
-    # -- items name
-    r_items <- kitems::items_name(id = kitems_id)
-    r_data_model <- kitems::dm_name(id = kitems_id)
-    r_trigger_add <- kitems::trigger_add_name(id = kitems_id)
-    r_trigger_update <- kitems::trigger_update_name(id = kitems_id)
-    r_trigger_delete <- kitems::trigger_delete_name(id = kitems_id)
-
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Load resources & connector: airports
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- File name
     filename_airports <- "airports.csv"
@@ -55,16 +65,16 @@ location_Server <- function(id, r, path) {
     # -- filter out heliports & entries without iata code (value = "\\N")
     raw_airports <- raw_airports[raw_airports$iata != '\\N', ]
     raw_airports <- raw_airports[!grepl('Heli', raw_airports$name), ]
-    cat("[location] Filter airports without iata code & heliports, output =", dim(raw_airports), "\n")
+    cat(MODULE, "Filter airports without iata code & heliports, output =", dim(raw_airports), "\n")
     
     # -- store & delete temp object
     r$airports <- raw_airports
     rm(raw_airports)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Load resources & connector: seaports
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # There is no specific file for seaports at this moment
     # it is taken from the standard locations with type = Port
     
@@ -104,7 +114,7 @@ location_Server <- function(id, r, path) {
                                   create = FALSE)
     
     # -- filter out locations without gps coordinate (lng)
-    cat("[location] Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
+    cat(MODULE, "Filter stations without lng / lat:", sum(is.na(stations$lng)), "\n")
     stations <-  stations[!is.na(stations$lng), ]
     
     # -- expose railway stations
@@ -181,16 +191,16 @@ location_Server <- function(id, r, path) {
     })
 
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Actions (click from marker popup)
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- Observe: action_update
     observeEvent(input$action_update, {
       
       # -- extract id
       id <- unlist(strsplit(input$action_update, split = "_"))[2]
-      cat("[EVENT] Marker popup click: update id =", id, "\n")
+      cat(MODULE, "[EVENT] Marker popup click: update id =", id, "\n")
       
       # -- get location to update
       location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
@@ -242,7 +252,7 @@ location_Server <- function(id, r, path) {
     
       # -- extract id
       id <- unlist(strsplit(input$action_delete, split = "_"))[2]
-      cat("[EVENT] Marker popup click: delete id =", id, "\n")
+      cat(MODULE, "[EVENT] Marker popup click: delete id =", id, "\n")
       
       # -- call trigger
       r[[r_trigger_delete]](id)
@@ -255,7 +265,7 @@ location_Server <- function(id, r, path) {
       
       # -- extract id
       id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
-      cat("[EVENT] Marker popup click: been-there id =", id, "\n")
+      cat(MODULE, "[EVENT] Marker popup click: been-there id =", id, "\n")
       
       # -- update item
       item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
@@ -267,13 +277,5 @@ location_Server <- function(id, r, path) {
       
     })
 
-    
-    # -------------------------------------
-    # save for later
-    # To dynamically switch from a tabItem to another:
-    # updateTabItems(session, "inTabset", selected = "widgets")
-    # -------------------------------------
-
-    
   })
 }
