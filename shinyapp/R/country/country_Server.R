@@ -14,7 +14,7 @@ library(future)
 # Server logic
 # -------------------------------------
 
-country_Server <- function(id, r, path, map_proxy, filter_country) {
+country_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace

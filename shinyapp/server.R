@@ -49,7 +49,7 @@ shinyServer(
     location_Server(id = "locationmngr", r = r, path = path)
     
     # -- countries
-    country_Server(id = "country", r = r, path = path, map_proxy = 'world_proxy', filter_country = 'map_country')
+    country_Server(id = "country", r = r, path = path)
     
     # -- tracks
     track_Server(id = "track", r = r, path = path, map_proxy = 'world_proxy')
