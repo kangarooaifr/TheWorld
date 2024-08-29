@@ -41,7 +41,7 @@ shinyServer(
     # Modules
     # --------------------------------------------------------------------------
     
-    # -- the map
+    # -- the maps
     map_Server(id = "world", r = r, verbose = TRUE)
     map_Server(id = "trip", r = r, verbose = TRUE)
     
@@ -55,14 +55,18 @@ shinyServer(
     track_Server(id = "track", r = r, path = path)
     
     # -- transports
-    route_Server(id = "routemngr", r = r, path = path, map_proxy = 'trip_proxy')
+    route_Server(id = "routemngr", r = r, path = path)
+    
+    
+    # --------------------------------------------------------------------------
+    # Activity modules
+    # --------------------------------------------------------------------------
     
     # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path, mapId = "trip", map_proxy = 'trip_proxy', map_flyto = 'trip_flyto', location_ns = "locationmngr",
-                route_id = "route")
+    trip_Server(id = "tripmngr", r = r, path = path, mapId = "trip", locationId = "location", location_ns = "locationmngr", routeId = "route")
     
     # -- worldmap
-    worldmap_Server(id = "worldmap", r = r, location_id = "location", location_ns = "locationmngr", mapId = "world")
+    worldmap_Server(id = "worldmap", r = r, mapId = "world", locationId = "location", location_ns = "locationmngr")
     
     
     # --------------------------------------------------------------------------

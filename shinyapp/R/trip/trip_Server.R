@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, route_id) {
+trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -21,8 +21,13 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
     # -- settings
     coord_digits <- 3
     
+    # -- map names
+    map_proxy <- paste0(mapId, "_proxy")
+    map_flyto <- paste0(mapId, "_flyto")
+    
+    
     # -- get names
-    route_items <- kitems::items_name(route_id)
+    route_items <- kitems::items_name(routeId)
     route_group_id <- 'route'
     
     # -------------------------------------
@@ -88,7 +93,7 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
     
     # -- select locations
     selected_locations <- reactive(
-      location_select(r, id = "location", location_id = c(selected_steps()$location.id, 
+      location_select(r, id = locationId, location_id = c(selected_steps()$location.id, 
                                              selected_accommodations()$location.id, 
                                              selected_route()$origin, 
                                              selected_route()$destination))) %>% 
@@ -423,7 +428,7 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
         )
         
         # -- location search
-        result <- search_item(r, id = "location", search_string = 'city')
+        result <- search_item(r, id = locationId, search_string = 'city')
         
         # -- check result size to avoid crash
         if(dim(result)[1] > 0){
@@ -679,7 +684,7 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
             actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
         # -- location search
-        result <- search_item(r, id = "location", search_string = 'accommodation')
+        result <- search_item(r, id = locationId, search_string = 'accommodation')
         
         # -- check search result size to avoid crash
         if(dim(result)[1] > 0){

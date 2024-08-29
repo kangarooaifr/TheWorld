@@ -13,7 +13,7 @@ library(dplyr)
 # Module Server logic
 # ------------------------------------------------------------------------------
 
-route_Server <- function(id, r, path, map_proxy) {
+route_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # get namespace

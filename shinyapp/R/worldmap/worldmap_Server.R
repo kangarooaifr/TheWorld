@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, r, location_id, location_ns, mapId) {
+worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -21,7 +21,7 @@ worldmap_Server <- function(id, r, location_id, location_ns, mapId) {
     coord_digits <- 3
     
     # -- items name
-    r_location_items <- kitems::items_name(id = location_id)
+    r_location_items <- kitems::items_name(id = locationId)
     
     # -- cache
     cache_contextual <- reactiveVal(NULL)
