@@ -23,7 +23,7 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
     
     # -- get names
     route_items <- kitems::items_name(route_id)
-    
+    route_group_id <- 'route'
     
     # -------------------------------------
     # Register observer (map_click)
@@ -86,20 +86,93 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
     # -- accommodations
     selected_accommodations <- reactive(r[[accommodation_r_items]]()[r[[accommodation_r_items]]()$trip.id == input$trip_selector, ])
     
-    # -- call trigger (select route)
-    observe(
-      r$route_select <- selected_transports()$route.id) %>%
-      bindEvent(selected_transports(),
-                ignoreInit = TRUE)
-    
-    
-    # -- call trigger (select locations)
+    # -- select locations
     selected_locations <- reactive(
       location_select(r, id = "location", location_id = c(selected_steps()$location.id, 
                                              selected_accommodations()$location.id, 
-                                             r$selected_route()$origin, 
-                                             r$selected_route()$destination))) %>% 
-      bindEvent(list(selected_steps(), selected_accommodations(), r$selected_route()))
+                                             selected_route()$origin, 
+                                             selected_route()$destination))) %>% 
+      bindEvent(list(selected_steps(), selected_accommodations(), selected_route()))
+    
+    # -- select route 
+    # keep it after location to minimize fly to bounds side effect (half route displayed + refresh after crop)
+    selected_route <- reactive(
+      route_select(routes = r[[route_items]](), query = selected_transports()$route.id))
+    
+    
+    # -------------------------------------
+    # Display trip items on map
+    # -------------------------------------
+    
+    # -- display routes
+    observeEvent(selected_route(), {
+      
+      # -- init
+      routes <- selected_route()
+      cat("[trip] Update map, selected routes =", length(routes$id), "\n")
+      
+      # -- clear map (group)
+      r[[map_proxy]] %>%
+        clearGroup(route_group_id)
+      
+      # -- check (otherwise unselect, so clearGroup is enough)
+      if(length(routes$id) > 0){
+        
+        # -- Helper: add route to map
+        addroute <- function(id){
+          
+          # -- get route & parameters
+          route <- routes[routes$id == id, ]
+          origin <- route$origin
+          destination <- route$destination
+          type  <- route$type
+          
+          cat("-- route origin", origin, "/ destination", destination, "/ type =", type, "\n")
+          
+          # -- mode: air
+          if(type == 'air'){
+            
+            # -- get names
+            origin_name <- r$airports[r$airports$id == origin, 'name']
+            destination_name <- r$airports[r$airports$id == destination, 'name']
+            
+            # -- compute great circle route
+            route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
+                                    p2 = airport_coord(r$airports, id = destination), 
+                                    n = 100, 
+                                    addStartEnd = TRUE)
+            
+            # -- add fight route
+            r[[map_proxy]] %>%
+              addPolylines(data = route, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+            
+            # -- mode: sea
+          } else if(type == 'sea'){
+            
+            # -- get names
+            origin_name <- r$seaports()[r$seaports()$id == origin, 'name']
+            destination_name <- r$seaports()[r$seaports()$id == destination, 'name']
+            
+            # -- compute route
+            route <- data.frame(lng = c(r$seaports()[r$seaports()$id == origin, 'lng'], r$seaports()[r$seaports()$id == destination, 'lng']),
+                                lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
+            
+            # -- add sea route
+            r[[map_proxy]] %>%
+              addPolylines(lng = route$lng, lat = route$lat, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+          }
+          
+        }
+        
+        # -- apply helper to routes df
+        cat("[trip] Looping over route list... \n")
+        lapply(routes$id, addroute)
+        
+      }
+      
+    })
     
     
     # -- display locations
@@ -171,8 +244,8 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
         p(strong('Departure:'), selected_transports()[selected_transports()$id == id, ]$departure),
         p(strong('Arrival:'), selected_transports()[selected_transports()$id == id, ]$arrival),
         
-        p(strong('Company:'), r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$company),
-        p(strong('Flight #:'), r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$number),
+        p(strong('Company:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$company),
+        p(strong('Flight #:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$number),
         
         p(strong('Origin:'),
           HTML(
@@ -181,12 +254,12 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
                 
                 # -- remove from trip
                 actionLink(inputId = "flyto_%s_%s",
-                           label =  r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$name,
+                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$name,
                            onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
                                              ns("fly_to_location")))),
               
-              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lng,
-              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lat)),
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lat)),
         ),
         
         p(strong('Destination:'),
@@ -196,16 +269,16 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
                 
                 # -- remove from trip
                 actionLink(inputId = "flyto_%s_%s",
-                           label =  r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$name,
+                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$name,
                            onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
                                              ns("fly_to_location")))),
               
-              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lng,
-              r$selected_locations[r$selected_locations$id == r$selected_route()[r$selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lat)),
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lat)),
           
         ))
       
-    }) %>% bindEvent(list(selected_transports(), r$selected_route(), r$selected_locations),
+    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
                      ignoreInit = TRUE)
     
     
@@ -284,7 +357,7 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, r
         p(strong('Check-in:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkin),
         p(strong('Check-out:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkout))
       
-    }) %>% bindEvent(list(selected_transports(), r$selected_route(), r$selected_locations),
+    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
                      ignoreInit = TRUE)
     
     
