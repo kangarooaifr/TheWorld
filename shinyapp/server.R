@@ -46,8 +46,7 @@ shinyServer(
     map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path,
-                    map_proxy = 'world_proxy', map_click = 'world_click')
+    location_Server(id = "locationmngr", r = r, path = path)
     
     # -- countries
     country_Server(id = "country", r = r, path = path, map_proxy = 'world_proxy', filter_country = 'map_country')
