@@ -26,11 +26,6 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     # -- cache
     cache_contextual <- reactiveVal(NULL)
     
-    # -- declare input names
-    filter_country <- paste0(id, "_country")
-     
-    r[[filter_country]] <- reactive(NULL)
-    
     # -- map
     map_proxy <- paste0(mapId, "_proxy")
     map_bounds <- paste0(mapId, "_bounds")
@@ -223,7 +218,7 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
     observeEvent({
       r$geojson_data
       visited_countries()
-      r[[filter_country]]()}, {
+      input$filter_country}, {
         
         # -- because ignoreNULL = FALSE
         # need to wait for async data to be ready
@@ -233,8 +228,8 @@ worldmap_Server <- function(id, r, mapId, locationId, location_ns) {
         selected_countries <- visited_countries()
         
         # -- apply filter
-        if(!is.null(r[[filter_country]]()))
-          selected_countries <- selected_countries[selected_countries %in% r[[filter_country]]()]
+        if(!is.null(input$filter_country))
+          selected_countries <- selected_countries[selected_countries %in% input$filter_country]
         
         # -- switch to country code
         # WARNING! the column name is switched to X3digits.code upon reading the file

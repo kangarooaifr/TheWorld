@@ -61,13 +61,13 @@ shinyServer(
     # --------------------------------------------------------------------------
     # Activity modules
     # --------------------------------------------------------------------------
-    
-    # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path, mapId = "trip", locationId = "location", location_ns = "locationmngr", routeId = "route")
-    
+
     # -- worldmap
     worldmap_Server(id = "worldmap", r = r, mapId = "world", locationId = "location", location_ns = "locationmngr")
-    
+        
+    # -- trips
+    trip_Server(id = "tripmngr", r = r, path = path, mapId = "trip", locationId = "location", location_ns = "locationmngr", routeId = "route")
+
     
     # --------------------------------------------------------------------------
     # Application server ready
