@@ -469,6 +469,22 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     })
     
     
+    # -- Observe: add_to_trip
+    observeEvent(input$add_to_trip, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$add_to_trip, split = "_"))[2]
+      cat("[EVENT] Marker popup click: add_to_trip id =", id, "\n")
+      
+      # -- get location
+      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      
+      # -- call trigger
+      r$trigger_add_step <- location
+      
+    })
+    
+    
     # -- observe: trigger_add_step
     observeEvent(r$trigger_add_step, {
 
@@ -490,7 +506,7 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
     })
     
     
-    # -- observe: trigger_add_step
+    # -- observe: trigger_remove_step
     observeEvent(r$trigger_remove_step, {
       
       cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
@@ -501,6 +517,19 @@ trip_Server <- function(id, r, path, mapId, locationId, location_ns, routeId) {
       
       # -- call trigger
       r[[step_trigger_delete]](id)
+      
+    })
+    
+    
+    # -- Observe: remove_from_trip
+    observeEvent(input$remove_from_trip, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$remove_from_trip, split = "_"))[2]
+      cat("[EVENT] Marker popup click: remove_from_trip id =", id, "\n")
+      
+      # -- call trigger
+      r$trigger_remove_step <- id
       
     })
     
