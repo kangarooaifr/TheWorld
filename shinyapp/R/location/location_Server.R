@@ -143,6 +143,9 @@ location_Server <- function(id, r, path) {
     # -- Event: btn confirm_add_location
     observeEvent(input$confirm_add_location, {
 
+      # -- secure against empty locations #161
+      req(input$name, input$type, input$country, input$city)
+      
       # -- close dialog
       removeModal()
       
