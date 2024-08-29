@@ -121,85 +121,21 @@ location_Server <- function(id, r, path) {
     # -- Event: popup link (add_to_locations)
     observeEvent(input$add_to_locations, {
     
-      str(input$add_to_locations)
-      
       # -- get map id from input
       map_click <- paste0(input$add_to_locations, "_click")
       
-      # -- modal
-      showModal(modalDialog(
-    
-            p("Coordinates:"), 
-            
-            tags$ul(tags$li("long =", r[[map_click]]()[['lng']]), 
-                    tags$li("lat =", r[[map_click]]()[['lat']])),
-            
-            # -- name
-            textInput(inputId = ns("name"), 
-                      label = "Name"),
-            
-            # -- type
-            selectizeInput(inputId = ns("type"), 
-                           label = "Type", 
-                           choices = r[[r_items]]()$type, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'),
-                                          create = TRUE)),
-            
-            # -- country          
-            selectizeInput(inputId = ns("country"), 
-                           label = "Country", 
-                           choices = r$countries_iso$country.en, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'),
-                                          create = FALSE)),
-            
-            # -- state / region
-            selectizeInput(inputId = ns("state"), 
-                           label = "State", 
-                           choices = r[[r_items]]()$state, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'),
-                                          create = TRUE)),
-            
-            # -- zip code
-            textInput(inputId = ns("zip.code"), 
-                      label = "Zip code"),
-            
-            # -- city
-            selectizeInput(inputId = ns("city"), 
-                           label = "City", 
-                           choices = r[[r_items]]()$city, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'),
-                                          create = TRUE)),
-            
-            # -- address
-            textInput(inputId = ns("address"), 
-                      label = "Address"),
-            
-            # -- comment
-            textInput(inputId = ns("comment"), 
-                      label = "Comment"),
-            
-            # -- been.there
-            checkboxInput(inputId = ns("been.there"), 
-                          label = "Been there", 
-                          value = FALSE),
-            
-            # -- wish.list
-            checkboxInput(inputId = ns("wish.list"), 
-                          label = "Wish list", 
-                          value = FALSE),
-            
-            # -- title
-            title = "Add to my locations",
-            
-            # -- actions
-            footer = tagList(
-              modalButton("Cancel"),
-              actionButton(inputId = ns("confirm_add_location"), 
-                           label = "Create"))))
+      # -- get lng, lat
+      lng <- r[[map_click]]()[['lng']]
+      lat <- r[[map_click]]()[['lat']]
+      
+      # -- build choices
+      choices <- list(type = unique(r[[r_items]]()$type),
+                      country = r$countries_iso$country.en,
+                      state = unique(r[[r_items]]()$state),
+                      city = unique(r[[r_items]]()$city))
+                      
+      # -- display form
+      showModal(location_modal(location = NULL, lng, lat, choices, ns))
       
     })
     
@@ -253,8 +189,47 @@ location_Server <- function(id, r, path) {
       id <- unlist(strsplit(input$action_update, split = "_"))[2]
       cat("[EVENT] Marker popup click: update id =", id, "\n")
       
+      # -- get location to update
+      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      
+      # -- build choices
+      choices <- list(type = unique(r[[r_items]]()$type),
+                      country = r$countries_iso$country.en,
+                      state = unique(r[[r_items]]()$state),
+                      city = unique(r[[r_items]]()$city))
+      
+      # -- display form
+      showModal(location_modal(location, choices = choices, ns = ns))
+      
+    })
+    
+    
+    # -- Event: btn confirm_update_location
+    observeEvent(input$confirm_update_location, {
+      
+      # -- close dialog
+      removeModal()
+      
+      # -- extract location id
+      id <- unlist(strsplit(input$action_update, split = "_"))[2]
+      
+      # -- get location to update
+      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      
+      # -- update values
+      location$name = input$name
+      location$type = input$type
+      location$country = input$country
+      location$state = input$state
+      location$zip.code = input$zip.code
+      location$city = input$city
+      location$address = input$address
+      location$comment = input$comment
+      location$been.there = input$been.there
+      location$wish.list = input$wish.list
+
       # -- call trigger
-      #r[[]](id)
+      r[[r_trigger_update]](location)
       
     })
     
