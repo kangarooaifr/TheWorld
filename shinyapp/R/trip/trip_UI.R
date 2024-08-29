@@ -22,13 +22,17 @@ trip_panel_UI <- function(id)
     # -- display options
     #radioButtons(inputId = ns("display_options"), label = "", choiceNames = list(icon("compass-drafting"), icon("circle-check"), icon("layer-group")), choiceValues = list("plan", "done", "all"), inline = TRUE),
     
-    # -- hide / show
-    #checkboxInput(inputId = ns("hide_show"), label = "Hide / Show", value = TRUE),
-    
-    # -- line break
+    # -- general info
     hr(),
-    
     uiOutput(ns("trip_info")),
+    
+    # -- transport
+    hr(),
+    uiOutput(ns("trip_transport")),
+    
+    # -- accommodation
+    hr(),
+    uiOutput(ns("trip_accommodation")),
     
     # -- line break
     hr(),
@@ -37,10 +41,13 @@ trip_panel_UI <- function(id)
     p("Add"),
     actionButton(inputId = ns("add_location"), label = "", icon = icon("location-dot")),
     actionButton(inputId = ns("add_transport"), label = "", icon = icon("route")),
-    actionButton(inputId = ns("add_accomodation"), label = "", icon = icon("bed")),
+    actionButton(inputId = ns("add_accommodation"), label = "", icon = icon("bed")),
     
     # -- add_transport zone
-    uiOutput(ns("shared_zone"))
+    uiOutput(ns("shared_zone")),
+    
+    # -- test
+    uiOutput(ns("mywidget"))
     
     )
   

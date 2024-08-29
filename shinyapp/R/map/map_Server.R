@@ -4,15 +4,50 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-map_Server <- function(id, r, path) {
+map_Server <- function(id, r, verbose = TRUE) {
   moduleServer(id, function(input, output, session) {
+    
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
+    
+    # -- fly to settings
+    fly_duration <<- 1.0
+    fly_padding <<- 50
+    fly_zoom <<- 12
+    
+    
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+    
+    # -- declare names
+    map_proxy <- paste0(id, "_proxy")
+    map_click <- paste0(id, "_click")
+    map_center <- paste0(id, "_center")
+    map_bounds <- paste0(id, "_bounds")
+    map_zoom <- paste0(id, "_zoom")
+    map_flyto <- paste0(id, "_flyto")
+    
     
     # --------------------------------------------------------------------------
     # Communication objects
     # --------------------------------------------------------------------------
     
-    r$filter_country <- NULL
-    r$freeze_map <- NULL
+    # -- declare connectors
+    r[[map_proxy]] <- NULL
+    r[[map_click]] <- NULL
+    r[[map_center]] <- NULL
+    r[[map_bounds]] <- NULL
+    r[[map_zoom]] <- NULL
+    
+    # -- declare triggers
+    r[[map_flyto]] <- NULL
+    
     
     # --------------------------------------------------------------------------
     # The map
@@ -20,6 +55,8 @@ map_Server <- function(id, r, path) {
     
     # -- Declare the map output
     output$map <- renderLeaflet({
+      
+      cat(MODULE, "Generate leaflet output \n")
       
       leaflet() %>%
         
@@ -32,67 +69,109 @@ map_Server <- function(id, r, path) {
         
         # -- Add National Geographic
         # TODO: set as optional parameters when calling module
-        #addProviderTiles(providers$Stamen.Watercolor)
+        # addProviderTiles(providers$Stamen.Watercolor)
       
     })
-    
-    # -- Declare proxy for the map
-    r$proxymap <- leafletProxy('map')
     
     
     # --------------------------------------------------------------------------
-    # Event observers
+    # Map observers & connectors
     # --------------------------------------------------------------------------
     
-    # -- Observe mouse clicks
-    observeEvent(input$map_click, {
+    # -- Connector: map proxy
+    r[[map_proxy]] <- leafletProxy('map')
+    
+    
+    # -- Connector: mouse click
+    r[[map_click]] <- reactive({
 
-      # -- Get the click info
-      click <- input$map_click
-
-      # -- print
-      cat("[map] Point clicked: lng =", click$lng, "/ lat =", click$lat, "\n")
+      # -- check
+      req(input$map_click)
       
-      # -- store
-      r$map_click <- input$map_click
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Point clicked: lng =", input$map_click$lng, "/ lat =", input$map_click$lat, "\n")
+      
+      # -- return
+      input$map_click
 
     })
     
     
-    # -- Observe map center
-    observeEvent(input$map_center, {
+    # -- Connector: map center
+    r[[map_center]] <- reactive({
       
-      # -- Get the click info
-      center <- input$map_center
+      # -- check
+      req(input$map_center)
       
-      # -- print
-      cat("[map] Center: lng =", center$lng, "/ lat =", center$lat, "\n")
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Center: lng =", input$map_center$lng, "/ lat =", input$map_center$lat, "\n")
       
-      # -- store
-      r$map_click <- NULL
-      r$map_center <- input$map_center
-      
-    })
-    
-    
-    # -- Observer map bounds
-    observeEvent(input$map_bounds, {
-      bounds <- input$map_bounds
-      cat("[map] Bounds: north =", bounds$north, "/ east =", bounds$east, "/ south =", bounds$south, "\ west =", bounds$west, "\n")
-      
-      # -- store
-      r$map_bounds <- bounds
+      # -- return
+      input$map_center
       
     })
     
     
-    # -- Observer map zoom
-    observeEvent(input$map_zoom, {
+    # -- Connector: map bounds
+    r[[map_bounds]] <- reactive({
       
-      zoom <- input$map_zoom
-      cat("[map] Zoom =", zoom, "\n")
+      # -- check
+      req(input$map_bounds)
       
-      r$zoom <- zoom
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Bounds: north =", input$map_bounds$north, "/ east =", input$map_bounds$east, 
+            "/ south =", input$map_bounds$south, "\ west =", input$map_bounds$west, "\n")
+      
+      # -- return
+      input$map_bounds
+      
+    })
+    
+    
+    # -- Connector: map zoom
+    r[[map_zoom]] <- reactive({
+      
+      # -- check
+      req(input$map_zoom)
+      
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Zoom: level =", input$map_zoom, "\n")
+      
+      # -- return
+      input$map_zoom
+      
+    })
+    
+    
+    # --------------------------------------------------------------------------
+    # Trigger: map_flyto
+    # --------------------------------------------------------------------------
+    # r[[map_flyto]] = list(lng, lat)
+    
+    # -- observe trigger
+    observeEvent(r[[map_flyto]], {
+      
+      # -- check setting
+      req(!input$map_freeze)
+      
+      # -- trace
+      if(verbose)
+        cat(MODULE, "Trigger map_flyto, applying flyTo \n")
+      
+      # -- crop view
+      r[[map_proxy]] %>%
+        flyTo(lng = r[[map_flyto]]$lng, 
+              lat = r[[map_flyto]]$lat,
+              zoom = fly_zoom,
+              options = list(duration = fly_duration, 
+                             padding = c(fly_padding, fly_padding)))
+      
+      # -- unset trigger (otherwise you can't call again with same value)
+      r[[map_flyto]] <- NULL
       
     })
     
@@ -101,14 +180,14 @@ map_Server <- function(id, r, path) {
     # Search
     # --------------------------------------------------------------------------
     
-    # -- Observe search
+    # -- Observe: search input
     observeEvent(input$search, {
       
       # -- check
       req(input$search)
       
       # -- print
-      cat("[map] search input =", input$search, "\n")
+      cat(MODULE, "search input =", input$search, "\n")
       
       # -- get search result
       # TODO: rework, this function should be part of a package
@@ -126,51 +205,6 @@ map_Server <- function(id, r, path) {
       
     })
     
-    
-    # --------------------------------------------------------------------------
-    # Filters
-    # --------------------------------------------------------------------------
-    
-    # -- trigger: set filter choices
-    observeEvent(r$filter_country_choices, {
-      
-      # -- update choices
-      updateSelectizeInput(inputId = "filter_country", choices = r$filter_country_choices)
-      
-    })
-    
-    
-    # -- Observe: update filter
-    observeEvent(input$filter_country, {
-      
-      # -- check filter reset
-      if(identical(input$filter_country, ""))
-        r$filter_country <- NULL
-      else {
-        cat("[map] EVENT: Filter country =", input$filter_country, "\n")
-        r$filter_country <- input$filter_country}
-      
-    }, ignoreInit = TRUE)
-    
-    # -- reset filter
-    observeEvent(input$filter_reset, {
-      
-      cat("[map] EVENT: Reset filter country \n")
-      
-      # -- update filter
-      updateSelectizeInput(inputId = "filter_country", selected = character(0))
-      
-      
-    })
-    
-    
-    # --------------------------------------------------------------------------
-    # Freeze map
-    # --------------------------------------------------------------------------
-    
-    # -- update connector
-    r$freeze_map <- reactive(input$freeze_map)
-    
-    
+
   })
 }

@@ -1,47 +1,95 @@
 
 
-# Shiny: server logic of the Shiny web application
+# ------------------------------------------------------------------------------
+# Server logic of the Shiny web application
+# ------------------------------------------------------------------------------
 
 # -- Define server logic
-
 shinyServer(
   function(input, output){
   
-    # declare r communication object
+    # --------------------------------------------------------------------------
+    # Communication object
+    # --------------------------------------------------------------------------
+    
+    # -- declare object
     r <- reactiveValues()
     
-    # -- declare connectors
-    r$activity <- NULL
     
-    # -- observe: selected tab (tabsetPanel)
-    # Can't use eventReactive (idk why)
-    observeEvent(input$selected_tab, {
-      
-      cat("[EVENT] Selected tab =", input$selected_tab, "\n")
-      r$activity <- input$selected_tab
-      
-    })
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+    
+    locationId <- "location"
+    locationMngrId <- "locationmngr"
+    routeId <- "route"
+    
+    # --------------------------------------------------------------------------
+    # Selected tab
+    # --------------------------------------------------------------------------
+    
+    # -- Observe
+    # r$activity <- reactive({
+    #   
+    #   cat("[EVENT] Selected activity =", input$selected_tab, "\n")
+    #   input$selected_tab
+    #   
+    # })
+    
+    # -------------------------------------
+    # save for later
+    # To dynamically switch from a tabItem to another:
+    # updateTabItems(session, "inTabset", selected = "widgets")
+    # -------------------------------------
+    
+    
+    # --------------------------------------------------------------------------
+    # Kitems menu
+    # --------------------------------------------------------------------------
     
     # -- kitems: generate dynamic sidebar
     output$menu <- renderMenu(kitems::dynamic_sidebar(r))
 
-    # -- the map
-    map_Server(id = "map", r = r, path = path)
+    
+    # --------------------------------------------------------------------------
+    # Modules
+    # --------------------------------------------------------------------------
+    
+    # -- the maps
+    map_Server(id = "world", r = r, verbose = TRUE)
+    map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = "locationmngr", r = r, path = path)
+    location_Server(id = locationMngrId, locationId, r, path)
     
     # -- countries
-    country_Server(id = "country", r = r, path = path)
-    
-    # -- transports
-    route_Server(id = "routemngr", r = r, path = path)
+    country_Server(id = "country", r, path)
     
     # -- tracks
-    track_Server(id = "track", r = r, path = path)
+    track_Server(id = "track", r, path)
     
+    # -- transports
+    route_Server(id = "routemngr", routeId, r, path)
+    
+    
+    # --------------------------------------------------------------------------
+    # Activity modules
+    # --------------------------------------------------------------------------
+
+    # -- worldmap
+    worldmap_Server(id = "worldmap", mapId = "world", locationId, location_ns = locationMngrId, r)
+        
     # -- trips
-    trip_Server(id = "tripmngr", r = r, path = path)
+    trip_Server(id = "tripmngr", mapId = "trip", locationId, location_ns = locationMngrId, routeId, r, path)
+
+    
+    # --------------------------------------------------------------------------
+    # Application server ready
+    # --------------------------------------------------------------------------
+    
+    cat("--------------------------------------------------------------------\n")
+    cat("Application server ready! \n")
+    cat("--------------------------------------------------------------------\n")
     
   }
 )

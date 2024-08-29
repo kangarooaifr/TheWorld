@@ -9,21 +9,35 @@ library(sf)
 library(leaflet)
 
 
-# -------------------------------------
+# ------------------------------------------------------------------------------
 # Server logic
-# -------------------------------------
+# ------------------------------------------------------------------------------
 
 track_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
-    # get namespace
-    ns <- session$ns
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
     
-    # -- id
-    group_id <- "tracks"
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
     
-    # -- prepare
-    # file
+    
+    # --------------------------------------------------------------------------
+    # Communication objects
+    # --------------------------------------------------------------------------
+    
+    # -- declare
+    r$track <- NULL
+    
+    
+    # --------------------------------------------------------------------------
+    # Load resources
+    # --------------------------------------------------------------------------
+    
+    # -- prepare file
     gpx_file <- file.path(path$data, "gpx/Randonn_e__04_09_2021_17_07.gpx")
     
     
@@ -36,32 +50,18 @@ track_Server <- function(id, r, path) {
     
     observeEvent(track1(), {
       
+      cat(MODULE, "Display tracks on map \n")
+      
       # Convert track
       track2 <- track1() %>%
         st_combine() %>%
         st_cast(to = "LINESTRING") %>%
         st_sf()
       
-      # add to leaflet map
-      r$proxymap %>%
-        
-        # -- hidden by default
-        hideGroup(group_id) %>%
-        
-        # -- add on map
-        addPolylines(data = track2, group = group_id)
-
+      # -- expose
+      r$track <- track2
+      
     })
-    
-    
-    # -------------------------------------
-    # Hide / Show
-    # -------------------------------------
-    
-    # -- Observe checkbox
-    observeEvent(input$hide_show, 
-                 hide_show(proxy = r$proxymap, id = group_id, show = input$hide_show))
-
     
   })
 }

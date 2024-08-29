@@ -4,39 +4,73 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path) {
+trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path) {
   moduleServer(id, function(input, output, session) {
+    
+    # --------------------------------------------------------------------------
+    # Parameters
+    # --------------------------------------------------------------------------
+    
+    # -- trace
+    MODULE <- paste0("[", id, "]")
+    cat(MODULE, "Starting module server... \n")
     
     # -- get namespace
     ns <- session$ns
+    
+    # -- settings
+    coord_digits <- 3
+    
+    
+    # --------------------------------------------------------------------------
+    # Names
+    # --------------------------------------------------------------------------
+    
+    # -- map names
+    map_proxy <- paste0(mapId, "_proxy")
+    map_flyto <- paste0(mapId, "_flyto")
+
+    # -- get names
+    route_items <- kitems::items_name(routeId)
+    route_group_id <- 'route'
+    
+    
+    # --------------------------------------------------------------------------
+    # Init
+    # --------------------------------------------------------------------------
     
     # -- shared input zone
     output$shared_zone <- NULL
     is_shared_zone <- reactiveVal("")
     
-    # -------------------------------------
+    # -- marker icons
+    icons <- location_icons()
+    
+    
+    # --------------------------------------------------------------------------
+    # Register observer (map_click)
+    # --------------------------------------------------------------------------
+    
+    obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
+    
+    
+    # --------------------------------------------------------------------------
     # Trip management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     trip_kitems_id <- "trip"
-    
-    # id, name, status, description, comment
-    # status = draft, planned, inwork, done
-    # date.start, date.end, cities, countries >> computed from other tables based on trip.id
     
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = trip_kitems_id, r, path$data)
     
     # -- items name
     r_items <- kitems::items_name(trip_kitems_id)
-    # r_trigger_add <- kitems::trigger_add_name(id = trip_kitems_id)
-    # r_trigger_delete <- kitems::trigger_delete_name(id = trip_kitems_id)
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Trip selector
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- observer:
     # feed trip_selector when items are ready
@@ -55,55 +89,306 @@ trip_Server <- function(id, r, path) {
     })
     
     
-    # -- observer:
-    observeEvent(input$trip_selector, {
+    # --------------------------------------------------------------------------
+    # select trip items
+    # --------------------------------------------------------------------------
+    
+    # -- steps
+    selected_steps <- reactive(r[[step_items]]()[r[[step_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- transports
+    selected_transports <- reactive(r[[transport_r_items]]()[r[[transport_r_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- accommodations
+    selected_accommodations <- reactive(r[[accommodation_r_items]]()[r[[accommodation_r_items]]()$trip.id == input$trip_selector, ])
+    
+    # -- select locations
+    selected_locations <- reactive(
+      location_select(r, id = locationId, location_id = c(selected_steps()$location.id, 
+                                             selected_accommodations()$location.id, 
+                                             selected_route()$origin, 
+                                             selected_route()$destination))) %>% 
+      bindEvent(list(selected_steps(), selected_accommodations(), selected_route()))
+    
+    # -- select route 
+    # keep it after location to minimize fly to bounds side effect (half route displayed + refresh after crop)
+    selected_route <- reactive(
+      route_select(routes = r[[route_items]](), query = selected_transports()$route.id))
+    
+    
+    # --------------------------------------------------------------------------
+    # Display trip items on map
+    # --------------------------------------------------------------------------
+    
+    # -- display routes
+    observeEvent(selected_route(), {
       
-      cat("[trip] Trip selector, id =", input$trip_selector, "\n")
+      # -- init
+      routes <- selected_route()
+      cat(MODULE, "Update map, selected routes =", length(routes$id), "\n")
       
-      # -- get steps
-      steps <- r[[step_items]]()
-      steps <- steps[steps$trip.id == input$trip_selector, ]
+      # -- clear map (group)
+      r[[map_proxy]] %>%
+        clearGroup(route_group_id)
       
-      str(steps)
+      # -- check (otherwise unselect, so clearGroup is enough)
+      if(length(routes$id) > 0){
+        
+        # -- Helper: add route to map
+        addroute <- function(id){
+          
+          # -- get route & parameters
+          route <- routes[routes$id == id, ]
+          origin <- route$origin
+          destination <- route$destination
+          type  <- route$type
+          
+          cat("-- route origin", origin, "/ destination", destination, "/ type =", type, "\n")
+          
+          # -- mode: air
+          if(type == 'air'){
+            
+            # -- get names
+            origin_name <- r$airports[r$airports$id == origin, 'name']
+            destination_name <- r$airports[r$airports$id == destination, 'name']
+            
+            # -- compute great circle route
+            route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
+                                    p2 = airport_coord(r$airports, id = destination), 
+                                    n = 100, 
+                                    addStartEnd = TRUE)
+            
+            # -- add fight route
+            r[[map_proxy]] %>%
+              addPolylines(data = route, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+            
+            # -- mode: sea
+          } else if(type == 'sea'){
+            
+            # -- get names
+            origin_name <- r$seaports()[r$seaports()$id == origin, 'name']
+            destination_name <- r$seaports()[r$seaports()$id == destination, 'name']
+            
+            # -- compute route
+            route <- data.frame(lng = c(r$seaports()[r$seaports()$id == origin, 'lng'], r$seaports()[r$seaports()$id == destination, 'lng']),
+                                lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
+            
+            # -- add sea route
+            r[[map_proxy]] %>%
+              addPolylines(lng = route$lng, lat = route$lat, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
+            
+          }
+          
+        }
+        
+        # -- apply helper to routes df
+        cat(MODULE, "Looping over route list... \n")
+        lapply(routes$id, addroute)
+        
+      }
       
-      # -- get transports
-      transports <- r[[transport_r_items]]()
-      transports <- transports[transports$trip.id == input$trip_selector, ]
+    })
+    
+    
+    # -- display locations
+    observe({
       
-      # -- call trigger (select route)
-      r$route_select <- transports$route.id
+      locations <- selected_locations()
       
-      # -- output
-      str(transports)
+      # -- remove markers
+      clearMarkers(r[[map_proxy]])
       
-      # -- get accomodations
-      accommodations <- r[[accomodation_r_items]]()
-      accommodations <- accommodations[accommodations$trip.id == input$trip_selector, ]
+      # -- check dim #
+      if(nrow(locations) != 0){
+        
+        # -- add icon & popup columns
+        locations <- location_icon(locations)
+        locations$popup <- location_popups(locations, type = 'selected', activity = 'trip_planner', ns = ns, location_ns = location_ns)
+        
+        # -- display on map
+        add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
+        
+        # -- crop map around markers
+        map_crop(map_proxy = r[[map_proxy]], 
+                 lng1 = min(locations$lng), 
+                 lat1 = min(locations$lat), 
+                 lng2 = max(locations$lng),
+                 lat2 = max(locations$lat), 
+                 fly_duration, 
+                 fly_padding)}
       
-      # -- output
-      str(accommodations)
+    }) %>% bindEvent(selected_locations())
+    
+    
+    
+    # -- compute timeline table
+    # takes into account transports & accommodations (because steps have no date/time)
+    timeline_table <- reactive({
       
-      # -- select locations
-      r$location_select <- c(steps$location.id, accommodations$location.id, r$selected_route()$origin, r$selected_route()$destination)
+      cat(MODULE, "Compute timeline table \n")
       
+      # -- transports
+      transports <- selected_transports()[c('id', 'departure', 'arrival')]
+      colnames(transports) <- c('id', 'start', 'end')
+      
+      # -- accommodations
+      accomodations <- selected_accommodations()[c('id', 'checkin', 'checkout')]
+      colnames(accomodations) <- c('id', 'start', 'end')
+      
+      # -- return
+      rbind(transports, accomodations)
+      
+    }) %>% bindEvent(list(selected_transports(), selected_accommodations()),
+                     ignoreInit = FALSE)
+    
+    
+    # --------------------------------------------------------------------------
+    # trip info outputs
+    # --------------------------------------------------------------------------
+    
+    # -- routes
+    output$trip_transport <- renderUI({
+      
+      cat(MODULE, "Update trip info \n")
+      
+      id <- selected_transports()$id[[1]]
+      cat("id ==", id, "\n")
+      
+      # -- return
+      tagList(
+        p(strong('Departure:'), selected_transports()[selected_transports()$id == id, ]$departure),
+        p(strong('Arrival:'), selected_transports()[selected_transports()$id == id, ]$arrival),
+        
+        p(strong('Company:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$company),
+        p(strong('Flight #:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$number),
+        
+        p(strong('Origin:'),
+          HTML(
+            sprintf(
+              paste0(
+                
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                             ns("fly_to_location")))),
+              
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lat)),
+        ),
+        
+        p(strong('Destination:'),
+          HTML(
+            sprintf(
+              paste0(
+                
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
+                                             ns("fly_to_location")))),
+              
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lat)),
+          
+        ))
+      
+    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
+                     ignoreInit = TRUE)
+    
+    
+    # -- Observe: fly_to_location
+    observeEvent(input$fly_to_location, {
+      
+      # -- extract values
+      lng <- unlist(strsplit(input$fly_to_location, split = "_"))[2]
+      lat <- unlist(strsplit(input$fly_to_location, split = "_"))[3]
+      cat("[EVENT] ActionLink click: fly_to_location lng =", lng, ", lat =", lat, "\n")
+      
+      # -- call trigger
+      r[[map_flyto]] <- list(lng = lng, lat = lat)
+      
+    })
+    
+    
+    # -- output: trip_info
+    output$trip_info <- renderUI({
       
       # -- compute values
-      date_start <- min(c(transports$departure, accommodations$checkin))
-      date_end <- max(c(transports$arrival, accommodations$checkout))
-      duration <- date_end - date_start
+      date_start <- min(c(selected_transports()$departure, selected_accommodations()$checkin))
+      date_end <- max(c(selected_transports()$arrival, selected_accommodations()$checkout))
+      duration <- round(date_end - date_start, digits = 0)
       
-      output$trip_info <- renderUI(
-        tagList(
-          p(strong('Start:'), date_start),
-          p(strong('End:'), date_end),
-          p(strong('Duration:'), duration)))
+      # -- return tag
+      tagList(
+        p(strong('Start:'), date_start),
+        p(strong('End:'), date_end),
+        p(strong('Duration:'), duration),
+        
+        sliderInput(ns("timeline"), label = "Timeline", 
+                    min = as.Date(date_start), max = as.Date(date_end), value = Sys.Date(),
+                    animate = TRUE))}) %>% bindEvent(list(selected_transports(), selected_accommodations()), ignoreInit = TRUE)
+    
+    # -- observer: timeline
+    observe({
       
-    }, ignoreInit = TRUE)
+      cat(MODULE, "New timeline value =", input$timeline, "\n")
+      
+      # -- slice timeline table
+      slice <- timeline_table()[as.Date(timeline_table()$start) == input$timeline | as.Date(timeline_table()$end) == input$timeline, ]
+      
+      str(slice)
+      
+    }) %>% bindEvent(input$timeline, ignoreInit = TRUE)
     
     
-    # -------------------------------------
+    
+    
+    # -- accommodations
+    output$trip_accommodation <- renderUI({
+      
+      cat(MODULE, "Update accommodation info \n")
+      
+      id <- selected_accommodations()$id[[1]]
+      cat("id ==", id, "\n")
+      
+      # -- return
+      tagList(
+        
+        p(strong('Name:'),
+          HTML(
+            sprintf(
+              paste0(
+
+                # -- remove from trip
+                actionLink(inputId = "flyto_%s_%s",
+                           label =  r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$name,
+                           onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                                             ns("fly_to_location")))),
+
+              r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_accommodations()[selected_accommodations()$id == id, ]$location.id, ]$lat))),
+        
+        p(strong('Check-in:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkin),
+        p(strong('Check-out:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkout))
+      
+    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
+                     ignoreInit = TRUE)
+    
+    
+    # -- style test
+    output$mywidget <- renderUI(
+      
+      div(
+        p("some text goes here.")
+      ) %>% tagAppendAttributes(class = "my_row_class") 
+    
+    )
+    
+    # --------------------------------------------------------------------------
     # Step management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     step_kitems_id <- "step"
@@ -115,8 +400,11 @@ trip_Server <- function(id, r, path) {
     step_data_model <- kitems::dm_name(step_kitems_id)
     step_items <- kitems::items_name(step_kitems_id)
     step_trigger_add <- kitems::trigger_add_name(step_kitems_id)
+    step_trigger_delete <- kitems::trigger_delete_name(step_kitems_id)
     
-    # id, trip.id, location.id, order, comment
+    # -- define triggers
+    r$trigger_add_step <- NULL
+    r$trigger_remove_step <- NULL
     
     # -- observer
     observeEvent(input$add_location, {
@@ -150,23 +438,17 @@ trip_Server <- function(id, r, path) {
           )
         )
         
-        # -- init location search trigger
-        r$location_search_string <- 'City'
+        # -- location search
+        result <- search_item(r, id = locationId, pattern = 'city')
         
-        # -- observer: search result
-        observeEvent(r$location_search_result(), {
+        # -- check result size to avoid crash
+        if(dim(result)[1] > 0){
           
-          cat("[trip] Location search result, dim =", dim(r$location_search_result()), "\n")
-          
-          # -- compute choices
-          result <- r$location_search_result()
           choices <- result$id
           names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
           # -- update input
-          updateSelectizeInput(inputId = "select_step", choices = choices)
-          
-        })
+          updateSelectizeInput(inputId = "select_step", choices = choices)}
         
       }
       
@@ -198,9 +480,74 @@ trip_Server <- function(id, r, path) {
     })
     
     
-    # -------------------------------------
+    # -- Observe: add_to_trip
+    observeEvent(input$add_to_trip, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$add_to_trip, split = "_"))[2]
+      cat("[EVENT] Marker popup click: add_to_trip id =", id, "\n")
+      
+      # -- get location
+      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      
+      # -- call trigger
+      r$trigger_add_step <- location
+      
+    })
+    
+    
+    # -- observe: trigger_add_step
+    observeEvent(r$trigger_add_step, {
+
+      cat("[TRIGGER] Add step to trip, input location =", r$trigger_add_step$id, "\n")
+
+      # -- compute values
+      values <- list(id = ktools::getTimestamp(),
+                     trip.id = input$trip_selector,
+                     location.id = r$trigger_add_step$id,
+                     order = step_order(r[[step_items]]()),
+                     comment = NULL)
+      
+      # -- create item
+      step <- kitems::item_create(values, data.model = r[[step_data_model]]())
+      
+      # -- call trigger
+      r[[step_trigger_add]](step)
+      
+    })
+    
+    
+    # -- observe: trigger_remove_step
+    observeEvent(r$trigger_remove_step, {
+      
+      cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
+      
+      # -- get step id from location.id
+      id <- r[[step_items]]()[r[[step_items]]()$location.id == r$trigger_remove_step, ]$id
+      str(id)
+      
+      # -- call trigger
+      r[[step_trigger_delete]](id)
+      
+    })
+    
+    
+    # -- Observe: remove_from_trip
+    observeEvent(input$remove_from_trip, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$remove_from_trip, split = "_"))[2]
+      cat("[EVENT] Marker popup click: remove_from_trip id =", id, "\n")
+      
+      # -- call trigger
+      r$trigger_remove_step <- id
+      
+    })
+    
+    
+    # --------------------------------------------------------------------------
     # Transport management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
     transport_kitems_id <- "transport"
@@ -225,7 +572,7 @@ trip_Server <- function(id, r, path) {
         
       } else {
         
-        cat("[trip] Add transport \n")
+        cat(MODULE, "Add transport \n")
         
         # -- declare cache
         is_shared_zone("transport")
@@ -262,20 +609,21 @@ trip_Server <- function(id, r, path) {
       
       # -- observer: transport mode radio
       observeEvent(input$route_type, {
-        r$route_search_string <- input$route_type})
-      
-      
-      # -- observer: search result
-      observeEvent(r$route_search_result(), {
         
-        cat("[trip] Route search result, dim =", dim(r$route_search_result()), "\n")
+        cat(MODULE, "Event route_type input \n")
+
+        # -- search route
+        result <- route_search(routes = r[[route_items]](), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
         
-        # -- compute choices
-        result <- r$route_search_result()
-        choices <- result$id
-        names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
-        
-        updateSelectizeInput(inputId = "select_route", choices = choices)
+        # -- check
+        if(nrow(result) > 0){
+          
+          # -- compute choices
+          choices <- result$id
+          names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
+          
+          # -- update input
+          updateSelectizeInput(inputId = "select_route", choices = choices)}
         
       })
         
@@ -312,30 +660,30 @@ trip_Server <- function(id, r, path) {
     })
     
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # -- create tables flight, sea, road to instantiate in route!
     
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     # Accommodation management
-    # -------------------------------------
+    # --------------------------------------------------------------------------
     
     # -- id
-    accomodation_kitems_id <- "accomodation"
+    accommodation_kitems_id <- "accommodation"
     
     # -- names
-    accomodation_r_items <- kitems::items_name(accomodation_kitems_id)
-    accomodation_r_trigger_add <- kitems::trigger_add_name(accomodation_kitems_id)
-    accomodation_r_data_model <- kitems::dm_name(accomodation_kitems_id)
+    accommodation_r_items <- kitems::items_name(accommodation_kitems_id)
+    accommodation_r_trigger_add <- kitems::trigger_add_name(accommodation_kitems_id)
+    accommodation_r_data_model <- kitems::dm_name(accommodation_kitems_id)
     
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = accomodation_kitems_id, r, path$data)
+    kitems::kitemsManager_Server(id = accommodation_kitems_id, r, path$data)
     
     # id, trip.id, location.id, checkin, checkout, breakfast, comment
     
     # -- observer
-    observeEvent(input$add_accomodation, {
+    observeEvent(input$add_accommodation, {
       
-      if(is_shared_zone() == "accomodation"){
+      if(is_shared_zone() == "accommodation"){
         
         # -- clear all
         output$shared_zone <- NULL
@@ -343,17 +691,17 @@ trip_Server <- function(id, r, path) {
         
       } else {
         
-        cat("[trip] Add accommodation \n")
+        cat(MODULE, "Add accommodation \n")
         
         # -- declare cache
-        is_shared_zone("accomodation")
+        is_shared_zone("accommodation")
         
         # -- output
         output$shared_zone <- renderUI(
           tagList(
             
             # -- accommodation
-            selectizeInput(inputId = ns("select_accomodation"), label = "Accomodation", choices = NULL,
+            selectizeInput(inputId = ns("select_accommodation"), label = "Accommodation", choices = NULL,
                            options = list(placeholder = 'Please select an option below',
                                           onInitialize = I('function() { this.setValue(""); }'))),
             
@@ -364,7 +712,7 @@ trip_Server <- function(id, r, path) {
             # -- checkout
             dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
             timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
-            selectizeInput(inputId = ns("accomodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
+            selectizeInput(inputId = ns("accommodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
             
             # -- breakfast
             checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
@@ -373,32 +721,26 @@ trip_Server <- function(id, r, path) {
             textInput(inputId = ns("accommodation_comment"), label = "Comment"),
             
             # -- btn
-            actionButton(inputId = ns("confirm_accomodation"), label = "OK")))
+            actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
-        # -- init location search trigger
-        r$location_search_string <- 'Accomodation'
+        # -- location search
+        result <- search_item(r, id = locationId, pattern = 'accommodation')
         
-        # -- observer: search result
-        observeEvent(r$location_search_result(), {
+        # -- check search result size to avoid crash
+        if(dim(result)[1] > 0){
           
-          cat("[trip] Accomodation search result, dim =", dim(r$location_search_result()), "\n")
-          
-          # -- compute choices
-          result <- r$location_search_result()
           choices <- result$id
           names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
           
           # -- update input
-          updateSelectizeInput(inputId = "select_accomodation", choices = choices)
-          
-        })
+          updateSelectizeInput(inputId = "select_accommodation", choices = choices)}
         
       }
       
     })
     
     
-    observeEvent(input$confirm_accomodation, {
+    observeEvent(input$confirm_accommodation, {
       
       # -- clear
       output$shared_zone <- NULL
@@ -406,14 +748,14 @@ trip_Server <- function(id, r, path) {
       
       # -- compute values
       checkin <- paste(input$checkin_date, input$checkin_time)
-      checkin <- as.POSIXct(checkin, tz = input$accomodation_tz)
+      checkin <- as.POSIXct(checkin, tz = input$accommodation_tz)
       checkout <- paste(input$checkout_date, input$checkout_time)
-      checkout <- as.POSIXct(checkout, tz = input$accomodation_tz)
+      checkout <- as.POSIXct(checkout, tz = input$accommodation_tz)
       
       # -- merge
       values <- list(id = ktools::getTimestamp(),
                      trip.id = input$trip_selector,
-                     location.id = input$select_accomodation,
+                     location.id = input$select_accommodation,
                      checkin = checkin,
                      checkout = checkout,
                      breakfast = input$breakfast,
@@ -421,10 +763,10 @@ trip_Server <- function(id, r, path) {
   
       
       # -- create item
-      accomodation <- kitems::item_create(values, data.model = r[[accomodation_r_data_model]]())
+      accommodation <- kitems::item_create(values, data.model = r[[accommodation_r_data_model]]())
       
       # -- call trigger
-      r[[accomodation_r_trigger_add]](accomodation)
+      r[[accommodation_r_trigger_add]](accommodation)
       
       
       
