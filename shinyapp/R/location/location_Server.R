@@ -114,32 +114,9 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     r$bus_stations <- stations[stations$is_road %in% TRUE, ]
 
     
-    # -------------------------------------
-    # [EVENT] Map click
-    # -------------------------------------
-    
-    # # -- Event: map click
-    # observeEvent(r[[map_click]](), {
-    #   
-    #   cat("[location] Map click event received \n")
-    #   
-    #   # -- get values
-    #   lng <- r[[map_click]]()[['lng']]
-    #   lat <- r[[map_click]]()[['lat']]
-    #   
-    #   # -- display popup
-    #   r[[map_proxy]] %>% 
-    #     clearPopups() %>%
-    #     addPopups(lng, lat, 
-    #               paste("Longitude:", round(lng, digits = coord_digits), br(),
-    #                     "Latitude:", round(lat, digits = coord_digits), 
-    #                     hr(),
-    #                     actionLink(inputId = ns("link_add"), 
-    #                                label =  "add to my locations", 
-    #                                icon = icon("plus"),
-    #                                onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_locations")))))
-    # })
-    
+    # --------------------------------------------------------------------------
+    # Add location
+    # --------------------------------------------------------------------------
     
     # -- Event: popup link (add_to_locations)
     observeEvent(input$add_to_locations, {
