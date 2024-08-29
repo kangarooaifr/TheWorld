@@ -106,54 +106,6 @@ route_Server <- function(id, r, path, map_proxy) {
     
     
     # -------------------------------------
-    # Search
-    # -------------------------------------
-    
-    # -- declare trigger
-    r$route_search_string <- NULL
-    
-    
-    # -- observe trigger & expose connector
-    r$route_search_result <- eventReactive(r$route_search_string, {
-      
-      # -- check for empty string (otherwise the whole df is returned)
-      if(identical(r$route_search_string, ""))
-        NULL
-      
-      else {
-        
-        cat("[route] Trigger, search string =", r$route_search_string, "\n")
-        
-        # -- filter items
-        result <- r[[r_items]]() %>%
-          filter_all(any_vars(grepl(r$route_search_string, .)))
-
-        # -- air
-        if(r$route_search_string == 'air'){
-          
-          result <- merge(result, r$airports[c("id", "iata")], by.x = "origin", by.y = "id")
-          result <- merge(result, r$airports[c("id", "iata")], by.x = "destination", by.y = "id")
-          names(result)[names(result) == 'iata.x'] <- 'origin.code'
-          names(result)[names(result) == 'iata.y'] <- 'destination.code'
-          
-          # -- sea
-        } else if(r$route_search_string == 'sea'){
-          
-          result <- merge(result, r$seaports()[c("id", "name")], by.x = "origin", by.y = "id")
-          result <- merge(result, r$seaports()[c("id", "name")], by.x = "destination", by.y = "id")
-          names(result)[names(result) == 'name.x'] <- 'origin.code'
-          names(result)[names(result) == 'name.y'] <- 'destination.code'
-          
-        }
-        
-        # -- return
-        result
-        
-      }
-    })
-    
-    
-    # -------------------------------------
     # Select
     # -------------------------------------
     # query pattern:

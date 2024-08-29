@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns) {
+trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns, route_id) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -20,6 +20,9 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns) {
     
     # -- settings
     coord_digits <- 3
+    
+    # -- get names
+    route_items <- kitems::items_name(route_id)
     
     
     # -------------------------------------
@@ -488,20 +491,21 @@ trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns) {
       
       # -- observer: transport mode radio
       observeEvent(input$route_type, {
-        r$route_search_string <- input$route_type})
-      
-      
-      # -- observer: search result
-      observeEvent(r$route_search_result(), {
         
-        cat("[trip] Route search result, dim =", dim(r$route_search_result()), "\n")
+        cat("[trip] Event route_type input \n")
+
+        # -- search route
+        result <- route_search(routes = r[[route_items]](), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
         
-        # -- compute choices
-        result <- r$route_search_result()
-        choices <- result$id
-        names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
-        
-        updateSelectizeInput(inputId = "select_route", choices = choices)
+        # -- check
+        if(nrow(result) > 0){
+          
+          # -- compute choices
+          choices <- result$id
+          names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
+          
+          # -- update input
+          updateSelectizeInput(inputId = "select_route", choices = choices)}
         
       })
         
