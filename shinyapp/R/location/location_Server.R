@@ -13,9 +13,6 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     # -- ids
     kitems_id <- "location"
 
-    # -- settings
-    coord_digits <- 3
-
     # -- launch kitems sub module
     kitems::kitemsManager_Server(id = kitems_id, r, path$data)
     
@@ -121,32 +118,37 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
     # [EVENT] Map click
     # -------------------------------------
     
-    # -- Event: map click
-    observeEvent(r[[map_click]](), {
-      
-      cat("[location] Map click event received \n")
-      
-      # -- get values
-      lng <- r[[map_click]]()[['lng']]
-      lat <- r[[map_click]]()[['lat']]
-      
-      # -- display popup
-      r[[map_proxy]] %>% 
-        clearPopups() %>%
-        addPopups(lng, lat, 
-                  paste("Longitude:", round(lng, digits = coord_digits), br(),
-                        "Latitude:", round(lat, digits = coord_digits), 
-                        hr(),
-                        actionLink(inputId = ns("link_add"), 
-                                   label =  "add to my locations", 
-                                   icon = icon("plus"),
-                                   onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_locations")))))
-    })
+    # # -- Event: map click
+    # observeEvent(r[[map_click]](), {
+    #   
+    #   cat("[location] Map click event received \n")
+    #   
+    #   # -- get values
+    #   lng <- r[[map_click]]()[['lng']]
+    #   lat <- r[[map_click]]()[['lat']]
+    #   
+    #   # -- display popup
+    #   r[[map_proxy]] %>% 
+    #     clearPopups() %>%
+    #     addPopups(lng, lat, 
+    #               paste("Longitude:", round(lng, digits = coord_digits), br(),
+    #                     "Latitude:", round(lat, digits = coord_digits), 
+    #                     hr(),
+    #                     actionLink(inputId = ns("link_add"), 
+    #                                label =  "add to my locations", 
+    #                                icon = icon("plus"),
+    #                                onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', ns("add_to_locations")))))
+    # })
     
     
     # -- Event: popup link (add_to_locations)
     observeEvent(input$add_to_locations, {
     
+      str(input$add_to_locations)
+      
+      # -- get map id from input
+      map_click <- paste0(input$add_to_locations, "_click")
+      
       # -- modal
       showModal(modalDialog(
     
@@ -231,6 +233,10 @@ location_Server <- function(id, r, path, map_proxy, map_click) {
       # -- close dialog
       removeModal()
       
+      # -- get map id from input
+      map_proxy <- paste0(input$add_to_locations, "_proxy")
+      map_click <- paste0(input$add_to_locations, "_click")
+
       # -- clear popup
       r[[map_proxy]] %>% 
         clearPopups()

@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
+worldmap_Server <- function(id, r, location_id, location_ns, mapId) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -18,6 +18,8 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
     bus_stations_level <- 13
     railway_stations_level <- 10
     
+    coord_digits <- 3
+    
     # -- items name
     r_location_items <- kitems::items_name(id = location_id)
     
@@ -30,14 +32,21 @@ worldmap_Server <- function(id, r, location_id, location_ns, map_id) {
     r[[filter_country]] <- reactive(NULL)
     
     # -- map
-    map_proxy <- paste0(map_id, "_proxy")
-    map_bounds <- paste0(map_id, "_bounds")
-    map_zoom <- paste0(map_id, "_zoom")
+    map_proxy <- paste0(mapId, "_proxy")
+    map_bounds <- paste0(mapId, "_bounds")
+    map_zoom <- paste0(mapId, "_zoom")
     
     
     # -- marker icons
     icons <- location_icons()
 
+    
+    # -------------------------------------
+    # Register observer (map_click)
+    # -------------------------------------
+    
+    obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
+    
         
     # -------------------------------------
     # Connector: visited_countries

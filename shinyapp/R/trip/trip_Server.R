@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
+trip_Server <- function(id, r, path, mapId, map_proxy, map_flyto, location_ns) {
   moduleServer(id, function(input, output, session) {
     
     # -- get namespace
@@ -16,6 +16,18 @@ trip_Server <- function(id, r, path, map_proxy, map_flyto, location_ns) {
     
     # -- marker icons
     icons <- location_icons()
+    
+    
+    # -- settings
+    coord_digits <- 3
+    
+    
+    # -------------------------------------
+    # Register observer (map_click)
+    # -------------------------------------
+    
+    obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
+    
     
     # -------------------------------------
     # Trip management
