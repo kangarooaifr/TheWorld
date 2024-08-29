@@ -13,7 +13,7 @@ library(leaflet)
 # Server logic
 # -------------------------------------
 
-track_Server <- function(id, r, path, map_proxy) {
+track_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # -- trace
