@@ -16,9 +16,9 @@ map_Server <- function(id, r, verbose = TRUE) {
     cat(MODULE, "Starting module server... \n")
     
     # -- fly to settings
-    fly_duration <<- 1.0
-    fly_padding <<- 50
-    fly_zoom <<- 12
+    setting(name = "fly_duration", type = "numeric", default = 1.0)
+    setting(name = "fly_padding", type = "numeric", default = 50)
+    setting(name = "fly_zoom", type = "numeric", default = 12)
     
     
     # --------------------------------------------------------------------------
@@ -166,9 +166,9 @@ map_Server <- function(id, r, verbose = TRUE) {
       r[[map_proxy]] %>%
         flyTo(lng = r[[map_flyto]]$lng, 
               lat = r[[map_flyto]]$lat,
-              zoom = fly_zoom,
-              options = list(duration = fly_duration, 
-                             padding = c(fly_padding, fly_padding)))
+              zoom = setting("fly_zoom"),
+              optionss = list(duration = setting("fly_duration"), 
+                             padding = c(setting("fly_padding"), setting("fly_padding"))))
       
       # -- unset trigger (otherwise you can't call again with same value)
       r[[map_flyto]] <- NULL

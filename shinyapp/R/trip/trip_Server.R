@@ -19,7 +19,7 @@ trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path) {
     ns <- session$ns
     
     # -- settings
-    coord_digits <- 3
+    setting(name = "coord_digits", type = "numeric", default = 3)
     
     
     # --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path) {
     # Register observer (map_click)
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
+    obs <- map_click_observer(r, mapId = mapId, coord_digits = setting("coord_digits"), location_ns)
     
     
     # --------------------------------------------------------------------------

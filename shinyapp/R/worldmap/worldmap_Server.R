@@ -18,12 +18,15 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # -- get namespace
     ns <- session$ns
     
-    # -- settings
-    contextual_locations_level <- 8
-    bus_stations_level <- 13
-    railway_stations_level <- 10
+    # -- general settings
+    setting(name = "coord_digits", type = "numeric", default = 3)
     
-    coord_digits <- 3
+    # -- contextual locations settings
+    setting(name = "contextual_locations_level", type = "numeric", default = 8)
+    setting(name = "bus_stations_level", type = "numeric", default = 13)
+    setting(name = "railway_stations_level", type = "numeric", default = 10)
+    
+    
     
     # --------------------------------------------------------------------------
     # Names
@@ -53,7 +56,7 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # Register observer (map_click)
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(r, mapId = mapId, coord_digits, location_ns)
+    obs <- map_click_observer(r, mapId = mapId, coord_digits = setting("coord_digits"), location_ns)
     
         
     # --------------------------------------------------------------------------
@@ -166,18 +169,18 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     observe({
 
       # -- check zoom level
-      if(r[[map_zoom]]() >= contextual_locations_level){
+      if(r[[map_zoom]]() >= setting("contextual_locations_level")){
 
         # -- init
         railway_stations <- NULL
         bus_stations <- NULL
 
         # -- check setting
-        if(r[[map_zoom]]() >= railway_stations_level)
+        if(r[[map_zoom]]() >= setting("railway_stations_level"))
           railway_stations <- r$railway_stations
 
         # -- check setting
-        if(r[[map_zoom]]() >= bus_stations_level)
+        if(r[[map_zoom]]() >= setting("bus_stations_level"))
           bus_stations <- r$bus_stations
 
         # -- get contextual locations
