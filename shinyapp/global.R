@@ -19,7 +19,8 @@ library(leaflet)
 # -- Declare path list
 path <- list(code = "./R",
              data = "../data",
-             resources = "./resources")
+             resources = "./resources",
+             settings = "./settings")
 
 
 # ------------------------------------------------------------------------------
