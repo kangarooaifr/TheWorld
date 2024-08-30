@@ -30,13 +30,12 @@ setting <- function(name, type = NULL, value = NULL, default = NULL){
   } else {
    
     # -- check value
-    if(is.null(value)){
+    if(is.null(value))
       
       # -- return
-      cat("[setting] Setting name =", name, "/ value =", settings[settings$name == name, ]$value, "\n")
       settings[settings$name == name, ]$value
     
-    } else {
+    else {
       
       # -- update value
       settings[settings$name == name, ]$value <<- value
