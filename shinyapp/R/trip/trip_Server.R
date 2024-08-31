@@ -4,8 +4,23 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path) {
+trip_Server <- function(id, mapId, locationId, location_ns, routeId, r, path, routes) {
   moduleServer(id, function(input, output, session) {
+    
+    
+    
+    
+    observeEvent(routes(), {
+      
+      cat("[LAB] Inside observeEvent(routes(), ... !!!!!!! \n")
+      str(routes())
+      
+    })
+    
+    
+    
+    
+    
     
     # --------------------------------------------------------------------------
     # Parameters
