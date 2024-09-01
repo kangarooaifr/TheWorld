@@ -173,18 +173,18 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     observe({
 
       # -- check zoom level
-      if(r[[map_zoom]]() >= setting("contextual_locations_level")){
+      if(map$zoom() >= setting("contextual_locations_level")){
 
         # -- init
         railway_stations <- NULL
         bus_stations <- NULL
 
         # -- check setting
-        if(r[[map_zoom]]() >= setting("railway_stations_level"))
+        if(map$zoom() >= setting("railway_stations_level"))
           railway_stations <- r$railway_stations
 
         # -- check setting
-        if(r[[map_zoom]]() >= setting("bus_stations_level"))
+        if(map$zoom() >= setting("bus_stations_level"))
           bus_stations <- r$bus_stations
 
         # -- get contextual locations
