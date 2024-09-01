@@ -65,8 +65,8 @@ shinyServer(
     # --------------------------------------------------------------------------
     
     # -- the maps
-    map_Server(id = "world", r = r, verbose = TRUE)
-    map_Server(id = "trip", r = r, verbose = TRUE)
+    worldMap <- map_Server(id = "world", r = r, verbose = TRUE)
+    tripMap <- map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
     locations <- location_Server(id = locationMngrId, locationId, r, path)
@@ -86,15 +86,16 @@ shinyServer(
     # --------------------------------------------------------------------------
 
     # -- worldmap
-    worldmap_Server(id = "worldmap", mapId = "world", locations, location_ns = locationMngrId, r)
+    worldmap_Server(id = "worldmap", map = worldMap, locations, location_ns = locationMngrId, r)
         
     # -- trips
-    trip_Server(id = "tripmngr", mapId = "trip", locations, location_ns = locationMngrId, routes, r, path)
+    trip_Server(id = "tripmngr", map = tripMap, locations, location_ns = locationMngrId, routes, r, path)
 
     
     # --------------------------------------------------------------------------
     # Application server ready
     # --------------------------------------------------------------------------
+    
     
     cat("--------------------------------------------------------------------\n")
     cat("Application server ready! \n")

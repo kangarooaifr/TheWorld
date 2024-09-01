@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, mapId, locations, location_ns, r) {
+worldmap_Server <- function(id, map, locations, location_ns, r) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -36,6 +36,7 @@ worldmap_Server <- function(id, mapId, locations, location_ns, r) {
     # r_location_items <- kitems::items_name(id = locationId)
     
     # -- map
+    mapId <- "world"
     map_proxy <- paste0(mapId, "_proxy")
     map_bounds <- paste0(mapId, "_bounds")
     map_zoom <- paste0(mapId, "_zoom")
@@ -56,7 +57,7 @@ worldmap_Server <- function(id, mapId, locations, location_ns, r) {
     # Register observer (map_click)
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(r, mapId = mapId, coord_digits = setting("coord_digits"), location_ns)
+    obs <- map_click_observer(map, coord_digits = setting("coord_digits"), location_ns)
     
         
     # --------------------------------------------------------------------------

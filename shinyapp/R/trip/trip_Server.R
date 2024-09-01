@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, mapId, locations, location_ns, routes, r, path) {
+trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
   moduleServer(id, function(input, output, session) {
     
     
@@ -28,6 +28,7 @@ trip_Server <- function(id, mapId, locations, location_ns, routes, r, path) {
     # --------------------------------------------------------------------------
     
     # -- map names
+    mapId <- "trip"
     map_proxy <- paste0(mapId, "_proxy")
     map_flyto <- paste0(mapId, "_flyto")
 
@@ -52,7 +53,7 @@ trip_Server <- function(id, mapId, locations, location_ns, routes, r, path) {
     # Register observer (map_click)
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(r, mapId = mapId, coord_digits = setting("coord_digits"), location_ns)
+    obs <- map_click_observer(map, coord_digits = setting("coord_digits"), location_ns)
     
     
     # --------------------------------------------------------------------------
