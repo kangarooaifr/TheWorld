@@ -192,7 +192,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
                                           airports = r$airports,
                                           railway_stations = railway_stations,
                                           bus_stations = bus_stations,
-                                          bounds = r[[map_bounds]]())
+                                          bounds = map$bounds())
 
         # -- Remove locations already in filtered_locations
         x <- x[!x$id %in% filtered_locations()$id, ]
@@ -232,7 +232,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         
       }
 
-    }) %>% bindEvent(r[[map_bounds]]())
+    }) %>% bindEvent(map$bounds())
 
     
     # --------------------------------------------------------------------------

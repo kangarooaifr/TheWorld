@@ -29,7 +29,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     # map_proxy <- paste0(id, "_proxy")
     # map_click <- paste0(id, "_click")
     # map_center <- paste0(id, "_center")
-    map_bounds <- paste0(id, "_bounds")
+    # map_bounds <- paste0(id, "_bounds")
     map_zoom <- paste0(id, "_zoom")
     map_flyto <- paste0(id, "_flyto")
     
@@ -42,7 +42,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_proxy <- NULL
     map_click <- NULL
     map_center <- NULL
-    r[[map_bounds]] <- NULL
+    map_bounds <- NULL
     r[[map_zoom]] <- NULL
     
     # -- declare triggers
@@ -115,7 +115,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map bounds
-    r[[map_bounds]] <- reactive({
+    map_bounds <- reactive({
       
       # -- check
       req(input$map_bounds)
@@ -225,6 +225,7 @@ map_Server <- function(id, r, verbose = TRUE) {
          proxy = map_proxy,
          click = map_click,
          center = map_center,
+         bounds = map_bounds,
          trigger = myTrigger)
     
 
