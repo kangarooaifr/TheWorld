@@ -42,7 +42,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # Register observer (map_click)
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(map, coord_digits = setting("coord_digits"), location_ns)
+    obs <- map_click_observer(map, onclick_id = ns("add_location"), coord_digits = setting("coord_digits"))
     
     
     # --------------------------------------------------------------------------
