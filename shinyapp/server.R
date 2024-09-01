@@ -57,7 +57,12 @@ shinyServer(
     # --------------------------------------------------------------------------
     
     # -- kitems: generate dynamic sidebar
-    output$menu <- renderMenu(kitems::dynamic_sidebar(r))
+    output$menu <- renderMenu(kitems::dynamic_sidebar(names = list("location", 
+                                                                   "route",
+                                                                   "trip",
+                                                                   "step",
+                                                                   "transport",
+                                                                   "accommodation")))
 
     
     # --------------------------------------------------------------------------

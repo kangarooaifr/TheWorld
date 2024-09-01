@@ -57,10 +57,10 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
       lat <- map$click()[['lat']]
       
       # -- build choices
-      choices <- list(type = unique(locations()$type),
+      choices <- list(type = unique(locations$items()$type),
                       country = r$countries_iso$country.en,
-                      state = unique(locations()$state),
-                      city = unique(locations()$city))
+                      state = unique(locations$items()$state),
+                      city = unique(locations$items()$city))
       
       # -- display form
       showModal(location_modal(location = NULL, lng, lat, choices, ns))
@@ -97,8 +97,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
                                  wish.list = input$wish.list)
       
       # -- create item
-      r_data_model <- "location_data_model"
-      item <- kitems::item_create(values = input_values, data.model = r[[r_data_model]]())
+      item <- kitems::item_create(values = input_values, data.model = locations$data_model())
       
       # -- call trigger
       r_trigger_add <- location_trigger_add
@@ -113,7 +112,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     
     # -- expose as reactive
     visited_countries <- reactive(
-      unique(locations()[locations()$been.there, 'country']))
+      unique(locations$items()[locations$items()$been.there, 'country']))
   
     
     # --------------------------------------------------------------------------
@@ -124,13 +123,13 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     observe({
 
       # -- compute choices
-      choices <- sort(unique(locations()$country))
+      choices <- sort(unique(locations$items()$country))
       cat(MODULE, "Update country filter choices, nb =", length(choices), "\n")
       
       # -- update choices
       updateSelectizeInput(inputId = "filter_country", choices = choices)
 
-    }) %>% bindEvent(unique(locations()$country))
+    }) %>% bindEvent(unique(locations$items()$country))
     
     
     # --------------------------------------------------------------------------
@@ -144,9 +143,9 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
       
       # -- get locations (depending on selected option)
       x <- switch (input$display_options,
-                   'been-there' = locations()[locations()$type == 'city' & locations()$been.there, ],
-                   'wish-list'  = locations()[locations()$type == 'city' & locations()$wish.list, ],
-                   locations()[locations()$type == 'city', ])
+                   'been-there' = locations$items()[locations$items()$type == 'city' & locations$items()$been.there, ],
+                   'wish-list'  = locations$items()[locations$items()$type == 'city' & locations$items()$wish.list, ],
+                   locations$items()[locations$items()$type == 'city', ])
       
       # -- check
       cat("-- output dim =", dim(x)[1], "obs. \n")
@@ -235,7 +234,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           bus_stations <- r$bus_stations
 
         # -- get contextual locations
-        x <- contextual_locations(locations =  locations(),
+        x <- contextual_locations(locations =  locations$items(),
                                           airports = r$airports,
                                           railway_stations = railway_stations,
                                           bus_stations = bus_stations,

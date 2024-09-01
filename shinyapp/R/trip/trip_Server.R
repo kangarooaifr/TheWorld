@@ -62,12 +62,11 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     
     # -- observer:
     # feed trip_selector when items are ready
-    observeEvent(trips(), {
+    observeEvent(trips$items(), {
       
       # -- get items & prepare choices
-      trips <- trips()
-      choices <- trips$id
-      names(choices) <- trips$name
+      choices <- trips$items()$id
+      names(choices) <- trips$items()$name
       
       # -- update input
       updateSelectizeInput(inputId = "trip_selector", choices = choices,
@@ -82,17 +81,17 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # --------------------------------------------------------------------------
     
     # -- steps
-    selected_steps <- reactive(steps()[steps()$trip.id == input$trip_selector, ])
+    selected_steps <- reactive(steps$items()[steps$items()$trip.id == input$trip_selector, ])
     
     # -- transports
-    selected_transports <- reactive(transports()[transports()$trip.id == input$trip_selector, ])
+    selected_transports <- reactive(transports$items()[transports$items()$trip.id == input$trip_selector, ])
     
     # -- accommodations
-    selected_accommodations <- reactive(accommodations()[accommodations()$trip.id == input$trip_selector, ])
+    selected_accommodations <- reactive(accommodations$items()[accommodations$items()$trip.id == input$trip_selector, ])
     
     # -- select locations
     selected_locations <- reactive(
-      location_select(locations(), r$airports, location_id = c(selected_steps()$location.id, 
+      location_select(locations$items(), r$airports, location_id = c(selected_steps()$location.id, 
                                                                selected_accommodations()$location.id, 
                                                                selected_route()$origin, 
                                                                selected_route()$destination))) %>% 
@@ -101,7 +100,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- select route 
     # keep it after location to minimize fly to bounds side effect (half route displayed + refresh after crop)
     selected_route <- reactive(
-      route_select(routes = routes(), query = selected_transports()$route.id))
+      route_select(routes = routes$items(), query = selected_transports()$route.id))
     
     
     # --------------------------------------------------------------------------
@@ -432,7 +431,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         )
         
         # -- location search
-        result <- search_item(locations(), pattern = 'city')
+        result <- search_item(locations$items(), pattern = 'city')
         
         # -- check result size to avoid crash
         if(dim(result)[1] > 0){
@@ -461,7 +460,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       values <- list(id = ktools::getTimestamp(),
                      trip.id = input$trip_selector,
                      location.id = input$select_step,
-                     order = step_order(steps()),
+                     order = step_order(steps$items()),
                      comment = input$step_comment)
       
       # -- create item
@@ -481,7 +480,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       cat("[EVENT] Marker popup click: add_to_trip id =", id, "\n")
       
       # -- get location
-      location <- locations()[locations()$id == id, ]
+      location <- locations$items()[locations$items()$id == id, ]
       
       # -- call trigger
       r$trigger_add_step <- location
@@ -498,7 +497,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       values <- list(id = ktools::getTimestamp(),
                      trip.id = input$trip_selector,
                      location.id = r$trigger_add_step$id,
-                     order = step_order(steps()),
+                     order = step_order(steps$items()),
                      comment = NULL)
       
       # -- create item
@@ -516,7 +515,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
       
       # -- get step id from location.id
-      id <- steps()[steps()$location.id == r$trigger_remove_step, ]$id
+      id <- steps$items()[steps$items()$location.id == r$trigger_remove_step, ]$id
       str(id)
       
       # -- call trigger
@@ -605,7 +604,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         cat(MODULE, "Event route_type input \n")
 
         # -- search route
-        result <- route_search(routes = routes(), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
+        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
         
         # -- check
         if(nrow(result) > 0){
@@ -715,7 +714,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
             actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
         
         # -- location search
-        result <- search_item(locations(), pattern = 'accommodation')
+        result <- search_item(locations$items(), pattern = 'accommodation')
         
         # -- check search result size to avoid crash
         if(dim(result)[1] > 0){
