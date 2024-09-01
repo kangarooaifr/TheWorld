@@ -26,7 +26,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- declare names
-    map_proxy <- paste0(id, "_proxy")
+    # map_proxy <- paste0(id, "_proxy")
     # map_click <- paste0(id, "_click")
     map_center <- paste0(id, "_center")
     map_bounds <- paste0(id, "_bounds")
@@ -39,7 +39,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- declare connectors
-    r[[map_proxy]] <- NULL
+    map_proxy <- NULL
     map_click <- NULL
     r[[map_center]] <- NULL
     r[[map_bounds]] <- NULL
@@ -79,7 +79,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- Connector: map proxy
-    r[[map_proxy]] <- leafletProxy('map')
+    map_proxy <- leafletProxy('map')
     
     
     # -- Connector: mouse click
@@ -163,7 +163,7 @@ map_Server <- function(id, r, verbose = TRUE) {
         cat(MODULE, "Trigger map_flyto, applying flyTo \n")
       
       # -- crop view
-      r[[map_proxy]] %>%
+      map_proxy %>%
         flyTo(lng = r[[map_flyto]]$lng, 
               lat = r[[map_flyto]]$lat,
               zoom = setting("fly_zoom"),
@@ -222,7 +222,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     # -- return
     list(id = id,
-         proxy = leafletProxy('map'),
+         proxy = map_proxy,
          click = map_click,
          trigger = myTrigger)
     

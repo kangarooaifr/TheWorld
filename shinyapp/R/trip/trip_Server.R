@@ -130,7 +130,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       cat(MODULE, "Update map, selected routes =", length(routes$id), "\n")
       
       # -- clear map (group)
-      r[[map_proxy]] %>%
+      map$proxy %>%
         clearGroup(route_group_id)
       
       # -- check (otherwise unselect, so clearGroup is enough)
@@ -161,7 +161,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
                                     addStartEnd = TRUE)
             
             # -- add fight route
-            r[[map_proxy]] %>%
+            map$proxy %>%
               addPolylines(data = route, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
             
             
@@ -177,7 +177,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
                                 lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
             
             # -- add sea route
-            r[[map_proxy]] %>%
+            map$proxy %>%
               addPolylines(lng = route$lng, lat = route$lat, group = route_group_id, color = "purple", weight = 2, popup = route_labels(origin_name, destination_name))
             
           }
@@ -199,7 +199,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       x <- selected_locations()
       
       # -- remove markers
-      clearMarkers(r[[map_proxy]])
+      clearMarkers(map$proxy)
       
       # -- check dim #
       if(nrow(x) != 0){
@@ -209,10 +209,10 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         x$popup <- location_popups(x, type = 'selected', activity = 'trip_planner', ns = ns, location_ns = location_ns)
         
         # -- display on map
-        add_markers(x, map_proxy = r[[map_proxy]], icons = icons)
+        add_markers(x, map_proxy = map$proxy, icons = icons)
         
         # -- crop map around markers
-        map_crop(map_proxy = r[[map_proxy]], 
+        map_crop(map_proxy = map$proxy, 
                  lng1 = min(x$lng), 
                  lat1 = min(x$lat), 
                  lng2 = max(x$lng),

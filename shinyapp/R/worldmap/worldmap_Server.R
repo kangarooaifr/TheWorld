@@ -142,7 +142,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
       x <- filtered_locations()
       
       # -- remove markers
-      clearGroup(r[[map_proxy]], group = 'city')
+      clearGroup(map$proxy, group = 'city')
       
       # -- check dim #
       if(nrow(x) != 0){
@@ -152,10 +152,10 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
         
         # -- display on map
-        add_markers(x, map_proxy = r[[map_proxy]], icons = icons)
+        add_markers(x, map_proxy = map$proxy, icons = icons)
         
         # -- crop map around markers
-        map_crop(map_proxy = r[[map_proxy]], 
+        map_crop(map_proxy = map$proxy, 
                  lng1 = min(x$lng), 
                  lat1 = min(x$lat), 
                  lng2 = max(x$lng),
@@ -208,7 +208,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         if(!identical(locations_to_remove, numeric(0))){
           
           cat(MODULE, "Remove markers from map, nb =", length(locations_to_remove), "\n")
-          removeMarker(r[[map_proxy]], layerId = as.character(locations_to_remove))}
+          removeMarker(map$proxy, layerId = as.character(locations_to_remove))}
         
         # -- check dim
         if(nrow(locations_to_add) > 0){
@@ -220,14 +220,14 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
           
           # -- display on map
-          add_markers(locations_to_add, map_proxy = r[[map_proxy]], icons = icons)}
+          add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)}
 
       } else {
         
         if(length(cache_contextual()) > 0){
           
           cat(MODULE, "Clear contextual locations \n")
-          removeMarker(r[[map_proxy]], layerId = as.character(cache_contextual()))
+          removeMarker(map$proxy, layerId = as.character(cache_contextual()))
           cache_contextual(NULL)}
         
       }
@@ -263,7 +263,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         selected_geojson <- r$geojson_data[r$geojson_data@data$ISO_A3 %in% selected_countries, ]
         
         # -- update map
-        r[[map_proxy]] %>%
+        map$proxy %>%
           
           # -- cleanup
           clearGroup("countries") %>%
@@ -291,7 +291,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     observe({
       
       # add to leaflet map
-      r[[map_proxy]] %>%
+      map$proxy %>%
         
         # -- hidden by default
         hideGroup('track') %>%
