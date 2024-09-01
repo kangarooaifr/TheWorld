@@ -19,8 +19,6 @@ location_Server <- function(id, locationId, r, path) {
     ns <- session$ns
     
     # -- items name
-    # r_items <- kitems::items_name(id = locationId)
-    r_data_model <- kitems::dm_name(id = locationId)
     r_trigger_add <- kitems::trigger_add_name(id = locationId)
     r_trigger_update <- kitems::trigger_update_name(id = locationId)
     r_trigger_delete <- kitems::trigger_delete_name(id = locationId)
