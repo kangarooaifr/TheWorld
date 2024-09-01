@@ -1,13 +1,9 @@
 
 
 # -- function definition
-location_select <- function(r, id, location_id){
+location_select <- function(locations, airports, location_id){
   
   cat("[location_select] Select locations, nb =", length(location_id), "\n")
-  
-  # -- get item reference
-  r_items <- kitems::items_name(id)
-  locations <- r[[r_items]]()
   
   # -- apply selection
   locations <- locations[locations$id %in% location_id, ]
@@ -16,7 +12,7 @@ location_select <- function(r, id, location_id){
   if(dim(locations)[1] != length(location_id)){
     
     # -- check for airports
-    airports <- r$airports[r$airports$id %in% location_id, ]
+    airports <- airports[airports$id %in% location_id, ]
     
     # -- make locations from airports
     if(dim(airports)[1] > 0)
