@@ -33,7 +33,7 @@ route_Server <- function(id, routeId, r, path) {
     # --------------------------------------------------------------------------
     
     # -- items name
-    r_items <- kitems::items_name(id = routeId)
+    # r_items <- kitems::items_name(id = routeId)
     r_trigger_create <- kitems::trigger_create_name(id = routeId)
     
     
@@ -42,7 +42,7 @@ route_Server <- function(id, routeId, r, path) {
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = routeId, r, path$data)
+    routes <- kitems::kitemsManager_Server(id = routeId, r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -115,7 +115,7 @@ route_Server <- function(id, routeId, r, path) {
     # --------------------------------------------------------------------------
 
     # -- return (the reactive reference, not the value!)
-    reactive(r[[r_items]]())
+    routes
     
   })
 }

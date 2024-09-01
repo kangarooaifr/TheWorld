@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
+worldmap_Server <- function(id, mapId, locations, location_ns, r) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -33,7 +33,7 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # --------------------------------------------------------------------------
 
     # -- items name
-    r_location_items <- kitems::items_name(id = locationId)
+    # r_location_items <- kitems::items_name(id = locationId)
     
     # -- map
     map_proxy <- paste0(mapId, "_proxy")
@@ -65,7 +65,7 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     
     # -- expose as reactive
     visited_countries <- reactive(
-      unique(r[[r_location_items]]()[r[[r_location_items]]()$been.there, 'country']))
+      unique(locations()[locations()$been.there, 'country']))
   
     
     # --------------------------------------------------------------------------
@@ -76,13 +76,13 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     observe({
 
       # -- compute choices
-      choices <- sort(unique(r[[r_location_items]]()$country))
+      choices <- sort(unique(locations()$country))
       cat(MODULE, "Update country filter choices, nb =", length(choices), "\n")
       
       # -- update choices
       updateSelectizeInput(inputId = "filter_country", choices = choices)
 
-    }) %>% bindEvent(unique(r[[r_location_items]]()$country))
+    }) %>% bindEvent(unique(locations()$country))
     
     
     # --------------------------------------------------------------------------
@@ -90,15 +90,15 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # --------------------------------------------------------------------------
     
     # -- Level.1: observe location items
-    locations <- reactive({
+    selected_locations <- reactive({
       
       cat(MODULE, "Update locations from items \n")
       
       # -- get locations (depending on selected option)
       x <- switch (input$display_options,
-                   'been-there' = r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$been.there, ],
-                   'wish-list'  = r[[r_location_items]]()[r[[r_location_items]]()$type == 'city' & r[[r_location_items]]()$wish.list, ],
-                   r[[r_location_items]]()[r[[r_location_items]]()$type == 'city', ])
+                   'been-there' = locations()[locations()$type == 'city' & locations()$been.there, ],
+                   'wish-list'  = locations()[locations()$type == 'city' & locations()$wish.list, ],
+                   locations()[locations()$type == 'city', ])
       
       # -- check
       cat("-- output dim =", dim(x)[1], "obs. \n")
@@ -112,14 +112,17 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # -- Level.2: observe country filter
     filtered_locations <- reactive({
     
+      # -- get data
+      x <- selected_locations()
+      
       # -- reset (skip) when filter is NULL
       if(is.null(input$filter_country))
-        return(locations())
+        return(x)
       
       cat(MODULE, "Apply country filter, value =", input$filter_country, "\n")
       
       # -- compute value
-      x <- locations()[locations()$country %in% input$filter_country, ]
+      x <- x[x$country %in% input$filter_country, ]
       cat("-- output dim =", dim(x)[1], "obs. \n")
     
       # -- return
@@ -135,27 +138,27 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
     # -- Event: filtered_locations
     observe({
       
-      locations <- filtered_locations()
+      x <- filtered_locations()
       
       # -- remove markers
       clearGroup(r[[map_proxy]], group = 'city')
       
       # -- check dim #
-      if(nrow(locations) != 0){
+      if(nrow(x) != 0){
         
         # -- add icon & popup columns
-        locations <- location_icon(locations)
-        locations$popup <- location_popups(locations, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
+        x <- location_icon(x)
+        x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
         
         # -- display on map
-        add_markers(locations, map_proxy = r[[map_proxy]], icons = icons)
+        add_markers(x, map_proxy = r[[map_proxy]], icons = icons)
         
         # -- crop map around markers
         map_crop(map_proxy = r[[map_proxy]], 
-                 lng1 = min(locations$lng), 
-                 lat1 = min(locations$lat), 
-                 lng2 = max(locations$lng),
-                 lat2 = max(locations$lat), 
+                 lng1 = min(x$lng), 
+                 lat1 = min(x$lat), 
+                 lng2 = max(x$lng),
+                 lat2 = max(x$lat), 
                  fly_duration, 
                  fly_padding)}
       
@@ -184,21 +187,21 @@ worldmap_Server <- function(id, mapId, locationId, location_ns, r) {
           bus_stations <- r$bus_stations
 
         # -- get contextual locations
-        locations <- contextual_locations(locations =  r[[r_location_items]](),
+        x <- contextual_locations(locations =  locations(),
                                           airports = r$airports,
                                           railway_stations = railway_stations,
                                           bus_stations = bus_stations,
                                           bounds = r[[map_bounds]]())
 
         # -- Remove locations already in filtered_locations
-        locations <- locations[!locations$id %in% filtered_locations()$id, ]
+        x <- x[!x$id %in% filtered_locations()$id, ]
         
         # -- Extract locations to remove & add
-        locations_to_remove <- cache_contextual()[!cache_contextual() %in% locations$id]
-        locations_to_add <- locations[!locations$id %in% cache_contextual(), ]
+        locations_to_remove <- cache_contextual()[!cache_contextual() %in% x$id]
+        locations_to_add <- x[!x$id %in% cache_contextual(), ]
         
         # -- store in cache
-        cache_contextual(locations$id)
+        cache_contextual(x$id)
         
         # -- remove locations
         if(!identical(locations_to_remove, numeric(0))){

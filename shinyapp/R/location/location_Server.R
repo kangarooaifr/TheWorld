@@ -19,7 +19,7 @@ location_Server <- function(id, locationId, r, path) {
     ns <- session$ns
     
     # -- items name
-    r_items <- kitems::items_name(id = locationId)
+    # r_items <- kitems::items_name(id = locationId)
     r_data_model <- kitems::dm_name(id = locationId)
     r_trigger_add <- kitems::trigger_add_name(id = locationId)
     r_trigger_update <- kitems::trigger_update_name(id = locationId)
@@ -31,7 +31,7 @@ location_Server <- function(id, locationId, r, path) {
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = locationId, r, path$data)
+    locations <- kitems::kitemsManager_Server(id = locationId, r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ location_Server <- function(id, locationId, r, path) {
     # it is taken from the standard locations with type = Port
     
     # -- expose connector
-    r$seaports <- reactive(r[[r_items]]()[r[[r_items]]()$type == 'Port', ])
+    r$seaports <- reactive(locations()[locations()$type == 'Port', ])
     
     
     # --------------------------------------------------------------------------
@@ -139,10 +139,10 @@ location_Server <- function(id, locationId, r, path) {
       lat <- r[[map_click]]()[['lat']]
       
       # -- build choices
-      choices <- list(type = unique(r[[r_items]]()$type),
+      choices <- list(type = unique(locations()$type),
                       country = r$countries_iso$country.en,
-                      state = unique(r[[r_items]]()$state),
-                      city = unique(r[[r_items]]()$city))
+                      state = unique(locations()$state),
+                      city = unique(locations()$city))
                       
       # -- display form
       showModal(location_modal(location = NULL, lng, lat, choices, ns))
@@ -203,13 +203,13 @@ location_Server <- function(id, locationId, r, path) {
       cat(MODULE, "[EVENT] Marker popup click: update id =", id, "\n")
       
       # -- get location to update
-      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      location <- locations()[locations()$id == id, ]
       
       # -- build choices
-      choices <- list(type = unique(r[[r_items]]()$type),
+      choices <- list(type = unique(locations()$type),
                       country = r$countries_iso$country.en,
-                      state = unique(r[[r_items]]()$state),
-                      city = unique(r[[r_items]]()$city))
+                      state = unique(locations()$state),
+                      city = unique(locations()$city))
       
       # -- display form
       showModal(location_modal(location, choices = choices, ns = ns))
@@ -227,7 +227,7 @@ location_Server <- function(id, locationId, r, path) {
       id <- unlist(strsplit(input$action_update, split = "_"))[2]
       
       # -- get location to update
-      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      location <- locations()[locations()$id == id, ]
       
       # -- update values
       location$name = input$name
@@ -268,7 +268,7 @@ location_Server <- function(id, locationId, r, path) {
       cat(MODULE, "[EVENT] Marker popup click: been-there id =", id, "\n")
       
       # -- update item
-      item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
+      item <- locations()[locations()$id == id, ]
       item$been.there <- TRUE
       item$wish.list <- FALSE
       
@@ -276,6 +276,14 @@ location_Server <- function(id, locationId, r, path) {
       r[[r_trigger_update]](item)
       
     })
+    
+  
+    # --------------------------------------------------------------------------
+    # Module server return value
+    # --------------------------------------------------------------------------
+    
+    # -- the items reference from the sub module (not its value!)
+    locations
 
   })
 }
