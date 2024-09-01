@@ -22,19 +22,6 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-    
-    # -- declare names
-    # map_proxy <- paste0(id, "_proxy")
-    # map_click <- paste0(id, "_click")
-    # map_center <- paste0(id, "_center")
-    # map_bounds <- paste0(id, "_bounds")
-    # map_zoom <- paste0(id, "_zoom")
-    # map_flyto <- paste0(id, "_flyto")
-    
-    
-    # --------------------------------------------------------------------------
     # Communication objects
     # --------------------------------------------------------------------------
     
@@ -192,18 +179,8 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # --------------------------------------------------------------------------
-    # LAB
+    # Module return value
     # --------------------------------------------------------------------------
-    
-    # -- define trigger
-    myTrigger <- reactiveVal(NULL)
-    
-    # -- observe trigger
-    observeEvent(myTrigger(), {
-      
-      cat("[LAB] -- myTrigger has been updated !!!", myTrigger(), "\n")
-      
-    })
     
     # -- return
     list(id = id,

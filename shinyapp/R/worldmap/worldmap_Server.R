@@ -27,21 +27,6 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     setting(name = "railway_stations_level", type = "numeric", default = 10)
     
     
-    
-    # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-
-    # -- items name
-    # r_location_items <- kitems::items_name(id = locationId)
-    
-    # -- map
-    mapId <- "world"
-    map_proxy <- paste0(mapId, "_proxy")
-    map_bounds <- paste0(mapId, "_bounds")
-    map_zoom <- paste0(mapId, "_zoom")
-    
-    
     # --------------------------------------------------------------------------
     # Init
     # --------------------------------------------------------------------------

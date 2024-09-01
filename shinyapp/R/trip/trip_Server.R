@@ -22,17 +22,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- settings
     setting(name = "coord_digits", type = "numeric", default = 3)
     
-    
-    # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-    
-    # -- map names
-    # map_proxy <- paste0(mapId, "_proxy")
-    # map_flyto <- paste0(mapId, "_flyto")
-
     # -- get names
-    # route_items <- kitems::items_name(routeId)
     route_group_id <- 'route'
     
     
@@ -64,9 +54,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     
     # -- launch kitems sub module
     trips <- kitems::kitemsManager_Server(id = trip_kitems_id, r, path$data)
-    
-    # -- items name
-    # r_items <- kitems::items_name(trip_kitems_id)
     
     
     # --------------------------------------------------------------------------
@@ -405,7 +392,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     
     # -- get names
     step_data_model <- kitems::dm_name(step_kitems_id)
-    # step_items <- kitems::items_name(step_kitems_id)
     step_trigger_add <- kitems::trigger_add_name(step_kitems_id)
     step_trigger_delete <- kitems::trigger_delete_name(step_kitems_id)
     
@@ -563,7 +549,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     transports <- kitems::kitemsManager_Server(id = transport_kitems_id, r, path$data)
     
     # -- names
-    # transport_r_items <- kitems::items_name(transport_kitems_id)
     transport_r_data_model <- kitems::dm_name(transport_kitems_id)
     transport_r_trigger_add <- kitems::trigger_add_name(transport_kitems_id)
     
@@ -678,7 +663,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     accommodation_kitems_id <- "accommodation"
     
     # -- names
-    # accommodation_r_items <- kitems::items_name(accommodation_kitems_id)
     accommodation_r_trigger_add <- kitems::trigger_add_name(accommodation_kitems_id)
     accommodation_r_data_model <- kitems::dm_name(accommodation_kitems_id)
     
@@ -776,9 +760,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       r[[accommodation_r_trigger_add]](accommodation)
       
       
-      
     })
-    
     
   })
 }
