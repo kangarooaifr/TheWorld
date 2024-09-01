@@ -28,9 +28,8 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # --------------------------------------------------------------------------
     
     # -- map names
-    mapId <- "trip"
-    map_proxy <- paste0(mapId, "_proxy")
-    map_flyto <- paste0(mapId, "_flyto")
+    # map_proxy <- paste0(mapId, "_proxy")
+    # map_flyto <- paste0(mapId, "_flyto")
 
     # -- get names
     # route_items <- kitems::items_name(routeId)
@@ -308,8 +307,14 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       lat <- unlist(strsplit(input$fly_to_location, split = "_"))[3]
       cat("[EVENT] ActionLink click: fly_to_location lng =", lng, ", lat =", lat, "\n")
       
-      # -- call trigger
-      r[[map_flyto]] <- list(lng = lng, lat = lat)
+      # -- fly to
+      if(!map$freeze()){
+        map$proxy %>%
+          flyTo(lng = lng,
+                lat = lat,
+                zoom = setting("fly_zoom"),
+                optionss = list(duration = setting("fly_duration"), 
+                                padding = c(setting("fly_padding"), setting("fly_padding"))))}
       
     })
     

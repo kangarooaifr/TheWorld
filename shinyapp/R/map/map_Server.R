@@ -31,7 +31,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     # map_center <- paste0(id, "_center")
     # map_bounds <- paste0(id, "_bounds")
     # map_zoom <- paste0(id, "_zoom")
-    map_flyto <- paste0(id, "_flyto")
+    # map_flyto <- paste0(id, "_flyto")
     
     
     # --------------------------------------------------------------------------
@@ -44,9 +44,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_center <- NULL
     map_bounds <- NULL
     map_zoom <- NULL
-    
-    # -- declare triggers
-    r[[map_flyto]] <- NULL
+    map_freeze <- NULL
     
     
     # --------------------------------------------------------------------------
@@ -147,31 +145,18 @@ map_Server <- function(id, r, verbose = TRUE) {
     })
     
     
-    # --------------------------------------------------------------------------
-    # Trigger: map_flyto
-    # --------------------------------------------------------------------------
-    # r[[map_flyto]] = list(lng, lat)
-    
-    # -- observe trigger
-    observeEvent(r[[map_flyto]], {
+    # -- Connector: map freeze
+    map_freeze <- reactive({
       
-      # -- check setting
-      req(!input$map_freeze)
+      # -- check
+      req(input$map_freeze)
       
       # -- trace
       if(verbose)
-        cat(MODULE, "Trigger map_flyto, applying flyTo \n")
+        cat(MODULE, "Zoom: level =", input$map_freeze, "\n")
       
-      # -- crop view
-      map_proxy %>%
-        flyTo(lng = r[[map_flyto]]$lng, 
-              lat = r[[map_flyto]]$lat,
-              zoom = setting("fly_zoom"),
-              optionss = list(duration = setting("fly_duration"), 
-                             padding = c(setting("fly_padding"), setting("fly_padding"))))
-      
-      # -- unset trigger (otherwise you can't call again with same value)
-      r[[map_flyto]] <- NULL
+      # -- return
+      input$map_freeze
       
     })
     
@@ -227,7 +212,7 @@ map_Server <- function(id, r, verbose = TRUE) {
          center = map_center,
          bounds = map_bounds,
          zoom = map_zoom,
-         trigger = myTrigger)
+         freeze = map_freeze)
     
 
   })
