@@ -19,7 +19,6 @@ location_Server <- function(id, locationId, r, path) {
     ns <- session$ns
     
     # -- items name
-    r_trigger_update <- kitems::trigger_update_name(id = locationId)
     r_trigger_delete <- kitems::trigger_delete_name(id = locationId)
     
     
@@ -133,13 +132,13 @@ location_Server <- function(id, locationId, r, path) {
       cat(MODULE, "[EVENT] Marker popup click: update id =", id, "\n")
       
       # -- get location to update
-      location <- locations()[locations()$id == id, ]
+      location <- locations$items()[locations$items()$id == id, ]
       
       # -- build choices
-      choices <- list(type = unique(locations()$type),
+      choices <- list(type = unique(locations$items()$type),
                       country = r$countries_iso$country.en,
-                      state = unique(locations()$state),
-                      city = unique(locations()$city))
+                      state = unique(locations$items()$state),
+                      city = unique(locations$items()$city))
       
       # -- display form
       showModal(location_modal(location, choices = choices, ns = ns))
@@ -157,7 +156,7 @@ location_Server <- function(id, locationId, r, path) {
       id <- unlist(strsplit(input$action_update, split = "_"))[2]
       
       # -- get location to update
-      location <- locations()[locations()$id == id, ]
+      location <- locations$items()[locations$items()$id == id, ]
       
       # -- update values
       location$name = input$name
@@ -171,8 +170,8 @@ location_Server <- function(id, locationId, r, path) {
       location$been.there = input$been.there
       location$wish.list = input$wish.list
 
-      # -- call trigger
-      r[[r_trigger_update]](location)
+      # -- update location
+      kitems::item_update(locations$items, location, name = locations$id)
       
     })
     
@@ -198,12 +197,13 @@ location_Server <- function(id, locationId, r, path) {
       cat(MODULE, "[EVENT] Marker popup click: been-there id =", id, "\n")
       
       # -- update item
-      item <- locations()[locations()$id == id, ]
-      item$been.there <- TRUE
-      item$wish.list <- FALSE
+      location <- locations$items()[locations$items()$id == id, ]
+      location$been.there <- TRUE
+      location$wish.list <- FALSE
       
-      # -- call trigger
-      r[[r_trigger_update]](item)
+      # -- update location
+      kitems::item_update(locations$items, location, name = locations$id)
+      
       
     })
     
