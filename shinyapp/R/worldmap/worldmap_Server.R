@@ -100,8 +100,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
       item <- kitems::item_create(values = input_values, data.model = locations$data_model())
       
       # -- call trigger
-      r_trigger_add <- location_trigger_add
-      r[[r_trigger_add]](item)
+      kitems::item_add(locations$items, item, name = locations$id)
       
     })
     
