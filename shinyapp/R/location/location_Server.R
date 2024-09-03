@@ -107,10 +107,10 @@ location_Server <- function(id, r, path) {
     stations <-  stations[!is.na(stations$lng), ]
     
     # -- expose railway stations
-    r$railway_stations <- stations[!stations$is_rail %in% FALSE, ]
+    railway_stations <- stations[!stations$is_rail %in% FALSE, ]
     
     # -- expose bus stations
-    r$bus_stations <- stations[stations$is_road %in% TRUE, ]
+    bus_stations <- stations[stations$is_road %in% TRUE, ]
 
     
     # --------------------------------------------------------------------------
@@ -207,7 +207,9 @@ location_Server <- function(id, r, path) {
     
     # -- composite object
     c(locations, list('airports' = airports,
-                      'seaports' = seaports))
+                      'seaports' = seaports,
+                      'railway_stations' = railway_stations,
+                      'bus_stations' = bus_stations))
 
   })
 }

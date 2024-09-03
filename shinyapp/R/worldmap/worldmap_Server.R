@@ -226,11 +226,11 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
 
         # -- check setting
         if(map$zoom() >= setting("railway_stations_level"))
-          railway_stations <- r$railway_stations
+          railway_stations <- locations$railway_stations
 
         # -- check setting
         if(map$zoom() >= setting("bus_stations_level"))
-          bus_stations <- r$bus_stations
+          bus_stations <- locations$bus_stations
 
         # -- get contextual locations
         x <- contextual_locations(locations =  locations$items(),
