@@ -29,15 +29,6 @@ route_Server <- function(id, routeId, r, path) {
     
     
     # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-    
-    # -- items name
-    # r_items <- kitems::items_name(id = routeId)
-    r_trigger_create <- kitems::trigger_create_name(id = routeId)
-    
-    
-    # --------------------------------------------------------------------------
     # Data manager
     # --------------------------------------------------------------------------
 
@@ -103,7 +94,8 @@ route_Server <- function(id, routeId, r, path) {
           input$select_destination}
         
         # -- call trigger
-        r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
+        # Need to find another way to fire create !!
+        # r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
         
       })
       

@@ -18,9 +18,6 @@ location_Server <- function(id, locationId, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    # -- items name
-    r_trigger_delete <- kitems::trigger_delete_name(id = locationId)
-    
     
     # --------------------------------------------------------------------------
     # Data manager
@@ -183,8 +180,8 @@ location_Server <- function(id, locationId, r, path) {
       id <- unlist(strsplit(input$action_delete, split = "_"))[2]
       cat(MODULE, "[EVENT] Marker popup click: delete id =", id, "\n")
       
-      # -- call trigger
-      r[[r_trigger_delete]](id)
+      # -- delete item
+      kitems::item_delete(locations, id, name = "location")
       
     })
     

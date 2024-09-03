@@ -547,10 +547,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- launch kitems sub module
     transports <- kitems::kitemsManager_Server(id = transport_kitems_id, r, path$data)
     
-    # -- names
-    transport_r_trigger_add <- kitems::trigger_add_name(transport_kitems_id)
-    
-    
     # -- observer
     observeEvent(input$add_transport, {
       
@@ -644,8 +640,8 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       # -- create item
       transport <- kitems::item_create(values, data.model = transports$data_model())
 
-      # -- call trigger
-      r[[transport_r_trigger_add]](transport)
+      # -- add item
+      kitems::item_add(transports, item = transport, name = "transport")
 
     })
     
@@ -660,9 +656,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- id
     accommodation_kitems_id <- "accommodation"
     
-    # -- names
-    accommodation_r_trigger_add <- kitems::trigger_add_name(accommodation_kitems_id)
-
     # -- launch kitems sub module
     accommodations <- kitems::kitemsManager_Server(id = accommodation_kitems_id, r, path$data)
     
@@ -753,9 +746,8 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
       # -- create item
       accommodation <- kitems::item_create(values, data.model = accommodations$data_model())
       
-      # -- call trigger
-      r[[accommodation_r_trigger_add]](accommodation)
-      
+      # -- add item
+      kitems::item_add(accommodations, item = accommodation, name = "accommodation")
       
     })
     
