@@ -62,8 +62,9 @@ route_Server <- function(id, routeId, r, path) {
       # -- compute available choices:
       if(input$transport_mode == "air"){
         
-        choices <- r$airports$id
-        names(choices) <- r$airports$iata
+        # ********* To be reworked (r$airports is now locations$airports)
+        # choices <- r$airports$id
+        # names(choices) <- r$airports$iata
         
       } else if(input$transport_mode == "sea"){
         

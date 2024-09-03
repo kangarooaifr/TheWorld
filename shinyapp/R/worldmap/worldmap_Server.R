@@ -234,11 +234,11 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
 
         # -- get contextual locations
         x <- contextual_locations(locations =  locations$items(),
-                                          airports = r$airports,
-                                          railway_stations = railway_stations,
-                                          bus_stations = bus_stations,
-                                          bounds = map$bounds())
-
+                                  airports = locations$airports,
+                                  railway_stations = railway_stations,
+                                  bus_stations = bus_stations,
+                                  bounds = map$bounds())
+        
         # -- Remove locations already in filtered_locations
         x <- x[!x$id %in% filtered_locations()$id, ]
         

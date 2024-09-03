@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, locationId, r, path) {
+location_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -24,7 +24,7 @@ location_Server <- function(id, locationId, r, path) {
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    locations <- kitems::kitemsManager_Server(id = locationId, r, path$data)
+    locations <- kitems::kitemsManager_Server(id = "location", r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -46,23 +46,19 @@ location_Server <- function(id, locationId, r, path) {
                              altitude = "numeric")
     
     # -- load data
-    raw_airports <- kfiles::read_data(file = filename_airports,
+    airports <- kfiles::read_data(file = filename_airports,
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
     
     # -- rename columns to fit with convention & expose connector
-    names(raw_airports)[names(raw_airports) == 'latitude'] <- 'lat'
-    names(raw_airports)[names(raw_airports) == 'longitude'] <- 'lng'
+    names(airports)[names(airports) == 'latitude'] <- 'lat'
+    names(airports)[names(airports) == 'longitude'] <- 'lng'
     
     # -- filter out heliports & entries without iata code (value = "\\N")
-    raw_airports <- raw_airports[raw_airports$iata != '\\N', ]
-    raw_airports <- raw_airports[!grepl('Heli', raw_airports$name), ]
-    cat(MODULE, "Filter airports without iata code & heliports, output =", dim(raw_airports), "\n")
-    
-    # -- store & delete temp object
-    r$airports <- raw_airports
-    rm(raw_airports)
+    airports <- airports[airports$iata != '\\N', ]
+    airports <- airports[!grepl('Heli', airports$name), ]
+    cat(MODULE, "Filter airports without iata code & heliports, output =", dim(airports), "\n")
     
     
     # --------------------------------------------------------------------------
@@ -209,8 +205,8 @@ location_Server <- function(id, locationId, r, path) {
     # Module server return value
     # --------------------------------------------------------------------------
     
-    # -- the items reference from the sub module (not its value!)
-    locations
+    # -- composite object
+    c(locations, list('airports' = airports))
 
   })
 }

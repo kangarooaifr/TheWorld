@@ -20,7 +20,6 @@ shinyServer(
     # Names
     # --------------------------------------------------------------------------
     
-    locationId <- "location"
     locationMngrId <- "locationmngr"
     routeId <- "route"
     
@@ -74,7 +73,7 @@ shinyServer(
     tripMap <- map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
-    locations <- location_Server(id = locationMngrId, locationId, r, path)
+    locations <- location_Server(id = locationMngrId, r, path)
     
     # -- countries
     country_Server(id = "country", r, path)

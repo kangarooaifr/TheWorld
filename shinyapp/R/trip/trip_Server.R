@@ -91,7 +91,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     
     # -- select locations
     selected_locations <- reactive(
-      location_select(locations$items(), r$airports, location_id = c(selected_steps()$location.id, 
+      location_select(locations$items(), locations$airports, location_id = c(selected_steps()$location.id, 
                                                                selected_accommodations()$location.id, 
                                                                selected_route()$origin, 
                                                                selected_route()$destination))) %>% 
@@ -136,12 +136,12 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
           if(type == 'air'){
             
             # -- get names
-            origin_name <- r$airports[r$airports$id == origin, 'name']
-            destination_name <- r$airports[r$airports$id == destination, 'name']
+            origin_name <- locations$airports[locations$airports$id == origin, 'name']
+            destination_name <- locations$airports[locations$airports$id == destination, 'name']
             
             # -- compute great circle route
-            route <- gcIntermediate(p1 = airport_coord(r$airports, id = origin), 
-                                    p2 = airport_coord(r$airports, id = destination), 
+            route <- gcIntermediate(p1 = airport_coord(locations$airports, id = origin), 
+                                    p2 = airport_coord(locations$airports, id = destination), 
                                     n = 100, 
                                     addStartEnd = TRUE)
             
@@ -599,7 +599,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         cat(MODULE, "Event route_type input \n")
 
         # -- search route
-        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = r$airports, seaports = r$seaports())
+        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = locations$airports, seaports = r$seaports())
         
         # -- check
         if(nrow(result) > 0){
