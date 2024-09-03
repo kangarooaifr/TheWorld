@@ -68,8 +68,9 @@ route_Server <- function(id, routeId, r, path) {
         
       } else if(input$transport_mode == "sea"){
         
-        choices <- r$seaports()$id
-        names(choices) <- paste(r$seaports()$city, r$seaports()$name, sep = "-")
+        # ********* To be reworked (r$seaports is now locations$seaports)
+        # choices <- r$seaports()$id
+        # names(choices) <- paste(r$seaports()$city, r$seaports()$name, sep = "-")
         
       }
       choices <- as.list(choices)

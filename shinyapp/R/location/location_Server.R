@@ -68,7 +68,7 @@ location_Server <- function(id, r, path) {
     # it is taken from the standard locations with type = Port
     
     # -- expose connector
-    r$seaports <- reactive(locations()[locations()$type == 'Port', ])
+    seaports <- reactive(locations$items()[locations$items()$type == 'Port', ])
     
     
     # --------------------------------------------------------------------------
@@ -206,7 +206,8 @@ location_Server <- function(id, r, path) {
     # --------------------------------------------------------------------------
     
     # -- composite object
-    c(locations, list('airports' = airports))
+    c(locations, list('airports' = airports,
+                      'seaports' = seaports))
 
   })
 }

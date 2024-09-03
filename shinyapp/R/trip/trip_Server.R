@@ -154,12 +154,12 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
           } else if(type == 'sea'){
             
             # -- get names
-            origin_name <- r$seaports()[r$seaports()$id == origin, 'name']
-            destination_name <- r$seaports()[r$seaports()$id == destination, 'name']
+            origin_name <- location$seaports()[location$seaports()$id == origin, 'name']
+            destination_name <- location$seaports()[location$seaports()$id == destination, 'name']
             
             # -- compute route
-            route <- data.frame(lng = c(r$seaports()[r$seaports()$id == origin, 'lng'], r$seaports()[r$seaports()$id == destination, 'lng']),
-                                lat = c(r$seaports()[r$seaports()$id == origin, 'lat'], r$seaports()[r$seaports()$id == destination, 'lat']))
+            route <- data.frame(lng = c(location$seaports()[location$seaports()$id == origin, 'lng'], location$seaports()[location$seaports()$id == destination, 'lng']),
+                                lat = c(location$seaports()[location$seaports()$id == origin, 'lat'], location$seaports()[location$seaports()$id == destination, 'lat']))
             
             # -- add sea route
             map$proxy %>%
@@ -599,7 +599,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         cat(MODULE, "Event route_type input \n")
 
         # -- search route
-        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = locations$airports, seaports = r$seaports())
+        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = locations$airports, seaports = locations$seaports())
         
         # -- check
         if(nrow(result) > 0){
