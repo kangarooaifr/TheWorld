@@ -9,7 +9,7 @@ map_layers_control <- function(layer_control, baseGroups = NULL, overlayGroups =
   # -- check
   if(remove){
     
-    cat("[layer_control] Remove groups =", overlayGroups, "\n")
+    cat("[layer_control] Remove groups =", paste(overlayGroups, sep = ","), "\n")
     
     # -- baseGroups
     if(!is.null(baseGroups))
@@ -30,8 +30,6 @@ map_layers_control <- function(layer_control, baseGroups = NULL, overlayGroups =
       overlayGroups <- c(layer_control()$overlayGroups, overlayGroups[!overlayGroups %in% layer_control()$overlayGroups])
     
   }
-  
-  str(overlayGroups)
   
   # -- store
   layer_control(list(baseGroups = baseGroups,

@@ -246,11 +246,16 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         x <- x[!x$id %in% filtered_locations()$id, ]
         
         # -- Extract locations to remove & add
-        locations_to_remove <- cache_contextual()[!cache_contextual() %in% x$id]
-        locations_to_add <- x[!x$id %in% cache_contextual(), ]
+        locations_to_remove <- cache_contextual()[!cache_contextual()$id %in% x$id, ]$id
+        locations_to_add <- x[!x$id %in% cache_contextual()$id, ]
         
-        # -- store in cache
-        cache_contextual(x$id)
+        # -- Extract groups to remove & add
+        groups_to_add <- unique(locations_to_add$type)
+        groups_in_cache <- unique(cache_contextual()[!cache_contextual()$id %in% x$id, ]$type)
+        groups_to_remove <- groups_in_cache[!groups_in_cache %in% x$type]
+        
+        # -- store in cache (df)
+        cache_contextual(x[c("id", "type")])
         
         # -- remove locations
         if(!identical(locations_to_remove, numeric(0)) & !is.null(locations_to_remove)){
@@ -259,8 +264,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           removeMarker(map$proxy, layerId = as.character(locations_to_remove))
           
           # -- Remove from cache
-          groups <- unique(x[x$id %in% locations_to_remove, ]$type)
-          map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)}
+          map_layers_control(map$layer_control, overlayGroups = groups_to_remove, remove = TRUE)}
         
         # -- check dim
         if(nrow(locations_to_add) > 0){
@@ -275,31 +279,24 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
           
           # -- Add in cache
-          map_layers_control(map$layer_control, overlayGroups = unique(locations_to_add$type))}
+          map_layers_control(map$layer_control, overlayGroups = groups_to_add)}
 
       } else {
         
-        if(length(cache_contextual()) > 0){
-          
-          # -- Clear markers
-          cat(MODULE, "Clear contextual locations \n")
-          removeMarker(map$proxy, layerId = as.character(cache_contextual()))
-          
-          cat("*************************************************** \n")
-          str(cache_contextual())
-          
-          
-          # -- Remove from cache
-          groups <- unique(x[x$id %in% cache_contextual(), ]$type)
-          
-          cat("*************************************************** \n")
-          str(groups)
-          
-          
-          map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)
-          
-          # -- Reset cache
-          cache_contextual(NULL)}
+        if(!is.null(cache_contextual()))
+          if(nrow(cache_contextual()) > 0){
+            
+            # -- Clear markers
+            cat(MODULE, "Clear contextual locations \n")
+            removeMarker(map$proxy, layerId = as.character(cache_contextual()$id))
+            
+            # -- Remove from cache ('city' should be kept)
+            groups <- unique(cache_contextual()$type)
+            groups <- groups[!groups %in% filtered_locations()$type]
+            map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)
+            
+            # -- Reset cache
+            cache_contextual(NULL)}
         
       }
 
