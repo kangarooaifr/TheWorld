@@ -66,6 +66,9 @@ worldmap_Server <- function(id, map, locations, r) {
     # -- action_delete
     obsF <- delete_location_observer(map, input, locations)
     
+    # -- action_beenthere
+    obsG <- action_beenthere_observer(input, map, locations)
+    
     
     # *****************************
     #  >>>>>>>>> homogenize function names // functions parameters, check traces

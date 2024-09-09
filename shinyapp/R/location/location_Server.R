@@ -114,29 +114,6 @@ location_Server <- function(id, r, path) {
 
     
     # --------------------------------------------------------------------------
-    # Actions (click from marker popup)
-    # --------------------------------------------------------------------------
-
-    # -- Observe: action_beenthere
-    observeEvent(input$action_beenthere, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: been-there id =", id, "\n")
-      
-      # -- update item
-      location <- locations$items()[locations$items()$id == id, ]
-      location$been.there <- TRUE
-      location$wish.list <- FALSE
-      
-      # -- update location
-      kitems::item_update(locations$items, location, name = locations$id)
-      
-      
-    })
-    
-  
-    # --------------------------------------------------------------------------
     # Module server return value
     # --------------------------------------------------------------------------
     
