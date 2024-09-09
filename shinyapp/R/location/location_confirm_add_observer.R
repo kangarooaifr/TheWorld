@@ -1,9 +1,7 @@
 
 
 # -- function definition
-confirm_add_location_observer <- function(map, locations, input, confirm_add_location = "confirm_add_location"){
-  
-  cat("[confirm_add_location_observer] map id =", map$id, "\n")
+location_confirm_add_observer <- function(map, input, locations){
   
   observeEvent(input$confirm_add_location, {
     
@@ -11,6 +9,7 @@ confirm_add_location_observer <- function(map, locations, input, confirm_add_loc
     req(input$name, input$type, input$country, input$city)
     
     # -- close dialog
+    cat(paste0("[", map$id, "]"), "Confirm add location \n")
     removeModal()
     
     # -- clear popup

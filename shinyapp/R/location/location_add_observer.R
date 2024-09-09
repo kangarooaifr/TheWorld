@@ -1,12 +1,12 @@
 
 
 # -- function definition
-add_location_observer <- function(map, input, add_location = "add_location", choices, ns){
-  
-  cat("[add_location_observer] map id =", map$id, "\n")
+location_add_observer <- function(map, input, choices, ns){
   
   # -- return (observer reference !)
-  observeEvent(input$add_location, {
+  observeEvent(input$action_add, {
+    
+    cat(paste0("[", map$id, "]"), "Marker popup click / add location \n")
     
     # -- get lng, lat
     lng <- map$click()[['lng']]

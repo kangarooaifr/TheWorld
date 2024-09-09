@@ -1,14 +1,13 @@
 
 
 # -- function definition
-confirm_update_location_observer <- function(map, input, locations){
-  
-  cat("[confirm_update_location_observer] map id =", map$id, "\n")
+location_confirm_update_observer <- function(mapId, input, locations){
   
   # -- Event: btn confirm_update_location
   observeEvent(input$confirm_update_location, {
     
     # -- close dialog
+    cat(paste0("[", mapId, "]"), "Confirm add location \n")
     removeModal()
     
     # -- extract location id

@@ -49,25 +49,25 @@ worldmap_Server <- function(id, map, locations, r) {
     # --------------------------------------------------------------------------
     
     # -- map_click
-    obsA <- map_click_observer(map, onclick_id = ns("add_location"), coord_digits = setting("coord_digits"))
+    obsA <- map_click_observer(map, ns, coord_digits = setting("coord_digits"))
   
     # -- add_location
-    obsB <- add_location_observer(map, input, add_location = "add_location", choices, ns)
+    obsB <- location_add_observer(map, input, choices, ns)
     
     # -- confirm_add_location
-    obsC <- confirm_add_location_observer(map, locations, input, confirm_add_location = "confirm_add_location")
+    obsC <- location_confirm_add_observer(map, input, locations)
 
     # -- action_update
-    obsD <- update_location_observer(map, input, locations, choices, ns)
+    obsD <- location_update_observer(mapId = map$id, input, locations, choices, ns)
     
     # -- confirm_update
-    obsE <- confirm_update_location_observer(map, input, locations)
+    obsE <- location_confirm_update_observer(mapId = map$id, input, locations)
     
     # -- action_delete
-    obsF <- delete_location_observer(map, input, locations)
+    obsF <- location_delete_observer(mapId = map$id, input, locations)
     
     # -- action_beenthere
-    obsG <- action_beenthere_observer(input, map, locations)
+    obsG <- action_beenthere_observer(mapId = map$id, input, locations)
     
     
     # *****************************

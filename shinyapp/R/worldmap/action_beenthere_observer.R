@@ -1,15 +1,13 @@
 
 
-action_beenthere_observer <- function(input, map, locations){
+action_beenthere_observer <- function(mapId, input, locations){
   
   # -- Observe: action_beenthere
   observeEvent(input$action_beenthere, {
-    
-    MODULE <- paste0("[", map$id, "]")
-    
+
     # -- extract id
     id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
-    cat(MODULE, "Marker popup click: been-there id =", id, "\n")
+    cat(paste0("[", mapId, "]"), "Marker popup click: been-there id =", id, "\n")
     
     # -- update item
     location <- locations$items()[locations$items()$id == id, ]

@@ -1,9 +1,7 @@
 
 
 # -- function definition
-map_click_observer <- function(map, onclick_id, coord_digits){
-  
-  cat("[map_click_observer] map id =", map$id, "\n")
+map_click_observer <- function(map, ns, coord_digits){
   
   # -- return (observer reference !)
   observeEvent(map$click(), {
@@ -26,7 +24,7 @@ map_click_observer <- function(map, onclick_id, coord_digits){
                                  icon = icon("plus"),
                                  onclick = sprintf(
                                    'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
-                                   onclick_id))))
+                                   ns("action_add")))))
   })
   
 }
