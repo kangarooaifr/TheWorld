@@ -117,57 +117,7 @@ location_Server <- function(id, r, path) {
     # Actions (click from marker popup)
     # --------------------------------------------------------------------------
     
-    # -- Observe: action_update
-    observeEvent(input$action_update, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$action_update, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: update id =", id, "\n")
-      
-      # -- get location to update
-      location <- locations$items()[locations$items()$id == id, ]
-      
-      # -- build choices
-      choices <- list(type = unique(locations$items()$type),
-                      country = r$countries_iso$country.en,
-                      state = unique(locations$items()$state),
-                      city = unique(locations$items()$city))
-      
-      # -- display form
-      showModal(location_modal(location, choices = choices, ns = ns))
-      
-    })
-    
-    
-    # -- Event: btn confirm_update_location
-    observeEvent(input$confirm_update_location, {
-      
-      # -- close dialog
-      removeModal()
-      
-      # -- extract location id
-      id <- unlist(strsplit(input$action_update, split = "_"))[2]
-      
-      # -- get location to update
-      location <- locations$items()[locations$items()$id == id, ]
-      
-      # -- update values
-      location$name = input$name
-      location$type = input$type
-      location$country = input$country
-      location$state = input$state
-      location$zip.code = input$zip.code
-      location$city = input$city
-      location$address = input$address
-      location$comment = input$comment
-      location$been.there = input$been.there
-      location$wish.list = input$wish.list
 
-      # -- update location
-      kitems::item_update(locations$items, location, name = locations$id)
-      
-    })
-    
     
     # -- Observe: action_delete
     observeEvent(input$action_delete, {
