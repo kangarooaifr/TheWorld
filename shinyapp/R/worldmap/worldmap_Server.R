@@ -37,73 +37,26 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     # -- marker icons
     icons <- location_icons()
 
+    # -- build choices
+    choices <- reactive(list(type = unique(locations$items()$type),
+                             country = r$countries_iso$country.en,
+                             state = unique(locations$items()$state),
+                             city = unique(locations$items()$city)))
+    
     
     # --------------------------------------------------------------------------
-    # Register observer (map_click)
+    # Register observers
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(map, onclick_id = ns("add_location"), coord_digits = setting("coord_digits"))
+    # -- map_click
+    obsA <- map_click_observer(map, onclick_id = ns("add_location"), coord_digits = setting("coord_digits"))
+  
+    # -- add_location
+    obsB <- add_location_observer(map, input, add_location = "add_location", choices, ns)
     
-    
-    # --------------------------------------------------------------------------
-    # Add location
-    # --------------------------------------------------------------------------
-    
-    # -- Event: popup link (add_location)
-    observeEvent(input$add_location, {
-      
-      # -- get lng, lat
-      lng <- map$click()[['lng']]
-      lat <- map$click()[['lat']]
-      
-      # -- build choices
-      choices <- list(type = unique(locations$items()$type),
-                      country = r$countries_iso$country.en,
-                      state = unique(locations$items()$state),
-                      city = unique(locations$items()$city))
-      
-      # -- display form
-      showModal(location_modal(location = NULL, lng, lat, choices, ns))
-      
-    })
-    
-    
-    # -- Event: btn confirm_add_location
-    observeEvent(input$confirm_add_location, {
-      
-      # -- secure against empty locations #161
-      req(input$name, input$type, input$country, input$city)
-      
-      # -- close dialog
-      removeModal()
-      
-      # -- clear popup
-      map$proxy %>% 
-        clearPopups()
-      
-      # -- build values
-      input_values <- data.frame(id = NA,
-                                 name = input$name,
-                                 type = input$type,
-                                 lng = map$click()[['lng']],
-                                 lat = map$click()[['lat']],
-                                 country = input$country,
-                                 state = input$state,
-                                 zip.code = input$zip.code,
-                                 city = input$city,
-                                 address = input$address,
-                                 comment = input$comment,
-                                 been.there = input$been.there,
-                                 wish.list = input$wish.list)
-      
-      # -- create item
-      item <- kitems::item_create(values = input_values, data.model = locations$data_model())
-      
-      # -- call trigger
-      kitems::item_add(locations$items, item, name = locations$id)
-      
-    })
-    
+    # -- confirm_add_location
+    obsC <- confirm_add_location_observer(map, locations, input, confirm_add_location = "confirm_add_location")
+
     
     # --------------------------------------------------------------------------
     # Connector: visited_countries
