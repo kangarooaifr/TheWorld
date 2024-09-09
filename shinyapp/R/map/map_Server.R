@@ -33,6 +33,10 @@ map_Server <- function(id, r, verbose = TRUE) {
     map_zoom <- NULL
     map_freeze <- NULL
     
+    # -- addLayerControl cache
+    layer_control <- reactiveVal(list(baseGroups = character(0),
+                                      overlayGroups = character(0)))
+    
     
     # --------------------------------------------------------------------------
     # The map
@@ -149,6 +153,21 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # --------------------------------------------------------------------------
+    # Layer controle
+    # --------------------------------------------------------------------------
+    
+    observe(
+      
+      # -- update map
+      map_proxy %>%
+        
+        addLayersControl(baseGroups = layer_control()$baseGroups,
+                         overlayGroups = layer_control()$overlayGroups)
+      
+    )
+    
+    
+    # --------------------------------------------------------------------------
     # Search
     # --------------------------------------------------------------------------
     
@@ -189,7 +208,8 @@ map_Server <- function(id, r, verbose = TRUE) {
          center = map_center,
          bounds = map_bounds,
          zoom = map_zoom,
-         freeze = map_freeze)
+         freeze = map_freeze,
+         layer_control = layer_control)
     
 
   })

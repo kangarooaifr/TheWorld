@@ -25,7 +25,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     setting(name = "contextual_locations_level", type = "numeric", default = 8)
     setting(name = "bus_stations_level", type = "numeric", default = 13)
     setting(name = "railway_stations_level", type = "numeric", default = 10)
-    
+
     
     # --------------------------------------------------------------------------
     # Init
@@ -199,15 +199,18 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         # -- display on map
         add_markers(x, map_proxy = map$proxy, icons = icons)
         
+        # -- Add in cache
+        map_layers_control(map$layer_control, overlayGroups = unique(x$type))
+        
         # -- crop map around markers
         map_crop(map_proxy = map$proxy, 
                  lng1 = min(x$lng), 
                  lat1 = min(x$lat), 
                  lng2 = max(x$lng),
                  lat2 = max(x$lat), 
-                 fly_duration, 
-                 fly_padding)}
-      
+                 fly_duration = setting(name = "fly_duration"),
+                 fly_padding = setting(name = "fly_padding"))}
+       
     }) %>% bindEvent(filtered_locations())
       
   
@@ -250,10 +253,14 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         cache_contextual(x$id)
         
         # -- remove locations
-        if(!identical(locations_to_remove, numeric(0))){
+        if(!identical(locations_to_remove, numeric(0)) & !is.null(locations_to_remove)){
           
           cat(MODULE, "Remove markers from map, nb =", length(locations_to_remove), "\n")
-          removeMarker(map$proxy, layerId = as.character(locations_to_remove))}
+          removeMarker(map$proxy, layerId = as.character(locations_to_remove))
+          
+          # -- Remove from cache
+          groups <- unique(x[x$id %in% locations_to_remove, ]$type)
+          map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)}
         
         # -- check dim
         if(nrow(locations_to_add) > 0){
@@ -265,14 +272,33 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
           
           # -- display on map
-          add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)}
+          add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
+          
+          # -- Add in cache
+          map_layers_control(map$layer_control, overlayGroups = unique(locations_to_add$type))}
 
       } else {
         
         if(length(cache_contextual()) > 0){
           
+          # -- Clear markers
           cat(MODULE, "Clear contextual locations \n")
           removeMarker(map$proxy, layerId = as.character(cache_contextual()))
+          
+          cat("*************************************************** \n")
+          str(cache_contextual())
+          
+          
+          # -- Remove from cache
+          groups <- unique(x[x$id %in% cache_contextual(), ]$type)
+          
+          cat("*************************************************** \n")
+          str(groups)
+          
+          
+          map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)
+          
+          # -- Reset cache
           cache_contextual(NULL)}
         
       }
@@ -314,11 +340,15 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           clearGroup("countries") %>%
           
           # -- add areas
-          addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries") %>%
+          addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries")
         
           # -- Map overlay checkbox (hide / show groups)
-          addLayersControl(overlayGroups = "countries")
+          # addLayersControl(overlayGroups = "countries")
         
+        # -- Add in cache
+        map_layers_control(map$layer_control, overlayGroups = "countries")
+          
+          
         # -- update ui
         output$panel_ui <- renderUI({
           
@@ -342,10 +372,14 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         hideGroup('track') %>%
         
         # -- add on map
-        addPolylines(data = r$track, group = 'track') %>%
+        addPolylines(data = r$track, group = 'track')
         
         # -- Map overlay checkbox (hide / show groups)
-        addLayersControl(overlayGroups = "track")
+        # addLayersControl(overlayGroups = "track")
+      
+      # -- add in cache
+      map_layers_control(map$layer_control, overlayGroups = "track")
+      
         
     }) %>% bindEvent(r$track)
     
