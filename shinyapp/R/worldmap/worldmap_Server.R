@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, map, locations, countries, r) {
+worldmap_Server <- function(id, map, locations, countries, tracks) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -331,13 +331,13 @@ worldmap_Server <- function(id, map, locations, countries, r) {
         hideGroup('track') %>%
         
         # -- add on map
-        addPolylines(data = r$track, group = 'track')
+        addPolylines(data = tracks, group = 'track')
       
       # -- add in cache
       map_layers_control(map$layer_control, overlayGroups = "track")
       
         
-    }) %>% bindEvent(r$track)
+    }) %>% bindEvent(tracks)
     
     
   })

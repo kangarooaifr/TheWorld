@@ -13,7 +13,7 @@ library(leaflet)
 # Server logic
 # ------------------------------------------------------------------------------
 
-track_Server <- function(id, r, path) {
+track_Server <- function(id, path) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -23,14 +23,6 @@ track_Server <- function(id, r, path) {
     # -- trace
     MODULE <- paste0("[", id, "]")
     cat(MODULE, "Starting module server... \n")
-    
-    
-    # --------------------------------------------------------------------------
-    # Communication objects
-    # --------------------------------------------------------------------------
-    
-    # -- declare
-    r$track <- NULL
     
     
     # --------------------------------------------------------------------------
@@ -46,22 +38,13 @@ track_Server <- function(id, r, path) {
     
     
     # -- load track
-    track1 <- reactive(read_sf(gpx_file, layer = "track_points"))
+    tracks <- read_sf(gpx_file, layer = "track_points")
     
-    observeEvent(track1(), {
-      
-      cat(MODULE, "Display tracks on map \n")
-      
-      # Convert track
-      track2 <- track1() %>%
-        st_combine() %>%
-        st_cast(to = "LINESTRING") %>%
-        st_sf()
-      
-      # -- expose
-      r$track <- track2
-      
-    })
-    
+    # -- Convert track & return
+    tracks <- tracks %>%
+      st_combine() %>%
+      st_cast(to = "LINESTRING") %>%
+      st_sf()
+  
   })
 }

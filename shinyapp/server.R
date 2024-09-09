@@ -79,7 +79,7 @@ shinyServer(
     countries <- country_Server(id = "country", path)
     
     # -- tracks
-    track_Server(id = "track", r, path)
+    tracks <- track_Server(id = "track", path)
     
     # -- transports
     routes <- route_Server(id = "routemngr", routeId, r, path)
@@ -90,7 +90,7 @@ shinyServer(
     # --------------------------------------------------------------------------
 
     # -- worldmap
-    worldmap_Server(id = "worldmap", map = worldMap, locations, countries, r)
+    worldmap_Server(id = "worldmap", map = worldMap, locations, countries, tracks)
         
     # -- trips
     trip_Server(id = "tripmngr", map = tripMap, locations, location_ns = locationMngrId, routes, r, path)
