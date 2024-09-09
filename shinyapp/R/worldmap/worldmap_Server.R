@@ -70,9 +70,6 @@ worldmap_Server <- function(id, map, locations, r) {
     action_beenthere <- action_beenthere_observer(mapId = map$id, input, locations)
     
     
-    # *****************************
-    #  >>>>>>>>> homogenize function names // functions parameters, check traces
-      
     # --------------------------------------------------------------------------
     # Connector: visited_countries
     # --------------------------------------------------------------------------
