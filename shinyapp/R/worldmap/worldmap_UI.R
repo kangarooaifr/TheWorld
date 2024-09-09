@@ -18,7 +18,7 @@ country_INPUT <- function(id){
                                                       multiple = TRUE,
                                                       options = list(placeholder = 'Please select an option below',
                                                                      onInitialize = I('function() { this.setValue(""); }'),
-                                                                     create = TRUE))))
+                                                                     create = FALSE))))
   
 }
 
