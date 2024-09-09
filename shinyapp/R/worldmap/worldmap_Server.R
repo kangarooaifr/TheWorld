@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, map, locations, location_ns, r) {
+worldmap_Server <- function(id, map, locations, r) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -57,7 +57,15 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
     # -- confirm_add_location
     obsC <- confirm_add_location_observer(map, locations, input, confirm_add_location = "confirm_add_location")
 
+    # -- action_update
+    obsD <- update_location_observer(map, input, locations, choices, ns)
     
+    # -- confirm_update
+    obsE <- confirm_update_location_observer(map, input, locations)
+    
+    # *****************************
+    #  >>>>>>>>> homogenize function names // functions parameters, check traces
+      
     # --------------------------------------------------------------------------
     # Connector: visited_countries
     # --------------------------------------------------------------------------
@@ -147,7 +155,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         
         # -- add icon & popup columns
         x <- location_icon(x)
-        x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
+        x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns)
         
         # -- display on map
         add_markers(x, map_proxy = map$proxy, icons = icons)
@@ -226,7 +234,7 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           
           # -- add icon & popup columns
           locations_to_add <- location_icon(locations_to_add)
-          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns = ns, location_ns = location_ns)
+          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns)
           
           # -- display on map
           add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)

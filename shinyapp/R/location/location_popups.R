@@ -1,6 +1,6 @@
 
 
-location_popups <- function(locations, type, activity, ns, location_ns){
+location_popups <- function(locations, type, activity, ns){
   
   cat("[location] Build popups, activity =", activity, "/ type =", type, "\n")
   
@@ -27,19 +27,19 @@ location_popups <- function(locations, type, activity, ns, location_ns){
                    label =  "Update", 
                    onclick = sprintf(
                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_update", sep = '-'))),
+                     ns("action_update"))),
         
         actionLink(inputId = "delete_%s", 
                    label =  "Delete", 
                    onclick = sprintf(
                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_delete", sep = '-'))),
+                     ns("action_delete"))),
         
         actionLink(inputId = "been-there_%s", 
                    label =  "Been there", 
                    onclick = sprintf(
                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_beenthere", sep = '-')))),
+                     ns("action_beenthere")))),
       
       locations$id, locations$id, locations$id)
     
