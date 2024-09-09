@@ -13,7 +13,7 @@ delete_location_observer <- function(map, input, locations){
     cat(paste0("[", map$id, "]"), "Marker popup click: delete id =", id, "\n")
     
     # -- delete item
-    kitems::item_delete(locations, id, name = "location")
+    kitems::item_delete(locations$items, id, name = "location")
     
   })
   
