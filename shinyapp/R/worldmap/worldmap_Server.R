@@ -339,9 +339,6 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
           # -- add areas
           addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries")
         
-          # -- Map overlay checkbox (hide / show groups)
-          # addLayersControl(overlayGroups = "countries")
-        
         # -- Add in cache
         map_layers_control(map$layer_control, overlayGroups = "countries")
           
@@ -370,9 +367,6 @@ worldmap_Server <- function(id, map, locations, location_ns, r) {
         
         # -- add on map
         addPolylines(data = r$track, group = 'track')
-        
-        # -- Map overlay checkbox (hide / show groups)
-        # addLayersControl(overlayGroups = "track")
       
       # -- add in cache
       map_layers_control(map$layer_control, overlayGroups = "track")
