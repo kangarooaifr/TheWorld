@@ -116,22 +116,7 @@ location_Server <- function(id, r, path) {
     # --------------------------------------------------------------------------
     # Actions (click from marker popup)
     # --------------------------------------------------------------------------
-    
 
-    
-    # -- Observe: action_delete
-    observeEvent(input$action_delete, {
-    
-      # -- extract id
-      id <- unlist(strsplit(input$action_delete, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: delete id =", id, "\n")
-      
-      # -- delete item
-      kitems::item_delete(locations, id, name = "location")
-      
-    })
-    
-    
     # -- Observe: action_beenthere
     observeEvent(input$action_beenthere, {
       
