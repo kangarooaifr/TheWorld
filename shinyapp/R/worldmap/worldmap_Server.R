@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, map, locations, r) {
+worldmap_Server <- function(id, map, locations, countries, r) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -39,7 +39,7 @@ worldmap_Server <- function(id, map, locations, r) {
 
     # -- build choices
     choices <- reactive(list(type = unique(locations$items()$type),
-                             country = r$countries_iso$country.en,
+                             country = countries$iso$country.en,
                              state = unique(locations$items()$state),
                              city = unique(locations$items()$city)))
     
@@ -273,13 +273,13 @@ worldmap_Server <- function(id, map, locations, r) {
     # --------------------------------------------------------------------------
     
     observeEvent({
-      r$geojson_data
+      countries$geojson()
       visited_countries()
       input$filter_country}, {
         
         # -- because ignoreNULL = FALSE
         # need to wait for async data to be ready
-        req(r$geojson_data)
+        req(countries$geojson())
         
         # -- get visited countries
         selected_countries <- visited_countries()
@@ -290,10 +290,10 @@ worldmap_Server <- function(id, map, locations, r) {
         
         # -- switch to country code
         # WARNING! the column name is switched to X3digits.code upon reading the file
-        selected_countries <- r$countries_iso[r$countries_iso$country.en %in% selected_countries, 'X3digits.code']
+        selected_countries <- countries$iso[countries$iso$country.en %in% selected_countries, 'X3digits.code']
         
         # -- selected geojson to be displayed
-        selected_geojson <- r$geojson_data[r$geojson_data@data$ISO_A3 %in% selected_countries, ]
+        selected_geojson <- countries$geojson()[countries$geojson()@data$ISO_A3 %in% selected_countries, ]
         
         # -- update map
         map$proxy %>%
