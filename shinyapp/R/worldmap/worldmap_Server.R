@@ -106,16 +106,16 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
       cat(MODULE, "Update locations from items \n")
       
       # -- get locations (depending on selected option)
-      x <- switch (input$display_options,
-                   'been-there' = locations$items()[locations$items()$type == 'city' & locations$items()$been.there, ],
-                   'wish-list'  = locations$items()[locations$items()$type == 'city' & locations$items()$wish.list, ],
-                   locations$items()[locations$items()$type == 'city', ])
-      
-      # -- check
-      cat("-- output dim =", dim(x)[1], "obs. \n")
-    
-      # -- return
-      x
+      switch (input$display_options,
+              'been-there' = select_locations(locations, 
+                                              pattern = list(type = "city", been.there = TRUE), 
+                                              result = "locations"),
+              'wish-list'  = select_locations(locations, 
+                                              pattern = list(type = "city", wish.list = TRUE), 
+                                              result = "locations"),
+              select_locations(locations, 
+                               pattern = list(type = "city"), 
+                               result = "locations"))
       
     })
     
