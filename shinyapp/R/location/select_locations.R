@@ -20,17 +20,18 @@ select_locations <- function(locations, pattern, result){
   seaport_items <- locations$seaports()
   railway_items <- locations$railway_stations
   bus_items <- locations$bus_stations
+
+  # -- init (return value)
+  s_result <- data.frame()
+  s_locations <- data.frame()
+  s_airports <- data.frame()
   
-  
-  # -- check result
+  # -- locations
   if("locations" %in% result){
-    
-    # -- init (return value)
-    select <- NULL
-    
+
     # -- id
     if("id" %in% names(pattern))
-      select <- location_items[location_items$id %in% pattern['id'], ]
+      s_locations <- location_items[location_items$id %in% pattern['id'], ]
     
     else {
       
@@ -54,14 +55,33 @@ select_locations <- function(locations, pattern, result){
       
       # -- query
       if(length(query) > 0)
-        select <- location_items[eval(parse(text = query)), ]
+        s_locations <- location_items[eval(parse(text = query)), ]}}
+  
+  
+  # -- airports
+  if("airports" %in% result){
 
-    }
+    # -- id
+    if("id" %in% names(pattern)){
+      
+      # -- slice
+      s_airports <- airport_items[airport_items$id %in% pattern['id'], ]
+      
+      # -- make locations from airports
+      if(dim(s_airports)[1] > 0)
+        s_airports <- airport_to_location(s_airports)}}
+  
+  
+  # -- merge selections
+  if(nrow(s_locations) > 0)
+    s_result <- s_locations
+  
+  if(nrow(s_airports) > 0)
+    s_result <- rbind(s_result, s_airports)
     
-  }
   
   # -- return
-  cat("[select_locations] output dim =", dim(select),"\n")
-  select
+  cat("[select_locations] output dim =", dim(s_result),"\n")
+  s_result
   
 }
