@@ -76,7 +76,9 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     
     # -- expose as reactive
     visited_countries <- reactive(
-      unique(locations$items()[locations$items()$been.there, 'country']))
+      unique(select_locations(locations, 
+                              pattern = list(been.there = TRUE), 
+                              result = "locations")$country))
   
     
     # --------------------------------------------------------------------------
