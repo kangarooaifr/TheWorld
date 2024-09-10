@@ -15,33 +15,39 @@ location_popups <- function(locations, type, activity, ns){
   body <- paste0(
     
     "<p>", locations$type, "<p>")
+
   
+  # -- location
+  footer_location <- sprintf(
+    
+    paste0(
+      actionLink(inputId = "update_%s", 
+                 label =  "Update", 
+                 onclick = sprintf(
+                   'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                   ns("action_update"))),
+      
+      actionLink(inputId = "delete_%s", 
+                 label =  "Delete", 
+                 onclick = sprintf(
+                   'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                   ns("action_delete")))),
+    
+    locations$id, locations$id)
+    
   
   # -- compute footer
   footer <- if(activity == "world_map"){
     
     # -- world_map activity
-    sprintf(
-      paste0(
-        actionLink(inputId = "update_%s", 
-                   label =  "Update", 
-                   onclick = sprintf(
-                     'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     ns("action_update"))),
-        
-        actionLink(inputId = "delete_%s", 
-                   label =  "Delete", 
-                   onclick = sprintf(
-                     'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     ns("action_delete"))),
-        
+    sprintf(paste0(
         actionLink(inputId = "been-there_%s", 
                    label =  "Been there", 
                    onclick = sprintf(
                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
                      ns("action_beenthere")))),
       
-      locations$id, locations$id, locations$id)
+      locations$id)
     
   } else {
     
@@ -71,6 +77,6 @@ location_popups <- function(locations, type, activity, ns){
   
   
   # -- merge all & return
-  paste0(header, body, footer)
+  paste(header, body, footer_location, footer, sep = "<hr/>")
   
 }
