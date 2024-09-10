@@ -91,11 +91,15 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     
     # -- select locations
     selected_locations <- reactive(
-      location_select(locations$items(), locations$airports, location_id = c(selected_steps()$location.id, 
-                                                               selected_accommodations()$location.id, 
-                                                               selected_route()$origin, 
-                                                               selected_route()$destination))) %>% 
-      bindEvent(list(selected_steps(), selected_accommodations(), selected_route()))
+      
+      select_locations(locations, 
+                       pattern = list(id = c(selected_steps()$location.id, 
+                                             selected_accommodations()$location.id, 
+                                             selected_route()$origin, 
+                                             selected_route()$destination)), 
+                       result = c("locations", "airports"))
+      
+    ) %>% bindEvent(list(selected_steps(), selected_accommodations(), selected_route()), ignoreInit = TRUE)
     
     # -- select route 
     # keep it after location to minimize fly to bounds side effect (half route displayed + refresh after crop)
