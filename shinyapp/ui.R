@@ -42,8 +42,7 @@ body <- dashboardBody(
                      map_search_Input("world"),
                      
                      # -- locations & countries
-                     country_INPUT("worldmap"),
-                     location_INPUT("worldmap")),
+                     worldmap_INPUT("worldmap")),
                      
               
               # -- main area (map)
