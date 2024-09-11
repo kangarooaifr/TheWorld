@@ -22,7 +22,7 @@ map_UI <- function(id)
 # -------------------------------------
 
 # -- Search input form
-search_Input <- function(id) {
+map_search_Input <- function(id) {
   
   # namespace
   ns <- NS(id)
@@ -37,7 +37,7 @@ search_Input <- function(id) {
 
 
 # -- freeze
-freeze_INPUT <- function(id){
+map_freeze_INPUT <- function(id){
   
   # -- namespace
   ns <- NS(id)
