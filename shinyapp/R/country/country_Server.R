@@ -39,17 +39,6 @@ country_Server <- function(id, path) {
     
     
     # --------------------------------------------------------------------------
-    # Output
-    # --------------------------------------------------------------------------
-    
-    # -- Panel (waiting for file to be loaded)
-    output$panel_ui <- renderUI(
-      wellPanel(
-        h4("Countries"),
-        p("Loading country boundaries in progres...")))
-    
-    
-    # --------------------------------------------------------------------------
     # Load resources: iso countries
     # --------------------------------------------------------------------------
     

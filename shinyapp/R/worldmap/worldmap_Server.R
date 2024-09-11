@@ -309,14 +309,7 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
         # -- Add in cache
         map_layers_control(map$layer_control, overlayGroups = "countries")
           
-          
-        # -- update ui
-        output$panel_ui <- renderUI({
-          
-          wellPanel(
-            h4("Countries"),
-            p("Show visited countries."))})
-        
+
       }, ignoreNULL = FALSE, ignoreInit = TRUE)
     
     
