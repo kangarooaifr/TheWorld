@@ -68,17 +68,6 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     
     # -- action_beenthere
     action_beenthere <- action_beenthere_observer(mapId = map$id, input, locations)
-    
-    
-    # --------------------------------------------------------------------------
-    # Connector: visited_countries
-    # --------------------------------------------------------------------------
-    
-    # -- expose as reactive
-    visited_countries <- reactive(
-      unique(select_locations(locations, 
-                              pattern = list(been.there = TRUE), 
-                              result = "locations")$country))
   
     
     # --------------------------------------------------------------------------
@@ -121,6 +110,10 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
       
     })
     
+    
+    # --------------------------------------------------------------------------
+    # Filter locations
+    # --------------------------------------------------------------------------
     
     # -- Level.2: observe country filter
     filtered_locations <- reactive({
@@ -274,43 +267,64 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # Country area
     # --------------------------------------------------------------------------
     
-    observeEvent({
-      countries$geojson()
-      visited_countries()
-      input$filter_country}, {
+    # -- Visited countries
+    visited_countries <- reactive(
+      unique(select_locations(locations, 
+                              pattern = list(been.there = TRUE), 
+                              result = "locations")$country))
+    
+    
+    # -- Level.1: select countries
+    selected_countries <- reactive({
+      
+      cat(MODULE, "Select countries \n")
+      
+      # -- init
+      x <- visited_countries()
+      
+      # -- apply filter
+      if(!is.null(input$filter_country))
+        x <- x[x %in% input$filter_country]
+      
+      # -- switch to country code
+      # WARNING! the column name is switched to X3digits.code upon reading the file
+      x <- countries$iso[countries$iso$country.en %in% x, 'X3digits.code']
+      
+    })
+    
+    
+    # -- Level.2: select geojson
+    selected_geojson <- reactive({
+      
+      # -- need to wait for async data to be ready!
+      req(countries$geojson())
+      cat(MODULE, "Select geojson data \n")
+      
+      # -- selected geojson to be displayed
+      countries$geojson()[countries$geojson()@data$ISO_A3 %in% selected_countries(), ]
+      
+    })
+    
+    
+    # -- Level.3: display data
+    observe({
+      
+      cat(MODULE, "Update map (polygons) \n")
+      
+      # -- update map
+      map$proxy %>%
         
-        # -- because ignoreNULL = FALSE
-        # need to wait for async data to be ready
-        req(countries$geojson())
+        # -- cleanup
+        clearGroup("countries") %>%
         
-        # -- get visited countries
-        selected_countries <- visited_countries()
-        
-        # -- apply filter
-        if(!is.null(input$filter_country))
-          selected_countries <- selected_countries[selected_countries %in% input$filter_country]
-        
-        # -- switch to country code
-        # WARNING! the column name is switched to X3digits.code upon reading the file
-        selected_countries <- countries$iso[countries$iso$country.en %in% selected_countries, 'X3digits.code']
-        
-        # -- selected geojson to be displayed
-        selected_geojson <- countries$geojson()[countries$geojson()@data$ISO_A3 %in% selected_countries, ]
-        
-        # -- update map
-        map$proxy %>%
-          
-          # -- cleanup
-          clearGroup("countries") %>%
-          
-          # -- add areas
-          addPolygons(data = selected_geojson, weight = 1, color = "red", group = "countries")
-        
-        # -- Add in cache
-        map_layers_control(map$layer_control, overlayGroups = "countries")
-          
-
-      }, ignoreNULL = FALSE, ignoreInit = TRUE)
+        # -- add areas
+        addPolygons(data = selected_geojson(), weight = 1, color = "red", group = "countries")
+      
+      # -- Add in cache
+      map_layers_control(map$layer_control, overlayGroups = "countries")
+      
+      
+    }) %>% bindEvent(selected_geojson())
     
     
     # --------------------------------------------------------------------------
