@@ -40,6 +40,9 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # -- marker icons
     icons <- location_icons()
 
+    # -- fill colors
+    color_palette <- colorNumeric(palette = "YlOrBr", domain = c(0, 10))
+    
     # -- build choices
     choices <- reactive(list(type = unique(locations$items()$type),
                              country = countries$iso$country.en,
@@ -342,7 +345,7 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
         clearGroup("countries") %>%
         
         # -- add areas
-        addPolygons(data = selected_geojson(), weight = 1, color = "red", group = "countries")
+        addPolygons(data = selected_geojson(), weight = 1, color = color_palette(9), group = "countries")
       
       # -- Add in cache
       map_layers_control(map$layer_control, overlayGroups = "countries")
