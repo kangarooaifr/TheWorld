@@ -7,6 +7,9 @@
 settings_Server <- function(id, path) {
   moduleServer(id, function(input, output, session) {
     
+    # -- namespace
+    ns <- NS(id)
+    
     # --------------------------------------------------------------------------
     # Parameters
     # --------------------------------------------------------------------------
@@ -38,6 +41,22 @@ settings_Server <- function(id, path) {
       cat(MODULE, "Settings have been (auto) saved. \n")
       
     }) %>% bindEvent(settings, ignoreNULL = TRUE,  ignoreInit = TRUE)
+    
+    
+    # --------------------------------------------------------------------------
+    # Output
+    # --------------------------------------------------------------------------
+    
+    # -- Admin UI
+    output$settings_admin <- renderUI({
+      
+      # -- Generate observers
+      obs <- lapply(settings$name, setting_observer, input)
+      
+      # -- Generate inputs
+      apply(settings, 1, setting_input, ns)
+      
+    })
     
   })
 }
