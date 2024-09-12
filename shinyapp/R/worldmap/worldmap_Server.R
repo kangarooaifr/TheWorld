@@ -23,6 +23,7 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     
     # -- contextual locations settings
     setting(name = "contextual_locations_level", type = "numeric", default = 8)
+    setting(name = "airports_level", type = "numeric", default = 9)
     setting(name = "bus_stations_level", type = "numeric", default = 13)
     setting(name = "railway_stations_level", type = "numeric", default = 10)
 
@@ -31,8 +32,10 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # Init
     # --------------------------------------------------------------------------
     
-    # -- cache
+    # -- contextual locations
     cache_contextual <- reactiveVal(NULL)
+    add_to_map <- reactiveVal(NULL)
+    remove_from_map <- reactiveVal(NULL) 
     
     # -- marker icons
     icons <- location_icons()
@@ -178,89 +181,110 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # Contextual locations (observe map_bounds)
     # --------------------------------------------------------------------------
     
-    observe({
-
+    # -- Select contextual locations (given map bounds)
+    ctx_locations <- reactive(
+      
       # -- check zoom level
       if(map$zoom() >= setting("contextual_locations_level")){
-
-        # -- init
-        railway_stations <- NULL
-        bus_stations <- NULL
-
-        # -- check setting
-        if(map$zoom() >= setting("railway_stations_level"))
-          railway_stations <- locations$railway_stations
-
-        # -- check setting
-        if(map$zoom() >= setting("bus_stations_level"))
-          bus_stations <- locations$bus_stations
-
+        
         # -- get contextual locations
-        x <- contextual_locations(locations =  locations$items(),
-                                  airports = locations$airports,
-                                  railway_stations = railway_stations,
-                                  bus_stations = bus_stations,
-                                  bounds = map$bounds())
+        x <- contextual_locations(map, locations)
         
         # -- Remove locations already in filtered_locations
         x <- x[!x$id %in% filtered_locations()$id, ]
         
-        # -- Extract locations to remove & add
-        locations_to_remove <- cache_contextual()[!cache_contextual()$id %in% x$id, ]$id
-        locations_to_add <- x[!x$id %in% cache_contextual()$id, ]
-        
-        # -- Extract groups to remove & add
-        groups_to_add <- unique(locations_to_add$type)
-        groups_in_cache <- unique(cache_contextual()[!cache_contextual()$id %in% x$id, ]$type)
-        groups_to_remove <- groups_in_cache[!groups_in_cache %in% x$type]
-        
-        # -- store in cache (df)
-        cache_contextual(x[c("id", "type")])
-        
-        # -- remove locations
-        if(!identical(locations_to_remove, numeric(0)) & !is.null(locations_to_remove)){
-          
-          cat(MODULE, "Remove markers from map, nb =", length(locations_to_remove), "\n")
-          removeMarker(map$proxy, layerId = as.character(locations_to_remove))
-          
-          # -- Remove from cache
-          map_layers_control(map$layer_control, overlayGroups = groups_to_remove, remove = TRUE)}
-        
-        # -- check dim
-        if(nrow(locations_to_add) > 0){
-          
-          cat(MODULE, "Add markers on map, nb =", nrow(locations_to_add), "\n")
-          
-          # -- add icon & popup columns
-          locations_to_add <- location_icon(locations_to_add)
-          locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns)
-          
-          # -- display on map
-          add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
-          
-          # -- Add in cache
-          map_layers_control(map$layer_control, overlayGroups = groups_to_add)}
-
       } else {
         
-        if(!is.null(cache_contextual()))
-          if(nrow(cache_contextual()) > 0){
-            
-            # -- Clear markers
-            cat(MODULE, "Clear contextual locations \n")
-            removeMarker(map$proxy, layerId = as.character(cache_contextual()$id))
-            
-            # -- Remove from cache ('city' should be kept)
-            groups <- unique(cache_contextual()$type)
-            groups <- groups[!groups %in% filtered_locations()$type]
-            map_layers_control(map$layer_control, overlayGroups = groups, remove = TRUE)
-            
-            # -- Reset cache
-            cache_contextual(NULL)}
+        # -- check cache content
+        if(!is.null(cache_contextual())){
+          
+          cat(MODULE, "Clear contextual locations \n")
+          data.frame()
+          
+        } else NULL
         
-      }
+      }) %>% bindEvent(map$bounds())
+    
+    
+    # -- Define locations & groups to add / remove (vs cached ones)
+    observe({        
+      
+      # -- Extract locations to remove & add
+      locations_to_remove <- cache_contextual()[!cache_contextual()$id %in% ctx_locations()$id, ]$id
+      locations_to_add <- ctx_locations()[!ctx_locations()$id %in% cache_contextual()$id, ]
 
-    }) %>% bindEvent(map$bounds())
+      cat(MODULE, "Computing actions on map \n")
+      cat("-- locations to add =", length(locations_to_add), "\n")
+      cat("-- locations to remove =", length(locations_to_remove), "\n")
+      
+      # -- Extract groups to remove (not in filtered_locations!)
+      groups_in_cache <- unique(cache_contextual()[!cache_contextual()$id %in% ctx_locations()$id, ]$type)
+      groups_to_remove <- groups_in_cache[!groups_in_cache %in% ctx_locations()$type]
+      groups_to_remove <- groups_to_remove[!groups_to_remove %in% filtered_locations()$type]
+      
+      # -- store in cache (or clear cache!)
+      cache_contextual(
+        
+        if(nrow(ctx_locations()) != 0)
+          ctx_locations()[c("id", "type")]
+      
+        else
+          NULL)
+      
+      # -- trigger add (NULL won't trigger add marker!)
+      add_to_map(
+        
+        # -- check dim
+        if(nrow(locations_to_add) > 0)
+          list(locations = locations_to_add, 
+               groups = unique(locations_to_add$type))
+        
+        else NULL)
+      
+      # -- trigger remove (NULL won't trigger add marker!)
+      remove_from_map(
+        
+        # -- check dim
+        if(length(locations_to_remove) > 0)
+          
+          list(locations = locations_to_remove,
+                           groups = groups_to_remove)
+        else NULL)
+      
+    }) %>% bindEvent(ctx_locations())
+    
+      
+    # -- Remove locations & groups from map
+    observe({
+      
+      cat(MODULE, "Remove markers from map, nb =", length(remove_from_map()$locations), "\n")
+      removeMarker(map$proxy, layerId = as.character(remove_from_map()$locations))
+      
+      # -- Remove from cache
+      map_layers_control(map$layer_control, overlayGroups = remove_from_map()$groups, remove = TRUE)
+      
+    }) %>% bindEvent(remove_from_map())
+        
+    
+    # -- Add locations & groups to map
+    observe({
+      
+      cat(MODULE, "Add markers on map, nb =", nrow(add_to_map()$locations), "\n")
+      
+      # -- get value
+      locations_to_add <- add_to_map()$locations
+      
+      # -- add icon & popup columns
+      locations_to_add <- location_icon(locations_to_add)
+      locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns)
+      
+      # -- display on map
+      add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
+      
+      # -- Add in cache
+      map_layers_control(map$layer_control, overlayGroups = add_to_map()$groups)
+      
+    })  %>% bindEvent(add_to_map())
 
     
     # --------------------------------------------------------------------------
