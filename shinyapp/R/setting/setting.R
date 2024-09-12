@@ -37,11 +37,15 @@ setting <- function(name, type = NULL, value = NULL, default = NULL){
     
     else {
       
-      # -- update value
-      settings[settings$name == name, ]$value <<- value
+      # -- check
+      if(value != settings[settings$name == name, ]$value){
+        
+        # -- update value
+        settings[settings$name == name, ]$value <<- value
+        
+        # -- return
+        cat("[setting] Setting name =", name, "has been updated, value =", value, "\n")}
       
-      # -- return
-      cat("[setting] Setting name =", name, "has been updated, value =", value, "\n")
       value}
     
   }
