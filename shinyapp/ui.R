@@ -8,7 +8,8 @@
 sidebar <- dashboardSidebar(
   sidebarMenu(id = "selected_tab",
     menuItem("World map", tabName = "world_map", icon = icon("earth-americas"), selected = TRUE),
-    menuItem("Trip planner", tabName = "trip_planner", icon = icon("earth-americas"))),
+    menuItem("Trip planner", tabName = "trip_planner", icon = icon("earth-americas")),
+    menuItem("Options", tabName = "settings", icon = icon("gear"))),
   
   # -- Add dynamic section
   sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -76,6 +77,18 @@ body <- dashboardBody(
               column(width = 9,
                      map_freeze_INPUT("trip"),
                      map_UI("trip")))),
+    
+    
+    # --------------------------------------------------------------------------
+    # Settings section
+    # --------------------------------------------------------------------------
+    
+    # -- main
+    tabItem(tabName = "settings",
+            
+            settingsAdmin_UI("setting")
+            
+    ),
     
     
     # --------------------------------------------------------------------------
