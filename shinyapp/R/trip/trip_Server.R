@@ -19,9 +19,6 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    # -- settings
-    setting(name = "coord_digits", type = "numeric", default = 3)
-    
     # -- get names
     route_group_id <- 'route'
     
@@ -205,9 +202,9 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
                  lng1 = min(x$lng), 
                  lat1 = min(x$lat), 
                  lng2 = max(x$lng),
-                 lat2 = max(x$lat), 
-                 fly_duration, 
-                 fly_padding)}
+                 lat2 = max(x$lat),
+                 fly_duration = setting(name = "fly_duration"),
+                 fly_padding = setting(name = "fly_padding"))}
       
     }) %>% bindEvent(selected_locations())
     
