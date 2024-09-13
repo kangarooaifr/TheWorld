@@ -155,12 +155,12 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
           } else if(type == 'sea'){
             
             # -- get names
-            origin_name <- location$seaports()[location$seaports()$id == origin, 'name']
-            destination_name <- location$seaports()[location$seaports()$id == destination, 'name']
+            origin_name <- locations$seaports()[locations$seaports()$id == origin, 'name']
+            destination_name <- locations$seaports()[locations$seaports()$id == destination, 'name']
             
             # -- compute route
-            route <- data.frame(lng = c(location$seaports()[location$seaports()$id == origin, 'lng'], location$seaports()[location$seaports()$id == destination, 'lng']),
-                                lat = c(location$seaports()[location$seaports()$id == origin, 'lat'], location$seaports()[location$seaports()$id == destination, 'lat']))
+            route <- data.frame(lng = c(locations$seaports()[locations$seaports()$id == origin, 'lng'], locations$seaports()[locations$seaports()$id == destination, 'lng']),
+                                lat = c(locations$seaports()[locations$seaports()$id == origin, 'lat'], locations$seaports()[locations$seaports()$id == destination, 'lat']))
             
             # -- add sea route
             map$proxy %>%
