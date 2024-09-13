@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
+trip_Server <- function(id, map, locations, countries, location_ns, routes, r, path) {
   moduleServer(id, function(input, output, session) {
     
     
@@ -34,12 +34,34 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     # -- marker icons
     icons <- location_icons()
     
+    # -- build choices
+    choices <- reactive(list(type = unique(locations$items()$type),
+                             country = countries$iso$country.en,
+                             state = unique(locations$items()$state),
+                             city = unique(locations$items()$city)))
+    
     
     # --------------------------------------------------------------------------
-    # Register observer (map_click)
+    # Register observers
     # --------------------------------------------------------------------------
     
-    obs <- map_click_observer(map, ns, coord_digits = setting("coord_digits"))
+    # -- map_click
+    map_click <- map_click_observer(map, ns, coord_digits = setting("coord_digits"))
+    
+    # -- action_add
+    action_add <- location_add_observer(map, input, choices, ns)
+    
+    # -- confirm_add
+    confirm_add <- location_confirm_add_observer(map, input, locations)
+    
+    # -- action_update
+    action_update <- location_update_observer(mapId = map$id, input, locations, choices, ns)
+    
+    # -- confirm_update
+    confirm_update <- location_confirm_update_observer(mapId = map$id, input, locations)
+    
+    # -- action_delete
+    action_delete <- location_delete_observer(mapId = map$id, input, locations)
     
     
     # --------------------------------------------------------------------------
@@ -90,9 +112,9 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
     selected_locations <- reactive(
       
       select_locations(locations, 
-                       pattern = list(id = c(selected_steps()$location.id, 
-                                             selected_accommodations()$location.id, 
-                                             selected_route()$origin, 
+                       pattern = list(id = c(selected_steps()$location.id,
+                                             selected_accommodations()$location.id,
+                                             selected_route()$origin,
                                              selected_route()$destination)), 
                        result = c("locations", "airports"))
       
@@ -192,7 +214,7 @@ trip_Server <- function(id, map, locations, location_ns, routes, r, path) {
         
         # -- add icon & popup columns
         x <- location_icon(x)
-        x$popup <- location_popups(x, type = 'selected', activity = 'trip_planner', ns = ns, location_ns = location_ns)
+        x$popup <- location_popups(x, type = 'selected', activity = 'trip_planner', ns = ns)
         
         # -- display on map
         add_markers(x, map_proxy = map$proxy, icons = icons)
