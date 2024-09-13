@@ -1,6 +1,6 @@
 
 
-search_item <- function(r, id, pattern){
+search_item <- function(items, pattern){
   
   # -- check for empty string (otherwise the whole df is returned)
   if(identical(pattern, ""))
@@ -8,13 +8,10 @@ search_item <- function(r, id, pattern){
   
   else {
     
-    # -- get item reference
-    r_items <- kitems::items_name(id)
-    
-    cat("[search_item] items =", id, "/ Search string =", pattern, "\n")
+    cat("[search_item] Search string =", pattern, "\n")
     
     # -- filter items & return
-    result <- r[[r_items]]() %>%
+    result <- items %>%
       filter_all(any_vars(grepl(pattern, .)))
     
     # -- check

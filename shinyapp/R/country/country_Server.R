@@ -14,7 +14,7 @@ library(future)
 # Server logic
 # ------------------------------------------------------------------------------
 
-country_Server <- function(id, r, path) {
+country_Server <- function(id, path) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -36,21 +36,6 @@ country_Server <- function(id, r, path) {
     
     # -- geojson
     geojson_data <- reactiveVal()
-    r$geojson_data <- NULL
-    
-    # -- country
-    r$countries_iso <- NULL
-    
-    
-    # --------------------------------------------------------------------------
-    # Output
-    # --------------------------------------------------------------------------
-    
-    # -- Panel (waiting for file to be loaded)
-    output$panel_ui <- renderUI(
-      wellPanel(
-        h4("Countries"),
-        p("Loading country boundaries in progres...")))
     
     
     # --------------------------------------------------------------------------
@@ -67,10 +52,10 @@ country_Server <- function(id, r, path) {
                         "longitude" = "numeric")
     
     # -- load country ISO list
-    r$countries_iso <- kfiles::read_data(file = filename_iso, 
-                                       path = path$resources,
-                                       colClasses = colClasses_iso,
-                                       create = FALSE)
+    iso <- kfiles::read_data(file = filename_iso, 
+                             path = path$resources,
+                             colClasses = colClasses_iso,
+                             create = FALSE)
 
     
     # --------------------------------------------------------------------------
@@ -101,10 +86,12 @@ country_Server <- function(id, r, path) {
       # -- notify user
       showNotification("Country boundaries are now available", type = c("message"))
       
-      # -- expose
-      r$geojson_data <- geojson_data()
-      
     })
+    
+    
+    # -- module return value
+    list(iso = iso,
+         geojson = geojson_data)
     
   })
 }

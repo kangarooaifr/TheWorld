@@ -1,6 +1,6 @@
 
 
-location_popups <- function(locations, type, activity, ns, location_ns){
+location_popups <- function(locations, type, activity, ns){
   
   cat("[location] Build popups, activity =", activity, "/ type =", type, "\n")
   
@@ -15,33 +15,70 @@ location_popups <- function(locations, type, activity, ns, location_ns){
   body <- paste0(
     
     "<p>", locations$type, "<p>")
+
   
+  # -- location
+  footer_location <- sprintf(
+    
+    paste(
+      actionLink(inputId = "update_%s", 
+                 label =  "Update", 
+                 onclick = sprintf(
+                   'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                   ns("action_update"))),
+      
+      actionLink(inputId = "delete_%s", 
+                 label =  "Delete", 
+                 onclick = sprintf(
+                   'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                   ns("action_delete")))),
+    
+    locations$id, locations$id)
+
   
   # -- compute footer
-  footer <- if(activity == "world_map"){
+  footer_activity <- if(activity == "world_map"){
     
-    # -- world_map activity
-    sprintf(
+    # -- been.there (init empty vector)
+    link_been <- vector()
+    
+    # -- conditional feed (will extend vector with same length as df rows)
+    link_been[!locations$been.there] <- sprintf(
+      
       paste0(
-        actionLink(inputId = "update_%s", 
-                   label =  "Update", 
-                   onclick = sprintf(
-                     'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_update", sep = '-'))),
-        
-        actionLink(inputId = "delete_%s", 
-                   label =  "Delete", 
-                   onclick = sprintf(
-                     'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_delete", sep = '-'))),
-        
         actionLink(inputId = "been-there_%s", 
                    label =  "Been there", 
                    onclick = sprintf(
                      'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
-                     paste(location_ns, "action_beenthere", sep = '-')))),
+                     ns("action_beenthere")))),
       
-      locations$id, locations$id, locations$id)
+      locations[!locations$been.there, ]$id)
+    
+    # -- replace generated NAs
+    link_been[is.na(link_been)] <- ""
+    
+    
+    # -- wish.list (init empty vector)
+    link_wish <- vector()
+    
+    # -- conditional feed
+    link_wish[!locations$wish.list] <- sprintf(
+      
+      paste0(
+        actionLink(inputId = "wish-list_%s", 
+                   label =  "Wish list", 
+                   onclick = sprintf(
+                     'Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})',
+                     ns("action_wishlist")))),
+      
+      locations[!locations$wish.list, ]$id)
+    
+    # -- replace generated NAs
+    link_wish[is.na(link_wish)] <- ""
+    
+    # -- merge & return
+    paste(link_been, link_wish)
+    
     
   } else {
     
@@ -71,6 +108,6 @@ location_popups <- function(locations, type, activity, ns, location_ns){
   
   
   # -- merge all & return
-  paste0(header, body, footer)
+  paste(header, body, paste("Actions", "<br/>", footer_location, footer_activity), sep = "<hr/>")
   
 }

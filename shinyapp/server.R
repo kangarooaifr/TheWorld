@@ -20,9 +20,17 @@ shinyServer(
     # Names
     # --------------------------------------------------------------------------
     
-    locationId <- "location"
     locationMngrId <- "locationmngr"
     routeId <- "route"
+    
+    
+    # --------------------------------------------------------------------------
+    # Settings
+    # --------------------------------------------------------------------------
+    
+    # -- call module
+    settings_Server(id = "setting", path)
+    
     
     # --------------------------------------------------------------------------
     # Selected tab
@@ -48,7 +56,12 @@ shinyServer(
     # --------------------------------------------------------------------------
     
     # -- kitems: generate dynamic sidebar
-    output$menu <- renderMenu(kitems::dynamic_sidebar(r))
+    output$menu <- renderMenu(kitems::dynamic_sidebar(names = list("location", 
+                                                                   "route",
+                                                                   "trip",
+                                                                   "step",
+                                                                   "transport",
+                                                                   "accommodation")))
 
     
     # --------------------------------------------------------------------------
@@ -56,20 +69,20 @@ shinyServer(
     # --------------------------------------------------------------------------
     
     # -- the maps
-    map_Server(id = "world", r = r, verbose = TRUE)
-    map_Server(id = "trip", r = r, verbose = TRUE)
+    worldMap <- map_Server(id = "world", r = r, verbose = TRUE)
+    tripMap <- map_Server(id = "trip", r = r, verbose = TRUE)
     
     # -- locations
-    location_Server(id = locationMngrId, locationId, r, path)
+    locations <- location_Server(id = locationMngrId, r, path)
     
     # -- countries
-    country_Server(id = "country", r, path)
+    countries <- country_Server(id = "country", path)
     
     # -- tracks
-    track_Server(id = "track", r, path)
+    tracks <- track_Server(id = "track", path)
     
     # -- transports
-    route_Server(id = "routemngr", routeId, r, path)
+    routes <- route_Server(id = "routemngr", routeId, r, path)
     
     
     # --------------------------------------------------------------------------
@@ -77,15 +90,16 @@ shinyServer(
     # --------------------------------------------------------------------------
 
     # -- worldmap
-    worldmap_Server(id = "worldmap", mapId = "world", locationId, location_ns = locationMngrId, r)
+    worldmap_Server(id = "worldmap", map = worldMap, locations, countries, tracks)
         
     # -- trips
-    trip_Server(id = "tripmngr", mapId = "trip", locationId, location_ns = locationMngrId, routeId, r, path)
+    trip_Server(id = "tripmngr", map = tripMap, locations, location_ns = locationMngrId, routes, r, path)
 
     
     # --------------------------------------------------------------------------
     # Application server ready
     # --------------------------------------------------------------------------
+    
     
     cat("--------------------------------------------------------------------\n")
     cat("Application server ready! \n")

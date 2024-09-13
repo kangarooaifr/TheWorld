@@ -5,61 +5,78 @@
 # --------------------------------------------------------------------------
 
 # -- function definition
-contextual_locations <- function(locations, airports = NULL, railway_stations = NULL, bus_stations = NULL, bounds){
+contextual_locations <- function(map, locations){
+  
   
   cat("[contextual_locations] Get contextual locations \n")
   
+  # -------------------------------------
+  # locations
+  # -------------------------------------
+  
   # -- get locations
-  # -------------------------------------
-  locations <- bounding_box(locations, bounds)
-  cat("-- locations =", nrow(locations), "\n")
+  ctx_locations <- bounding_box(locations$items(), map$bounds())
+  cat("-- locations =", nrow(ctx_locations), "\n")
   
   
-  # -- get airports
   # -------------------------------------
-  if(!is.null(airports)){
+  # airports
+  # -------------------------------------
+  
+  # -- check zoom level
+  if(map$zoom() >= setting("airports_level")){
     
-    airports <- bounding_box(airports, bounds)
-    cat("-- airports =", nrow(airports), "\n")
+    # -- get airports
+    ctx_airports <- bounding_box(locations$airports, map$bounds())
+    cat("-- airports =", nrow(ctx_airports), "\n")
     
     # -- turn airports into locations & merge
-    if(dim(airports)[1] > 0){
+    if(nrow(ctx_airports) > 0){
       
-      airports <- airport_to_location(airports)
-      locations <- rbind(locations, airports)}}
+      ctx_airports <- airport_to_location(ctx_airports)
+      ctx_locations <- rbind(ctx_locations, ctx_airports)}}
   
   
-  # -- get railway_stations
   # -------------------------------------
-  if(!is.null(railway_stations)){
+  # railway stations
+  # -------------------------------------
+
+  # -- check zoom level
+  if(map$zoom() >= setting("railway_stations_level")){
     
-    railway_stations <- bounding_box(railway_stations, bounds)
-    cat("-- railway_stations =", nrow(railway_stations), "\n")
+    # -- get stations
+    ctx_railway_stations <- bounding_box(locations$railway_stations, map$bounds())
+    cat("-- railway_stations =", nrow(ctx_railway_stations), "\n")
     
     # -- turn railway stations into locations & merge
-    if(dim(railway_stations)[1] > 0){
+    if(nrow(ctx_railway_stations) > 0){
       
-      railway_stations <- railway_to_location(railway_stations)
-      locations <- rbind(locations, railway_stations)}}
+      ctx_railway_stations <- railway_to_location(ctx_railway_stations)
+      ctx_locations <- rbind(ctx_locations, ctx_railway_stations)}}
   
   
-  # -- get bus_stations
   # -------------------------------------
-  if(!is.null(bus_stations)){
+  # bus stations
+  # -------------------------------------   
+  
+    # -- check zoom level
+    if(map$zoom() >= setting("bus_stations_level")){
     
-    bus_stations <- bounding_box(bus_stations, bounds)
-    cat("-- bus_stations =", nrow(bus_stations), "\n")
+      # -- get stations
+    ctx_bus_stations <- bounding_box(locations$bus_stations, map$bounds())
+    cat("-- bus_stations =", nrow(ctx_bus_stations), "\n")
     
     # -- turn bus stations into locations & merge
-    if(dim(bus_stations)[1] > 0){
+    if(nrow(ctx_bus_stations) > 0){
       
-      bus_stations <- bus_to_location(bus_stations)
-      locations <- rbind(locations, bus_stations)}}
+      ctx_bus_stations <- bus_to_location(ctx_bus_stations)
+      ctx_locations <- rbind(ctx_locations, ctx_bus_stations)}}
   
   
-  # -- return
   # -------------------------------------
-  cat(">> output dim =", dim(locations), "\n")
-  locations
+  # return
+  # -------------------------------------
+  cat(">> output dim =", dim(ctx_locations), "\n")
+  ctx_locations
   
 }

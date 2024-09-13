@@ -8,7 +8,8 @@
 sidebar <- dashboardSidebar(
   sidebarMenu(id = "selected_tab",
     menuItem("World map", tabName = "world_map", icon = icon("earth-americas"), selected = TRUE),
-    menuItem("Trip planner", tabName = "trip_planner", icon = icon("earth-americas"))),
+    menuItem("Trip planner", tabName = "trip_planner", icon = icon("earth-americas")),
+    menuItem("Options", tabName = "settings", icon = icon("gear"))),
   
   # -- Add dynamic section
   sidebarMenu(tabName = "kitems", sidebarMenuOutput("menu")),
@@ -39,17 +40,15 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     search_Input("world"),
+                     map_search_Input("world"),
                      
                      # -- locations & countries
-                     country_INPUT("worldmap"),
-                     location_INPUT("worldmap"),
-                     country_UI("worldmap")),
+                     worldmap_INPUT("worldmap")),
                      
               
               # -- main area (map)
               column(width = 9,
-                     freeze_INPUT("world"),
+                     map_freeze_INPUT("world"),
                      map_UI("world")))),
     
     
@@ -66,7 +65,7 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     search_Input("trip"),
+                     map_search_Input("trip"),
                      trip_panel_UI("tripmngr"),
                      
                      #route_UI("routemngr"),
@@ -76,8 +75,20 @@ body <- dashboardBody(
                      
               # -- main area (trip)
               column(width = 9,
-                     freeze_INPUT("trip"),
+                     map_freeze_INPUT("trip"),
                      map_UI("trip")))),
+    
+    
+    # --------------------------------------------------------------------------
+    # Settings section
+    # --------------------------------------------------------------------------
+    
+    # -- main
+    tabItem(tabName = "settings",
+            
+            settingsAdmin_UI("setting")
+            
+    ),
     
     
     # --------------------------------------------------------------------------

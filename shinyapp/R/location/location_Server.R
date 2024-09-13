@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-location_Server <- function(id, locationId, r, path) {
+location_Server <- function(id, r, path) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -18,20 +18,13 @@ location_Server <- function(id, locationId, r, path) {
     # -- get namespace
     ns <- session$ns
     
-    # -- items name
-    r_items <- kitems::items_name(id = locationId)
-    r_data_model <- kitems::dm_name(id = locationId)
-    r_trigger_add <- kitems::trigger_add_name(id = locationId)
-    r_trigger_update <- kitems::trigger_update_name(id = locationId)
-    r_trigger_delete <- kitems::trigger_delete_name(id = locationId)
-    
     
     # --------------------------------------------------------------------------
     # Data manager
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = locationId, r, path$data)
+    locations <- kitems::kitemsManager_Server(id = "location", r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -53,23 +46,19 @@ location_Server <- function(id, locationId, r, path) {
                              altitude = "numeric")
     
     # -- load data
-    raw_airports <- kfiles::read_data(file = filename_airports,
+    airports <- kfiles::read_data(file = filename_airports,
                                     path = path$resources, 
                                     colClasses = colClasses_airports,
                                     create = FALSE)
     
     # -- rename columns to fit with convention & expose connector
-    names(raw_airports)[names(raw_airports) == 'latitude'] <- 'lat'
-    names(raw_airports)[names(raw_airports) == 'longitude'] <- 'lng'
+    names(airports)[names(airports) == 'latitude'] <- 'lat'
+    names(airports)[names(airports) == 'longitude'] <- 'lng'
     
     # -- filter out heliports & entries without iata code (value = "\\N")
-    raw_airports <- raw_airports[raw_airports$iata != '\\N', ]
-    raw_airports <- raw_airports[!grepl('Heli', raw_airports$name), ]
-    cat(MODULE, "Filter airports without iata code & heliports, output =", dim(raw_airports), "\n")
-    
-    # -- store & delete temp object
-    r$airports <- raw_airports
-    rm(raw_airports)
+    airports <- airports[airports$iata != '\\N', ]
+    airports <- airports[!grepl('Heli', airports$name), ]
+    cat(MODULE, "Filter airports without iata code & heliports, output =", dim(airports), "\n")
     
     
     # --------------------------------------------------------------------------
@@ -79,7 +68,7 @@ location_Server <- function(id, locationId, r, path) {
     # it is taken from the standard locations with type = Port
     
     # -- expose connector
-    r$seaports <- reactive(r[[r_items]]()[r[[r_items]]()$type == 'Port', ])
+    seaports <- reactive(locations$items()[locations$items()$type == 'Port', ])
     
     
     # --------------------------------------------------------------------------
@@ -118,164 +107,21 @@ location_Server <- function(id, locationId, r, path) {
     stations <-  stations[!is.na(stations$lng), ]
     
     # -- expose railway stations
-    r$railway_stations <- stations[!stations$is_rail %in% FALSE, ]
+    railway_stations <- stations[!stations$is_rail %in% FALSE, ]
     
     # -- expose bus stations
-    r$bus_stations <- stations[stations$is_road %in% TRUE, ]
+    bus_stations <- stations[stations$is_road %in% TRUE, ]
 
     
     # --------------------------------------------------------------------------
-    # Add location
+    # Module server return value
     # --------------------------------------------------------------------------
     
-    # -- Event: popup link (add_to_locations)
-    observeEvent(input$add_to_locations, {
-    
-      # -- get map id from input
-      map_click <- paste0(input$add_to_locations, "_click")
-      
-      # -- get lng, lat
-      lng <- r[[map_click]]()[['lng']]
-      lat <- r[[map_click]]()[['lat']]
-      
-      # -- build choices
-      choices <- list(type = unique(r[[r_items]]()$type),
-                      country = r$countries_iso$country.en,
-                      state = unique(r[[r_items]]()$state),
-                      city = unique(r[[r_items]]()$city))
-                      
-      # -- display form
-      showModal(location_modal(location = NULL, lng, lat, choices, ns))
-      
-    })
-    
-
-    # -- Event: btn confirm_add_location
-    observeEvent(input$confirm_add_location, {
-
-      # -- secure against empty locations #161
-      req(input$name, input$type, input$country, input$city)
-      
-      # -- close dialog
-      removeModal()
-      
-      # -- get map id from input
-      map_proxy <- paste0(input$add_to_locations, "_proxy")
-      map_click <- paste0(input$add_to_locations, "_click")
-
-      # -- clear popup
-      r[[map_proxy]] %>% 
-        clearPopups()
-      
-      # -- build values
-      input_values <- data.frame(id = NA,
-                                 name = input$name,
-                                 type = input$type,
-                                 lng = r[[map_click]]()[['lng']],
-                                 lat = r[[map_click]]()[['lat']],
-                                 country = input$country,
-                                 state = input$state,
-                                 zip.code = input$zip.code,
-                                 city = input$city,
-                                 address = input$address,
-                                 comment = input$comment,
-                                 been.there = input$been.there,
-                                 wish.list = input$wish.list)
-      
-      # -- create item
-      item <- kitems::item_create(values = input_values, data.model = r[[r_data_model]]())
-    
-      # -- call trigger
-      r[[r_trigger_add]](item)
-      
-    })
-
-    
-    # --------------------------------------------------------------------------
-    # Actions (click from marker popup)
-    # --------------------------------------------------------------------------
-    
-    # -- Observe: action_update
-    observeEvent(input$action_update, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$action_update, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: update id =", id, "\n")
-      
-      # -- get location to update
-      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
-      
-      # -- build choices
-      choices <- list(type = unique(r[[r_items]]()$type),
-                      country = r$countries_iso$country.en,
-                      state = unique(r[[r_items]]()$state),
-                      city = unique(r[[r_items]]()$city))
-      
-      # -- display form
-      showModal(location_modal(location, choices = choices, ns = ns))
-      
-    })
-    
-    
-    # -- Event: btn confirm_update_location
-    observeEvent(input$confirm_update_location, {
-      
-      # -- close dialog
-      removeModal()
-      
-      # -- extract location id
-      id <- unlist(strsplit(input$action_update, split = "_"))[2]
-      
-      # -- get location to update
-      location <- r[[r_items]]()[r[[r_items]]()$id == id, ]
-      
-      # -- update values
-      location$name = input$name
-      location$type = input$type
-      location$country = input$country
-      location$state = input$state
-      location$zip.code = input$zip.code
-      location$city = input$city
-      location$address = input$address
-      location$comment = input$comment
-      location$been.there = input$been.there
-      location$wish.list = input$wish.list
-
-      # -- call trigger
-      r[[r_trigger_update]](location)
-      
-    })
-    
-    
-    # -- Observe: action_delete
-    observeEvent(input$action_delete, {
-    
-      # -- extract id
-      id <- unlist(strsplit(input$action_delete, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: delete id =", id, "\n")
-      
-      # -- call trigger
-      r[[r_trigger_delete]](id)
-      
-    })
-    
-    
-    # -- Observe: action_beenthere
-    observeEvent(input$action_beenthere, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
-      cat(MODULE, "[EVENT] Marker popup click: been-there id =", id, "\n")
-      
-      # -- update item
-      item <- r[[r_items]]()[r[[r_items]]()$id == id, ]
-      item$been.there <- TRUE
-      item$wish.list <- FALSE
-      
-      # -- call trigger
-      r[[r_trigger_update]](item)
-      
-    })
+    # -- composite object
+    c(locations, list('airports' = airports,
+                      'seaports' = seaports,
+                      'railway_stations' = railway_stations,
+                      'bus_stations' = bus_stations))
 
   })
 }

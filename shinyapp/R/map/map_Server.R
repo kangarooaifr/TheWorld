@@ -16,22 +16,9 @@ map_Server <- function(id, r, verbose = TRUE) {
     cat(MODULE, "Starting module server... \n")
     
     # -- fly to settings
-    fly_duration <<- 1.0
-    fly_padding <<- 50
-    fly_zoom <<- 12
-    
-    
-    # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-    
-    # -- declare names
-    map_proxy <- paste0(id, "_proxy")
-    map_click <- paste0(id, "_click")
-    map_center <- paste0(id, "_center")
-    map_bounds <- paste0(id, "_bounds")
-    map_zoom <- paste0(id, "_zoom")
-    map_flyto <- paste0(id, "_flyto")
+    setting(name = "fly_duration", type = "numeric", default = 1.0)
+    setting(name = "fly_padding", type = "numeric", default = 50)
+    setting(name = "fly_zoom", type = "numeric", default = 12)
     
     
     # --------------------------------------------------------------------------
@@ -39,14 +26,16 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- declare connectors
-    r[[map_proxy]] <- NULL
-    r[[map_click]] <- NULL
-    r[[map_center]] <- NULL
-    r[[map_bounds]] <- NULL
-    r[[map_zoom]] <- NULL
+    map_proxy <- NULL
+    map_click <- NULL
+    map_center <- NULL
+    map_bounds <- NULL
+    map_zoom <- NULL
+    map_freeze <- NULL
     
-    # -- declare triggers
-    r[[map_flyto]] <- NULL
+    # -- addLayerControl cache
+    layer_control <- reactiveVal(list(baseGroups = character(0),
+                                      overlayGroups = character(0)))
     
     
     # --------------------------------------------------------------------------
@@ -79,11 +68,11 @@ map_Server <- function(id, r, verbose = TRUE) {
     # --------------------------------------------------------------------------
     
     # -- Connector: map proxy
-    r[[map_proxy]] <- leafletProxy('map')
+    map_proxy <- leafletProxy('map')
     
     
     # -- Connector: mouse click
-    r[[map_click]] <- reactive({
+    map_click <- reactive({
 
       # -- check
       req(input$map_click)
@@ -99,7 +88,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map center
-    r[[map_center]] <- reactive({
+    map_center <- reactive({
       
       # -- check
       req(input$map_center)
@@ -115,7 +104,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map bounds
-    r[[map_bounds]] <- reactive({
+    map_bounds <- reactive({
       
       # -- check
       req(input$map_bounds)
@@ -132,7 +121,7 @@ map_Server <- function(id, r, verbose = TRUE) {
     
     
     # -- Connector: map zoom
-    r[[map_zoom]] <- reactive({
+    map_zoom <- reactive({
       
       # -- check
       req(input$map_zoom)
@@ -147,33 +136,35 @@ map_Server <- function(id, r, verbose = TRUE) {
     })
     
     
-    # --------------------------------------------------------------------------
-    # Trigger: map_flyto
-    # --------------------------------------------------------------------------
-    # r[[map_flyto]] = list(lng, lat)
-    
-    # -- observe trigger
-    observeEvent(r[[map_flyto]], {
+    # -- Connector: map freeze
+    map_freeze <- reactive({
       
-      # -- check setting
-      req(!input$map_freeze)
+      # -- check
+      req(input$map_freeze)
       
       # -- trace
       if(verbose)
-        cat(MODULE, "Trigger map_flyto, applying flyTo \n")
+        cat(MODULE, "Zoom: level =", input$map_freeze, "\n")
       
-      # -- crop view
-      r[[map_proxy]] %>%
-        flyTo(lng = r[[map_flyto]]$lng, 
-              lat = r[[map_flyto]]$lat,
-              zoom = fly_zoom,
-              options = list(duration = fly_duration, 
-                             padding = c(fly_padding, fly_padding)))
-      
-      # -- unset trigger (otherwise you can't call again with same value)
-      r[[map_flyto]] <- NULL
+      # -- return
+      input$map_freeze
       
     })
+    
+    
+    # --------------------------------------------------------------------------
+    # Layer controle
+    # --------------------------------------------------------------------------
+    
+    observe(
+      
+      # -- update map
+      map_proxy %>%
+        
+        addLayersControl(baseGroups = layer_control()$baseGroups,
+                         overlayGroups = layer_control()$overlayGroups)
+      
+    )
     
     
     # --------------------------------------------------------------------------
@@ -204,6 +195,21 @@ map_Server <- function(id, r, verbose = TRUE) {
         showNotification("No result found", type = "error")
       
     })
+    
+    
+    # --------------------------------------------------------------------------
+    # Module return value
+    # --------------------------------------------------------------------------
+    
+    # -- return
+    list(id = id,
+         proxy = map_proxy,
+         click = map_click,
+         center = map_center,
+         bounds = map_bounds,
+         zoom = map_zoom,
+         freeze = map_freeze,
+         layer_control = layer_control)
     
 
   })

@@ -22,22 +22,24 @@ map_UI <- function(id)
 # -------------------------------------
 
 # -- Search input form
-search_Input <- function(id) {
+map_search_Input <- function(id) {
   
-  # namespace
+  # -- namespace
   ns <- NS(id)
   
-  # UI
+  # -- return
   wellPanel(
     
-    # search input
-    searchInput(ns("search"), label = "Search", value = ""))
+    # -- search input
+    searchInput(ns("search"), label = "Search", value = "", placeholder = "Enter search string", width = '100%'),
+    
+    p("Search on map uses OpenStreetMap API."))
   
 }
 
 
 # -- freeze
-freeze_INPUT <- function(id){
+map_freeze_INPUT <- function(id){
   
   # -- namespace
   ns <- NS(id)

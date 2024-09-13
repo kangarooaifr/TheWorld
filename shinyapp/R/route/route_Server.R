@@ -29,23 +29,11 @@ route_Server <- function(id, routeId, r, path) {
     
     
     # --------------------------------------------------------------------------
-    # Names
-    # --------------------------------------------------------------------------
-    
-    # -- items name
-    r_items <- kitems::items_name(id = routeId)
-    r_data_model <- kitems::dm_name(id = routeId)
-    r_trigger_add <- kitems::trigger_add_name(id = routeId)
-    r_trigger_delete <- kitems::trigger_delete_name(id = routeId)
-    r_trigger_create <- kitems::trigger_create_name(id = routeId)
-    
-    
-    # --------------------------------------------------------------------------
     # Data manager
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    kitems::kitemsManager_Server(id = routeId, r, path$data)
+    routes <- kitems::kitemsManager_Server(id = routeId, r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -74,13 +62,15 @@ route_Server <- function(id, routeId, r, path) {
       # -- compute available choices:
       if(input$transport_mode == "air"){
         
-        choices <- r$airports$id
-        names(choices) <- r$airports$iata
+        # ********* To be reworked (r$airports is now locations$airports)
+        # choices <- r$airports$id
+        # names(choices) <- r$airports$iata
         
       } else if(input$transport_mode == "sea"){
         
-        choices <- r$seaports()$id
-        names(choices) <- paste(r$seaports()$city, r$seaports()$name, sep = "-")
+        # ********* To be reworked (r$seaports is now locations$seaports)
+        # choices <- r$seaports()$id
+        # names(choices) <- paste(r$seaports()$city, r$seaports()$name, sep = "-")
         
       }
       choices <- as.list(choices)
@@ -106,11 +96,20 @@ route_Server <- function(id, routeId, r, path) {
           input$select_destination}
         
         # -- call trigger
-        r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
+        # Need to find another way to fire create !!
+        # r[[r_trigger_create]](r[[r_trigger_create]]() + 1)
         
       })
       
     })
+    
+    
+    # --------------------------------------------------------------------------
+    # Return
+    # --------------------------------------------------------------------------
+
+    # -- return (the reactive reference, not the value!)
+    routes
     
   })
 }
