@@ -13,7 +13,7 @@
 
 
 select_locations <- function(locations, pattern, result){
-
+  
   # -- get values
   location_items <- locations$items()
   airport_items <- locations$airports
@@ -28,11 +28,11 @@ select_locations <- function(locations, pattern, result){
   
   # -- locations
   if("locations" %in% result){
-
+    
     # -- id
     if("id" %in% names(pattern))
-      s_locations <- location_items[location_items$id %in% pattern['id'], ]
-    
+      s_locations <- location_items[location_items$id %in% pattern[['id']], ]
+      
     else {
       
       # -- get classes
@@ -65,7 +65,7 @@ select_locations <- function(locations, pattern, result){
     if("id" %in% names(pattern)){
       
       # -- slice
-      s_airports <- airport_items[airport_items$id %in% pattern['id'], ]
+      s_airports <- airport_items[airport_items$id %in% pattern[['id']], ]
       
       # -- make locations from airports
       if(dim(s_airports)[1] > 0)
