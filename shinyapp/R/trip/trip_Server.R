@@ -65,6 +65,14 @@ trip_Server <- function(id, map, locations, countries, location_ns, routes, r, p
     
     
     # --------------------------------------------------------------------------
+    # Contextual locations
+    # --------------------------------------------------------------------------
+    
+    # -- call module server
+    contextualLocation_Server(id = "trip_ctx", map, locations, exclude = selected_locations, icons)
+    
+    
+    # --------------------------------------------------------------------------
     # Trip management
     # --------------------------------------------------------------------------
     
