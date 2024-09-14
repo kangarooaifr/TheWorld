@@ -5,9 +5,9 @@
 # ------------------------------------------------------------------------------
 
 # -- Library
-library(geojsonio)
-library(promises)
-library(future)
+# library(geojsonio)
+# library(promises)
+# library(future)
 
 
 # ------------------------------------------------------------------------------
@@ -62,20 +62,35 @@ country_Server <- function(id, path) {
     # Load resources: geojson data
     # --------------------------------------------------------------------------
     
+    # -- define pipe operators in local env
+    `%...>%` <- promises::`%...>%`
+    `%...!%` <- promises::`%...!%`
+    
     # -- set async strategy
-    plan(multisession)
+    future::plan(future::multisession)
+    
+    # -- notify
+    cat(MODULE, "Asynchronous -- start reading countries geojson data... \n")
     
     # -- async read data
-    cat(MODULE, "Asynchronous -- start reading countries geojson data... \n")
-    future(
-      geojson_read(file.path(path$resources, filename_geojson), what = "sp")
-    ) %...>%
-      geojson_data() %...!%  # -- Assign to geojson_data
+    future::future(
+      
+      # -- read the data
+      # (pipe a %...>% b = a %>% then(b))
+      geojsonio::geojson_read(file.path(path$resources, filename_geojson), what = "sp")) %...>%
+      
+      # -- Assign output to reactiveVal 
+      # (pipe a %...!% b = a %>% catch(b))
+      geojson_data() %...!%
+      
+      # -- if error (anonymous function)
       (function(e) {
+        
+        # -- feed reactiveVal with NULL
         geojson_data(NULL)
-        warning(e)
-        session$close()
-      }) # -- if error
+        
+        # -- generate warning (console)
+        warning(e)})
       
     
     # -- observe when geojson_data is ready
