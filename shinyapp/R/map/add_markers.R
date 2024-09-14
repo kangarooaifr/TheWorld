@@ -23,7 +23,4 @@ add_markers <- function(locations, map_proxy, icons){
                       popup = ~popup,
                       clusterOptions = NULL)
     
-    # -- Map overlay checkbox (hide / show groups)
-    # addLayersControl(overlayGroups = unique(locations$type))
-  
 }
