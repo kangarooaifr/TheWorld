@@ -31,47 +31,16 @@ trip_Server <- function(id, map, locations, countries, location_ns, routes, r, p
     output$shared_zone <- NULL
     is_shared_zone <- reactiveVal("")
     
-    # -- marker icons
-    icons <- location_icons()
-    
-    # -- build choices
-    choices <- reactive(list(type = unique(locations$items()$type),
-                             country = countries$iso$country.en,
-                             state = unique(locations$items()$state),
-                             city = unique(locations$items()$city)))
-    
     
     # --------------------------------------------------------------------------
-    # Register observers
+    # Location manager
     # --------------------------------------------------------------------------
     
-    # -- map_click
-    map_click <- map_click_observer(map, ns, coord_digits = setting("coord_digits"))
+    # -- call module
+    locationManager_Server(id = paste0(id, "_lm"), map, locations, countries,
+                           onSelect = selected_locations)
     
-    # -- action_add
-    action_add <- location_add_observer(map, input, choices, ns)
-    
-    # -- confirm_add
-    confirm_add <- location_confirm_add_observer(map, input, locations)
-    
-    # -- action_update
-    action_update <- location_update_observer(mapId = map$id, input, locations, choices, ns)
-    
-    # -- confirm_update
-    confirm_update <- location_confirm_update_observer(mapId = map$id, input, locations)
-    
-    # -- action_delete
-    action_delete <- location_delete_observer(mapId = map$id, input, locations)
-    
-    
-    # --------------------------------------------------------------------------
-    # Contextual locations
-    # --------------------------------------------------------------------------
-    
-    # -- call module server
-    contextualLocation_Server(id = "trip_ctx", map, locations, exclude = selected_locations, icons)
-    
-    
+
     # --------------------------------------------------------------------------
     # Trip management
     # --------------------------------------------------------------------------
@@ -207,37 +176,6 @@ trip_Server <- function(id, map, locations, countries, location_ns, routes, r, p
       }
       
     })
-    
-    
-    # -- display locations
-    observe({
-      
-      x <- selected_locations()
-      
-      # -- remove markers
-      clearMarkers(map$proxy)
-      
-      # -- check dim #
-      if(nrow(x) != 0){
-        
-        # -- add icon & popup columns
-        x <- location_icon(x)
-        x$popup <- location_popups(x, type = 'selected', activity = 'trip_planner', ns = ns)
-        
-        # -- display on map
-        add_markers(x, map_proxy = map$proxy, icons = icons)
-        
-        # -- crop map around markers
-        map_crop(map_proxy = map$proxy, 
-                 lng1 = min(x$lng), 
-                 lat1 = min(x$lat), 
-                 lng2 = max(x$lng),
-                 lat2 = max(x$lat),
-                 fly_duration = setting(name = "fly_duration"),
-                 fly_padding = setting(name = "fly_padding"))}
-      
-    }) %>% bindEvent(selected_locations())
-    
     
     
     # -- compute timeline table

@@ -32,40 +32,25 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # Init
     # --------------------------------------------------------------------------
 
-    # -- marker icons
-    icons <- location_icons()
+    # -- init
+    filtered_locations <- reactiveVal()
 
     # -- fill colors
     color_palette <- colorNumeric(palette = "YlOrBr", domain = c(0, 10))
     
-    # -- build choices
-    choices <- reactive(list(type = unique(locations$items()$type),
-                             country = countries$iso$country.en,
-                             state = unique(locations$items()$state),
-                             city = unique(locations$items()$city)))
+    
+    # --------------------------------------------------------------------------
+    # Location manager
+    # --------------------------------------------------------------------------
+    
+    # -- call module
+    locationManager_Server(id = paste0(id, "_lm"), map, locations, countries,
+                           onSelect = filtered_locations)
     
     
     # --------------------------------------------------------------------------
     # Register observers
     # --------------------------------------------------------------------------
-    
-    # -- map_click
-    map_click <- map_click_observer(map, ns, coord_digits = setting("coord_digits"))
-  
-    # -- action_add
-    action_add <- location_add_observer(map, input, choices, ns)
-    
-    # -- confirm_add
-    confirm_add <- location_confirm_add_observer(map, input, locations)
-
-    # -- action_update
-    action_update <- location_update_observer(mapId = map$id, input, locations, choices, ns)
-    
-    # -- confirm_update
-    confirm_update <- location_confirm_update_observer(mapId = map$id, input, locations)
-    
-    # -- action_delete
-    action_delete <- location_delete_observer(mapId = map$id, input, locations)
     
     # -- action_beenthere
     action_beenthere <- action_beenthere_observer(mapId = map$id, input, locations)
@@ -136,51 +121,6 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
       x
       
     })
-    
-    
-    # --------------------------------------------------------------------------
-    # Display locations
-    # --------------------------------------------------------------------------
-    
-    # -- Event: filtered_locations
-    observe({
-      
-      x <- filtered_locations()
-      
-      # -- remove markers
-      clearGroup(map$proxy, group = 'city')
-      
-      # -- check dim #
-      if(nrow(x) != 0){
-        
-        # -- add icon & popup columns
-        x <- location_icon(x)
-        x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns)
-        
-        # -- display on map
-        add_markers(x, map_proxy = map$proxy, icons = icons)
-        
-        # -- Add in cache
-        map_layers_control(map$layer_control, overlayGroups = unique(x$type))
-        
-        # -- crop map around markers
-        map_crop(map_proxy = map$proxy, 
-                 lng1 = min(x$lng), 
-                 lat1 = min(x$lat), 
-                 lng2 = max(x$lng),
-                 lat2 = max(x$lat), 
-                 fly_duration = setting(name = "fly_duration"),
-                 fly_padding = setting(name = "fly_padding"))}
-       
-    }) %>% bindEvent(filtered_locations())
-      
-  
-    # --------------------------------------------------------------------------
-    # Contextual locations
-    # --------------------------------------------------------------------------
-
-    # -- call module server
-    contextualLocation_Server(id = "world_ctx", map, locations, exclude = filtered_locations, icons)
       
   
     # --------------------------------------------------------------------------
