@@ -42,18 +42,35 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # --------------------------------------------------------------------------
     # Location manager
     # --------------------------------------------------------------------------
-    
+   
+    # -- popups callback
+    activity_popups <- reactive(wm_popups(filtered_locations(), ns))
+     
     # -- call module
     locationManager_Server(id = paste0(id, "_lm"), map, locations, countries,
-                           onSelect = filtered_locations)
+                           onSelect = filtered_locations, popups = activity_popups)
     
     
     # --------------------------------------------------------------------------
     # Register observers
     # --------------------------------------------------------------------------
     
-    # -- action_beenthere
-    action_beenthere <- action_beenthere_observer(mapId = map$id, input, locations)
+    # -- Observe: action_beenthere
+    observeEvent(input$action_beenthere, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
+      cat(paste0("[", mapId, "]"), "Marker popup click: been-there id =", id, "\n")
+      
+      # -- update item
+      location <- locations$items()[locations$items()$id == id, ]
+      location$been.there <- TRUE
+      location$wish.list <- FALSE
+      
+      # -- update location
+      kitems::item_update(locations$items, location, name = locations$id)
+      
+    })
   
     
     # --------------------------------------------------------------------------
