@@ -131,7 +131,7 @@ contextualLocation_Server <- function(id, map, locations, exclude, icons) {
       
       # -- add icon & popup columns
       locations_to_add <- location_icon(locations_to_add)
-      locations_to_add$popup <- location_popups(locations_to_add, type = 'selected', activity = 'world_map', ns)
+      locations_to_add$popup <- location_popups(locations_to_add, ns, activity = NULL)
       
       # -- display on map
       add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
