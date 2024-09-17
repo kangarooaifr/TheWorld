@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-locationManager_Server <- function(id, map, locations, countries, onSelect) {
+locationManager_Server <- function(id, map, locations, countries, onSelect, popups) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -211,7 +211,7 @@ locationManager_Server <- function(id, map, locations, countries, onSelect) {
         
         # -- add icon & popup columns
         x <- location_icon(x)
-        x$popup <- location_popups(x, type = 'selected', activity = 'world_map', ns)
+        x$popup <- location_popups(x, ns, activity = popups())
         
         # -- display on map
         add_markers(x, map_proxy = map$proxy, icons = icons)
