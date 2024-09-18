@@ -68,10 +68,6 @@ shinyServer(
     # Modules
     # --------------------------------------------------------------------------
     
-    # -- the maps
-    worldMap <- map_Server(id = "world", r = r, verbose = TRUE)
-    tripMap <- map_Server(id = "trip", r = r, verbose = TRUE)
-    
     # -- locations
     locations <- location_Server(id = locationMngrId, r, path)
     
@@ -90,10 +86,10 @@ shinyServer(
     # --------------------------------------------------------------------------
 
     # -- worldmap
-    worldmap_Server(id = "worldmap", map = worldMap, locations, countries, tracks)
+    worldmap_Server(id = "worldmap", locations, countries, tracks)
         
     # -- trips
-    trip_Server(id = "tripmngr", map = tripMap, locations, countries, location_ns = locationMngrId, routes, r, path)
+    trip_Server(id = "tripmngr", locations, countries, location_ns = locationMngrId, routes, r, path)
 
     
     # --------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, map, locations, countries, location_ns, routes, r, path) {
+trip_Server <- function(id, locations, countries, location_ns, routes, r, path) {
   moduleServer(id, function(input, output, session) {
     
     
@@ -30,6 +30,14 @@ trip_Server <- function(id, map, locations, countries, location_ns, routes, r, p
     # -- shared input zone
     output$shared_zone <- NULL
     is_shared_zone <- reactiveVal("")
+    
+    
+    # --------------------------------------------------------------------------
+    # Map
+    # --------------------------------------------------------------------------
+    
+    # -- call module
+    map <- map_Server(id = "trip", r = r, verbose = TRUE)
     
     
     # --------------------------------------------------------------------------

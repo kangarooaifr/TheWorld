@@ -40,7 +40,7 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     map_search_Input("world"),
+                     map_search_Input("worldmap-world"),
                      
                      # -- locations & countries
                      worldmap_INPUT("worldmap")),
@@ -48,8 +48,8 @@ body <- dashboardBody(
               
               # -- main area (map)
               column(width = 9,
-                     map_freeze_INPUT("world"),
-                     map_UI("world")))),
+                     map_freeze_INPUT("worldmap-world"),
+                     map_UI("worldmap-world")))),
     
     
     # --------------------------------------------------------------------------
@@ -65,7 +65,7 @@ body <- dashboardBody(
               column(width = 3,
                      
                      # -- search
-                     map_search_Input("trip"),
+                     map_search_Input("tripmngr-trip"),
                      trip_panel_UI("tripmngr"),
                      
                      #route_UI("routemngr"),
@@ -75,8 +75,8 @@ body <- dashboardBody(
                      
               # -- main area (trip)
               column(width = 9,
-                     map_freeze_INPUT("trip"),
-                     map_UI("trip")))),
+                     map_freeze_INPUT("tripmngr-trip"),
+                     map_UI("tripmngr-trip")))),
     
     
     # --------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-worldmap_Server <- function(id, map, locations, countries, tracks) {
+worldmap_Server <- function(id, locations, countries, tracks) {
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -37,6 +37,14 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
 
     # -- fill colors
     color_palette <- colorNumeric(palette = "YlOrBr", domain = c(0, 10))
+    
+    
+    # --------------------------------------------------------------------------
+    # Map
+    # --------------------------------------------------------------------------
+    
+    # -- call module
+    map <- map_Server(id = "world", r = r, verbose = TRUE)
     
     
     # --------------------------------------------------------------------------
