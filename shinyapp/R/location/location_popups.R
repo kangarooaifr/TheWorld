@@ -1,6 +1,6 @@
 
 
-location_popups <- function(locations, ns, activity){
+location_popups <- function(locations, ns, callback = NULL, ns.callback = NULL){
   
   cat("[location] Build standard popups \n")
   
@@ -17,7 +17,7 @@ location_popups <- function(locations, ns, activity){
     "<p>", locations$type, "<p>")
 
   
-  # -- location
+  # -- standard section
   footer <- sprintf(
     
     paste(
@@ -35,6 +35,10 @@ location_popups <- function(locations, ns, activity){
     
     locations$id, locations$id)
 
+  # -- activity section
+  activity <- if(!is.null(callback))
+    callback(locations, ns.callback)
+  else NULL
   
   # -- merge all & return
   paste(header, body, paste("Actions", "<br/>", activity, footer), sep = "<hr/>")
