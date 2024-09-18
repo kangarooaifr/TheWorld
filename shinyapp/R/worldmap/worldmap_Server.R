@@ -42,13 +42,11 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # --------------------------------------------------------------------------
     # Location manager
     # --------------------------------------------------------------------------
-   
-    # -- popups callback
-    activity_popups <- reactive(wm_popups(filtered_locations(), ns))
-     
+
     # -- call module
     locationManager_Server(id = paste0(id, "_lm"), map, locations, countries,
-                           onSelect = filtered_locations, popups = activity_popups)
+                           onSelect = filtered_locations, popups = wm_popups,
+                           ns.callback = ns)
     
     
     # --------------------------------------------------------------------------
@@ -60,7 +58,7 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
       
       # -- extract id
       id <- unlist(strsplit(input$action_beenthere, split = "_"))[2]
-      cat(paste0("[", mapId, "]"), "Marker popup click: been-there id =", id, "\n")
+      cat(paste0("[", map$id, "]"), "Marker popup click: been-there id =", id, "\n")
       
       # -- update item
       location <- locations$items()[locations$items()$id == id, ]
@@ -71,6 +69,9 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
       kitems::item_update(locations$items, location, name = locations$id)
       
     })
+    
+    
+    # >> TODO:: action_wishlist
   
     
     # --------------------------------------------------------------------------

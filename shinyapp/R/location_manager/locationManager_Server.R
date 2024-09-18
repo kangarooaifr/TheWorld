@@ -4,7 +4,9 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-locationManager_Server <- function(id, map, locations, countries, onSelect, popups) {
+locationManager_Server <- function(id, map, locations, countries, 
+                                   onSelect, popups, ns.callback) {
+  
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -211,7 +213,7 @@ locationManager_Server <- function(id, map, locations, countries, onSelect, popu
         
         # -- add icon & popup columns
         x <- location_icon(x)
-        x$popup <- location_popups(x, ns, activity = popups())
+        x$popup <- location_popups(x, ns, callback = popups, ns.callback)
         
         # -- display on map
         add_markers(x, map_proxy = map$proxy, icons = icons)
@@ -236,7 +238,8 @@ locationManager_Server <- function(id, map, locations, countries, onSelect, popu
     # --------------------------------------------------------------------------
     
     # -- call module server
-    contextualLocation_Server(id = paste0(id, "_ctx"), map, locations, exclude = onSelect, icons)
+    contextualLocation_Server(id = paste0(id, "_ctx"), map, locations, exclude = onSelect, icons,
+                              popups, ns.callback)
         
     
   })

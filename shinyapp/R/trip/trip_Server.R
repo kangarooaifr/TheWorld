@@ -36,12 +36,10 @@ trip_Server <- function(id, map, locations, countries, location_ns, routes, r, p
     # Location manager
     # --------------------------------------------------------------------------
 
-    # -- popups callback
-    activity_popups <- reactive(tp_popups(selected_locations(), ns, type = 'selected'))
-    
     # -- call module
     locationManager_Server(id = paste0(id, "_lm"), map, locations, countries,
-                           onSelect = selected_locations, popups = activity_popups)
+                           onSelect = selected_locations, popups = tp_popups,
+                           ns.callback = ns)
 
 
     # --------------------------------------------------------------------------

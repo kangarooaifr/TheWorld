@@ -4,7 +4,9 @@
 # Module Server logic
 # ------------------------------------------------------------------------------
 
-contextualLocation_Server <- function(id, map, locations, exclude, icons) {
+contextualLocation_Server <- function(id, map, locations, exclude, icons,
+                                      popups, ns.callback) {
+  
   moduleServer(id, function(input, output, session) {
     
     # --------------------------------------------------------------------------
@@ -131,7 +133,7 @@ contextualLocation_Server <- function(id, map, locations, exclude, icons) {
       
       # -- add icon & popup columns
       locations_to_add <- location_icon(locations_to_add)
-      locations_to_add$popup <- location_popups(locations_to_add, ns, activity = NULL)
+      locations_to_add$popup <- location_popups(locations_to_add, ns, callback = popups, ns.callback)
       
       # -- display on map
       add_markers(locations_to_add, map_proxy = map$proxy, icons = icons)
