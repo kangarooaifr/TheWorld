@@ -53,7 +53,7 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     # Register observers
     # --------------------------------------------------------------------------
     
-    # -- Observe: action_beenthere
+    # -- Observe: actionLink
     observeEvent(input$action_beenthere, {
       
       # -- extract id
@@ -71,7 +71,21 @@ worldmap_Server <- function(id, map, locations, countries, tracks) {
     })
     
     
-    # >> TODO:: action_wishlist
+    # -- Observe: actionLink
+    observeEvent(input$action_wishlist, {
+      
+      # -- extract id
+      id <- unlist(strsplit(input$action_wishlist, split = "_"))[2]
+      cat(paste0("[", map$id, "]"), "Marker popup click: wish-list id =", id, "\n")
+      
+      # -- update item
+      location <- locations$items()[locations$items()$id == id, ]
+      location$wish.list <- TRUE
+      
+      # -- update location
+      kitems::item_update(locations$items, location, name = locations$id)
+      
+    })
   
     
     # --------------------------------------------------------------------------
