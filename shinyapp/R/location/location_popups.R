@@ -17,8 +17,15 @@ location_popups <- function(locations, ns, callback = NULL, ns.callback = NULL){
     "<p>", locations$type, "<p>")
 
   
-  # -- standard section
-  footer <- sprintf(
+  # ----------------------------------------------------------------------------
+  # Standard section
+  # ----------------------------------------------------------------------------
+  
+  # -- init empty vector
+  footer <- vector()
+  
+  # -- conditional feed (will extend vector with same length as df rows)
+  footer[!locations$locked] <- sprintf(
     
     paste(
       actionLink(inputId = "update_%s", 
@@ -35,10 +42,19 @@ location_popups <- function(locations, ns, callback = NULL, ns.callback = NULL){
     
     locations$id, locations$id)
 
-  # -- activity section
+  # -- replace generated NAs
+  footer[is.na(footer)] <- ""
+  
+  
+  # ----------------------------------------------------------------------------
+  # Activity section
+  # ----------------------------------------------------------------------------
+  
+  # -- apply callback function
   activity <- if(!is.null(callback))
     callback(locations, ns.callback)
   else NULL
+  
   
   # -- merge all & return
   paste(header, body, paste("Actions", "<br/>", activity, footer), sep = "<hr/>")
