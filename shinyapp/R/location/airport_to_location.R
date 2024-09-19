@@ -16,6 +16,7 @@ airport_to_location <- function(airports){
              address = NA,
              comment = NA,
              been.there = FALSE,
-             wish.list = FALSE)
+             wish.list = FALSE,
+             locked = TRUE)
   
 }
