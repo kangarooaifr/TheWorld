@@ -67,7 +67,8 @@ country_Server <- function(id, path) {
     `%...!%` <- promises::`%...!%`
     
     # -- set async strategy
-    future::plan(future::multisession)
+    # try: move code to global.R 
+    # future::plan(future::multisession)
     
     # -- notify
     cat(MODULE, "Asynchronous -- start reading countries geojson data... \n")

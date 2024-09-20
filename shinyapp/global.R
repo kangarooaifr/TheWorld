@@ -34,3 +34,12 @@ for (nm in list.files(path$code, full.names = TRUE, recursive = TRUE, include.di
   source(nm, encoding = 'UTF-8')
 }
 rm(nm)
+
+
+# ------------------------------------------------------------------------------
+# Init
+# ------------------------------------------------------------------------------
+
+# -- set async strategy
+# try: move code to global.R 
+future::plan(future::multisession)
