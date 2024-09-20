@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, locations, countries, location_ns, routes, r, path) {
+trip_Server <- function(id, locations, countries, location_ns, r, path) {
   moduleServer(id, function(input, output, session) {
     
     
@@ -62,6 +62,14 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
     
     
     # --------------------------------------------------------------------------
+    # Route management
+    # --------------------------------------------------------------------------
+    
+    # -- call module
+    routes <- route_Server(id = "routemngr", routeId = "route", r, path)
+    
+    
+    # --------------------------------------------------------------------------
     # Trip selector
     # --------------------------------------------------------------------------
     
@@ -88,8 +96,8 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
     # -- steps
     selected_steps <- reactive(steps$items()[steps$items()$trip.id == input$trip_selector, ])
     
-    # -- transports
-    selected_transports <- reactive(transports$items()[transports$items()$trip.id == input$trip_selector, ])
+    # -- routes
+    selected_routes <- reactive(routes$items()[routes$items()$trip.id == input$trip_selector, ])
     
     # -- accommodations
     selected_accommodations <- reactive(accommodations$items()[accommodations$items()$trip.id == input$trip_selector, ])
@@ -100,27 +108,22 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
       select_locations(locations, 
                        pattern = list(id = c(selected_steps()$location.id,
                                              selected_accommodations()$location.id,
-                                             selected_route()$origin,
-                                             selected_route()$destination)), 
+                                             selected_routes()$origin,
+                                             selected_routes()$destination)), 
                        result = c("locations", "airports"))
       
-    ) %>% bindEvent(list(selected_steps(), selected_accommodations(), selected_route()), ignoreInit = TRUE)
+    ) %>% bindEvent(list(selected_steps(), selected_accommodations(), selected_routes()), ignoreInit = TRUE)
     
-    # -- select route 
-    # keep it after location to minimize fly to bounds side effect (half route displayed + refresh after crop)
-    selected_route <- reactive(
-      route_select(routes = routes$items(), query = selected_transports()$route.id))
-    
-    
+
     # --------------------------------------------------------------------------
     # Display trip items on map
     # --------------------------------------------------------------------------
     
     # -- display routes
-    observeEvent(selected_route(), {
+    observeEvent(selected_routes(), {
       
       # -- init
-      routes <- selected_route()
+      routes <- selected_routes()
       cat(MODULE, "Update map, selected routes =", length(routes$id), "\n")
       
       # -- clear map (group)
@@ -188,23 +191,23 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
     
     
     # -- compute timeline table
-    # takes into account transports & accommodations (because steps have no date/time)
+    # takes into account routes & accommodations (because steps have no date/time)
     timeline_table <- reactive({
       
       cat(MODULE, "Compute timeline table \n")
       
-      # -- transports
-      transports <- selected_transports()[c('id', 'departure', 'arrival')]
-      colnames(transports) <- c('id', 'start', 'end')
+      # -- routes
+      route_df <- selected_routes()[c('id', 'departure', 'arrival')]
+      colnames(route_df) <- c('id', 'start', 'end')
       
       # -- accommodations
       accomodations <- selected_accommodations()[c('id', 'checkin', 'checkout')]
       colnames(accomodations) <- c('id', 'start', 'end')
       
       # -- return
-      rbind(transports, accomodations)
+      rbind(route_df, accomodations)
       
-    }) %>% bindEvent(list(selected_transports(), selected_accommodations()),
+    }) %>% bindEvent(list(selected_routes(), selected_accommodations()),
                      ignoreInit = FALSE)
     
     
@@ -217,16 +220,16 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
       
       cat(MODULE, "Update trip info \n")
       
-      id <- selected_transports()$id[[1]]
+      id <- selected_routes()$id[[1]]
       cat("id ==", id, "\n")
       
       # -- return
       tagList(
-        p(strong('Departure:'), selected_transports()[selected_transports()$id == id, ]$departure),
-        p(strong('Arrival:'), selected_transports()[selected_transports()$id == id, ]$arrival),
+        p(strong('Departure:'), selected_routes()[selected_routes()$id == id, ]$departure),
+        p(strong('Arrival:'), selected_routes()[selected_routes()$id == id, ]$arrival),
         
-        p(strong('Company:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$company),
-        p(strong('Flight #:'), selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$number),
+        p(strong('Company:'), selected_routes()[selected_routes()$id == id, ]$company),
+        p(strong('Flight #:'), selected_routes()[selected_routes()$id == id, ]$number),
         
         p(strong('Origin:'),
           HTML(
@@ -235,12 +238,12 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
                 
                 # -- remove from trip
                 actionLink(inputId = "flyto_%s_%s",
-                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$name,
+                           label =  r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$origin, ]$name,
                            onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
                                              ns("fly_to_location")))),
               
-              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lng,
-              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$origin, ]$lat)),
+              r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$origin, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$origin, ]$lat)),
         ),
         
         p(strong('Destination:'),
@@ -250,16 +253,16 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
                 
                 # -- remove from trip
                 actionLink(inputId = "flyto_%s_%s",
-                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$name,
+                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_routes()[selected_routes()$id == id, ]$route.id, ]$destination, ]$name,
                            onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
                                              ns("fly_to_location")))),
               
-              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lng,
-              r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_transports()[selected_transports()$id == id, ]$route.id, ]$destination, ]$lat)),
+              r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$destination, ]$lng,
+              r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$destination, ]$lat)),
           
         ))
       
-    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
+    }) %>% bindEvent(list(selected_routes(), r$selected_locations),
                      ignoreInit = TRUE)
     
     
@@ -287,8 +290,8 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
     output$trip_info <- renderUI({
       
       # -- compute values
-      date_start <- min(c(selected_transports()$departure, selected_accommodations()$checkin))
-      date_end <- max(c(selected_transports()$arrival, selected_accommodations()$checkout))
+      date_start <- min(c(selected_routes()$departure, selected_accommodations()$checkin))
+      date_end <- max(c(selected_routes()$arrival, selected_accommodations()$checkout))
       duration <- round(date_end - date_start, digits = 0)
       
       # -- return tag
@@ -299,7 +302,7 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
         
         sliderInput(ns("timeline"), label = "Timeline", 
                     min = as.Date(date_start), max = as.Date(date_end), value = Sys.Date(),
-                    animate = TRUE))}) %>% bindEvent(list(selected_transports(), selected_accommodations()), ignoreInit = TRUE)
+                    animate = TRUE))}) %>% bindEvent(list(selected_routes(), selected_accommodations()), ignoreInit = TRUE)
     
     # -- observer: timeline
     observe({
@@ -344,7 +347,7 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
         p(strong('Check-in:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkin),
         p(strong('Check-out:'), selected_accommodations()[selected_accommodations()$id == id, ]$checkout))
       
-    }) %>% bindEvent(list(selected_transports(), selected_route(), r$selected_locations),
+    }) %>% bindEvent(list(selected_routes(), r$selected_locations),
                      ignoreInit = TRUE)
     
     
@@ -512,115 +515,6 @@ trip_Server <- function(id, locations, countries, location_ns, routes, r, path) 
       # -- call trigger
       r$trigger_remove_step <- id
       
-    })
-    
-    
-    # --------------------------------------------------------------------------
-    # Transport management
-    # --------------------------------------------------------------------------
-    
-    # -- id
-    transport_kitems_id <- "transport"
-    
-    # -- launch kitems sub module
-    transports <- kitems::kitemsManager_Server(id = transport_kitems_id, r, path$data)
-    
-    # -- observer
-    observeEvent(input$add_transport, {
-      
-      # -- hide / show
-      if(is_shared_zone() == "transport"){
-        
-        output$shared_zone <- NULL
-        is_shared_zone("")
-        
-      } else {
-        
-        cat(MODULE, "Add transport \n")
-        
-        # -- declare cache
-        is_shared_zone("transport")
-        
-        # -- output
-        output$shared_zone <- renderUI(
-          tagList(
-            
-            radioButtons(inputId = ns("route_type"), 
-                         label = "", 
-                         choiceNames = list(icon("plane"), icon("train"), icon("ship"), icon("bus")),
-                         choiceValues = list("air", "rail", "sea", "road"),
-                         inline = TRUE),
-            
-            selectizeInput(inputId = ns("select_route"), label = "Select", choices = NULL, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'))),
-            
-            dateInput(inputId = ns("departure_date"), label = "Departure date", value = Sys.Date()),
-            timeInput(inputId = ns("departure_time"), label = "Departure time", value = Sys.time()),
-            selectizeInput(inputId = ns("departure_tz"), label = "Departure tz", choices = OlsonNames(), selected = Sys.timezone()),
-            
-            
-            dateInput(inputId = ns("arrival_date"), label = "Arrival date", value = Sys.Date()),
-            timeInput(inputId = ns("arrival_time"), label = "Arrival time", value = Sys.time()),
-            selectizeInput(inputId = ns("arrival_tz"), label = "Arrival tz", choices = OlsonNames(), selected = Sys.timezone()),
-            
-            textInput(inputId = ns("route_comment"), label = "Comment"),
-            
-            actionButton(inputId = ns("confirm_route"), label = "OK")))
-        
-      }
-        
-      
-      # -- observer: transport mode radio
-      observeEvent(input$route_type, {
-        
-        cat(MODULE, "Event route_type input \n")
-
-        # -- search route
-        result <- route_search(routes = routes$items(), pattern = input$route_type, airports = locations$airports, seaports = locations$seaports())
-        
-        # -- check
-        if(nrow(result) > 0){
-          
-          # -- compute choices
-          choices <- result$id
-          names(choices) <- paste(result$company, "[", result$number, "]", result$origin.code, ">", result$destination.code)
-          
-          # -- update input
-          updateSelectizeInput(inputId = "select_route", choices = choices)}
-        
-      })
-        
-    })
-    
-    
-    # -- observer: confirm add route
-    observeEvent(input$confirm_route, {
-      
-      # -- clear
-      output$shared_zone <- NULL
-      is_shared_zone("")
-      
-      # -- compute values
-      departure <- paste(input$departure_date, input$departure_time)
-      departure <- as.POSIXct(departure, tz = input$departure_tz)
-      arrival <- paste(input$arrival_date, input$arrival_time)
-      arrival <- as.POSIXct(arrival, tz = input$arrival_tz)
-      
-      # -- merge
-      values <- list(id = ktools::getTimestamp(),
-                     trip.id = input$trip_selector,
-                     route.id = input$select_route,
-                     departure = departure,
-                     arrival = arrival,
-                     comment = input$route_comment)
-    
-      # -- create item
-      transport <- kitems::item_create(values, data.model = transports$data_model())
-
-      # -- add item
-      kitems::item_add(transports, item = transport, name = "transport")
-
     })
     
     
