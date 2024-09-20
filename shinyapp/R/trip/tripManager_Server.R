@@ -263,7 +263,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
                 
                 # -- remove from trip
                 actionLink(inputId = "flyto_%s_%s",
-                           label =  r$selected_locations[r$selected_locations$id == selected_route()[selected_route()$id == selected_routes()[selected_routes()$id == id, ]$route.id, ]$destination, ]$name,
+                           label =  r$selected_locations[r$selected_locations$id == selected_routes()[selected_routes()$id == id, ]$destination, ]$name,
                            onclick = sprintf('Shiny.setInputValue(\"%s\", this.id, {priority: \"event\"})', 
                                              ns("fly_to_location")))),
               
