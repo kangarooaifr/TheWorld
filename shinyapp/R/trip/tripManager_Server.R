@@ -27,10 +27,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # Init
     # --------------------------------------------------------------------------
     
-    # -- shared input zone
-    output$shared_zone <- NULL
-    is_shared_zone <- reactiveVal("")
-    
+
     
     # --------------------------------------------------------------------------
     # Map
@@ -56,6 +53,22 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     
     # -- launch kitems sub module
     trips <- kitems::kitemsManager_Server(id = "trip", r, path$data)
+    
+    
+    # --------------------------------------------------------------------------
+    # Step management
+    # --------------------------------------------------------------------------
+    
+    # -- launch kitems sub module
+    steps <- kitems::kitemsManager_Server(id = "step", r, path$data)
+    
+    
+    # --------------------------------------------------------------------------
+    # Accommodation management
+    # --------------------------------------------------------------------------
+    
+    # -- launch kitems sub module
+    accommodations <- kitems::kitemsManager_Server(id = "accommodation", r, path$data)
     
     
     # --------------------------------------------------------------------------
@@ -347,269 +360,6 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     }) %>% bindEvent(list(selected_routes(), r$selected_locations),
                      ignoreInit = TRUE)
     
-  
-    # --------------------------------------------------------------------------
-    # Step management
-    # --------------------------------------------------------------------------
-    
-    # -- id
-    step_kitems_id <- "step"
-    
-    # -- launch kitems sub module
-    steps <- kitems::kitemsManager_Server(id = step_kitems_id, r, path$data)
-    
-    # -- get names
-    step_data_model <- kitems::dm_name(step_kitems_id)
-    step_trigger_add <- kitems::trigger_add_name(step_kitems_id)
-    step_trigger_delete <- kitems::trigger_delete_name(step_kitems_id)
-    
-    # -- define triggers
-    r$trigger_add_step <- NULL
-    r$trigger_remove_step <- NULL
-    
-    # -- observer
-    observeEvent(input$add_location, {
-      
-      # -- check shared zone
-      if(is_shared_zone() == "step"){
-        
-        # -- clear zone
-        output$shared_zone <- NULL
-        is_shared_zone("")
-        
-      } else {
-        
-        # -- declare cache
-        is_shared_zone("step")
-        
-        # -- output
-        output$shared_zone <- renderUI(
-          tagList(
-            
-            # -- location
-            selectizeInput(inputId = ns("select_step"), label = "Select", choices = NULL, 
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'))),
-            
-            # -- comment
-            textInput(inputId = ns("step_comment"), label = "Comment"),
-            
-            actionButton(inputId = ns("confirm_step"), label = "OK")
-            
-          )
-        )
-        
-        # -- location search
-        result <- search_item(locations$items(), pattern = 'city')
-        
-        # -- check result size to avoid crash
-        if(dim(result)[1] > 0){
-          
-          choices <- result$id
-          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
-          
-          # -- update input
-          updateSelectizeInput(inputId = "select_step", choices = choices)}
-        
-      }
-      
-    })
-    
-    
-    # -- observe: confirm step
-    observeEvent(input$confirm_step, {
-      
-      cat("[EVENT] Add step, selected location =", input$select_step, "\n")
-      
-      # -- clear all
-      output$shared_zone <- NULL
-      is_shared_zone("")
-      
-      # -- compute values
-      values <- list(id = ktools::getTimestamp(),
-                     trip.id = input$trip_selector,
-                     location.id = input$select_step,
-                     order = step_order(steps$items()),
-                     comment = input$step_comment)
-      
-      # -- create item
-      step <- kitems::item_create(values, data.model = r[[step_data_model]]())
-      
-      # -- call trigger
-      r[[step_trigger_add]](step)
-      
-    })
-    
-    
-    # -- Observe: add_to_trip
-    observeEvent(input$add_to_trip, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$add_to_trip, split = "_"))[2]
-      cat("[EVENT] Marker popup click: add_to_trip id =", id, "\n")
-      
-      # -- get location
-      location <- locations$items()[locations$items()$id == id, ]
-      
-      # -- call trigger
-      r$trigger_add_step <- location
-      
-    })
-    
-    
-    # -- observe: trigger_add_step
-    observeEvent(r$trigger_add_step, {
-
-      cat("[TRIGGER] Add step to trip, input location =", r$trigger_add_step$id, "\n")
-
-      # -- compute values
-      values <- list(id = ktools::getTimestamp(),
-                     trip.id = input$trip_selector,
-                     location.id = r$trigger_add_step$id,
-                     order = step_order(steps$items()),
-                     comment = NULL)
-      
-      # -- create item
-      step <- kitems::item_create(values, data.model = r[[step_data_model]]())
-      
-      # -- call trigger
-      r[[step_trigger_add]](step)
-      
-    })
-    
-    
-    # -- observe: trigger_remove_step
-    observeEvent(r$trigger_remove_step, {
-      
-      cat("[TRIGGER] Remove step from trip, input location =", r$trigger_remove_step, "\n")
-      
-      # -- get step id from location.id
-      id <- steps$items()[steps$items()$location.id == r$trigger_remove_step, ]$id
-      str(id)
-      
-      # -- call trigger
-      r[[step_trigger_delete]](id)
-      
-    })
-    
-    
-    # -- Observe: remove_from_trip
-    observeEvent(input$remove_from_trip, {
-      
-      # -- extract id
-      id <- unlist(strsplit(input$remove_from_trip, split = "_"))[2]
-      cat("[EVENT] Marker popup click: remove_from_trip id =", id, "\n")
-      
-      # -- call trigger
-      r$trigger_remove_step <- id
-      
-    })
-    
-    
-    # --------------------------------------------------------------------------
-    # -- create tables flight, sea, road to instantiate in route!
-    
-    # --------------------------------------------------------------------------
-    # Accommodation management
-    # --------------------------------------------------------------------------
-    
-    # -- id
-    accommodation_kitems_id <- "accommodation"
-    
-    # -- launch kitems sub module
-    accommodations <- kitems::kitemsManager_Server(id = accommodation_kitems_id, r, path$data)
-    
-    # id, trip.id, location.id, checkin, checkout, breakfast, comment
-    
-    # -- observer
-    observeEvent(input$add_accommodation, {
-      
-      if(is_shared_zone() == "accommodation"){
-        
-        # -- clear all
-        output$shared_zone <- NULL
-        is_shared_zone("")
-        
-      } else {
-        
-        cat(MODULE, "Add accommodation \n")
-        
-        # -- declare cache
-        is_shared_zone("accommodation")
-        
-        # -- output
-        output$shared_zone <- renderUI(
-          tagList(
-            
-            # -- accommodation
-            selectizeInput(inputId = ns("select_accommodation"), label = "Accommodation", choices = NULL,
-                           options = list(placeholder = 'Please select an option below',
-                                          onInitialize = I('function() { this.setValue(""); }'))),
-            
-            # -- checkin
-            dateInput(inputId = ns("checkin_date"), label = "Checkin date", value = Sys.Date()),
-            timeInput(inputId = ns("checkin_time"), label = "Checkin time", value = Sys.time()),
-            
-            # -- checkout
-            dateInput(inputId = ns("checkout_date"), label = "Checkout date", value = Sys.Date()),
-            timeInput(inputId = ns("checkout_time"), label = "Checkout time", value = Sys.time()),
-            selectizeInput(inputId = ns("accommodation_tz"), label = "Timezone", choices = OlsonNames(), selected = Sys.timezone()),
-            
-            # -- breakfast
-            checkboxInput(inputId = ns("breakfast"), label = "Breakfast", value = FALSE),
-            
-            # -- comment
-            textInput(inputId = ns("accommodation_comment"), label = "Comment"),
-            
-            # -- btn
-            actionButton(inputId = ns("confirm_accommodation"), label = "OK")))
-        
-        # -- location search
-        result <- search_item(locations$items(), pattern = 'accommodation')
-        
-        # -- check search result size to avoid crash
-        if(dim(result)[1] > 0){
-          
-          choices <- result$id
-          names(choices) <- paste0(result$name, ", ", result$city, " - ", result$country)
-          
-          # -- update input
-          updateSelectizeInput(inputId = "select_accommodation", choices = choices)}
-        
-      }
-      
-    })
-    
-    
-    observeEvent(input$confirm_accommodation, {
-      
-      # -- clear
-      output$shared_zone <- NULL
-      is_shared_zone("")
-      
-      # -- compute values
-      checkin <- paste(input$checkin_date, input$checkin_time)
-      checkin <- as.POSIXct(checkin, tz = input$accommodation_tz)
-      checkout <- paste(input$checkout_date, input$checkout_time)
-      checkout <- as.POSIXct(checkout, tz = input$accommodation_tz)
-      
-      # -- merge
-      values <- list(id = ktools::getTimestamp(),
-                     trip.id = input$trip_selector,
-                     location.id = input$select_accommodation,
-                     checkin = checkin,
-                     checkout = checkout,
-                     breakfast = input$breakfast,
-                     comment = input$accommodation_comment)
-  
-      
-      # -- create item
-      accommodation <- kitems::item_create(values, data.model = accommodations$data_model())
-      
-      # -- add item
-      kitems::item_add(accommodations, item = accommodation, name = "accommodation")
-      
-    })
     
   })
 }
