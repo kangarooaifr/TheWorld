@@ -75,8 +75,8 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # Route management
     # --------------------------------------------------------------------------
     
-    # -- call module
-    routes <- route_Server(id = "routemngr", routeId = "route", r, path)
+    # -- launch kitems sub module
+    routes <- kitems::kitemsManager_Server(id = "route", r, path$data)
     
     
     # --------------------------------------------------------------------------

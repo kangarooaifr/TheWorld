@@ -66,12 +66,8 @@ body <- dashboardBody(
                      
                      # -- search
                      map_search_Input("tripmngr-trip"),
-                     trip_panel_UI("tripmngr"),
-                     
-                     #route_UI("routemngr"),
-                     
-                     ),
-              
+                     trip_panel_UI("tripmngr")),
+            
                      
               # -- main area (trip)
               column(width = 9,
