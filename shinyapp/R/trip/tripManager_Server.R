@@ -4,7 +4,7 @@
 # Server logic
 # ------------------------------------------------------------------------------
 
-trip_Server <- function(id, locations, countries, location_ns, r, path) {
+tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
   moduleServer(id, function(input, output, session) {
     
     
@@ -54,11 +54,8 @@ trip_Server <- function(id, locations, countries, location_ns, r, path) {
     # Trip management
     # --------------------------------------------------------------------------
     
-    # -- id
-    trip_kitems_id <- "trip"
-    
     # -- launch kitems sub module
-    trips <- kitems::kitemsManager_Server(id = trip_kitems_id, r, path$data)
+    trips <- kitems::kitemsManager_Server(id = "trip", r, path$data)
     
     
     # --------------------------------------------------------------------------

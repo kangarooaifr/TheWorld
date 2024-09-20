@@ -84,7 +84,7 @@ shinyServer(
     worldmap_Server(id = "worldmap", locations, countries, tracks)
         
     # -- trips
-    trip_Server(id = "tripmngr", locations, countries, location_ns = locationMngrId, r, path)
+    tripManager_Server(id = "tripmngr", locations, countries, location_ns = locationMngrId, r, path)
 
     
     # --------------------------------------------------------------------------
