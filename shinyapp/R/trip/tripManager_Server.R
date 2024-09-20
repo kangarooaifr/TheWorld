@@ -162,10 +162,10 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
             destination_name <- locations$airports[locations$airports$id == destination, 'name']
             
             # -- compute great circle route
-            route <- gcIntermediate(p1 = airport_coord(locations$airports, id = origin), 
-                                    p2 = airport_coord(locations$airports, id = destination), 
-                                    n = 100, 
-                                    addStartEnd = TRUE)
+            route <- geosphere::gcIntermediate(p1 = airport_coord(locations$airports, id = origin), 
+                                               p2 = airport_coord(locations$airports, id = destination), 
+                                               n = 100, 
+                                               addStartEnd = TRUE)
             
             # -- add fight route
             map$proxy %>%
