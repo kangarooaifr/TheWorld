@@ -347,16 +347,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     }) %>% bindEvent(list(selected_routes(), r$selected_locations),
                      ignoreInit = TRUE)
     
-    
-    # -- style test
-    output$mywidget <- renderUI(
-      
-      div(
-        p("some text goes here.")
-      ) %>% tagAppendAttributes(class = "my_row_class") 
-    
-    )
-    
+  
     # --------------------------------------------------------------------------
     # Step management
     # --------------------------------------------------------------------------

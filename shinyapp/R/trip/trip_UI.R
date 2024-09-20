@@ -46,9 +46,6 @@ trip_panel_UI <- function(id)
     # -- add_transport zone
     uiOutput(ns("shared_zone")),
     
-    # -- test
-    uiOutput(ns("mywidget"))
-    
     )
   
 }
