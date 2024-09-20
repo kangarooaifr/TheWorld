@@ -7,7 +7,8 @@ wm_popups <- function(locations, ns){
   link_been <- vector()
   
   # -- conditional feed (will extend vector with same length as df rows)
-  link_been[!locations$been.there] <- sprintf(
+  # adding locked so that airports & stations are excluded #203
+  link_been[!locations$been.there & !locations$locked] <- sprintf(
     
     paste0(
       actionLink(inputId = "been-there_%s", 
@@ -25,8 +26,9 @@ wm_popups <- function(locations, ns){
   # -- wish.list (init empty vector)
   link_wish <- vector()
   
-  # -- conditional feed
-  link_wish[!locations$wish.list] <- sprintf(
+  # -- conditional feed (will extend vector with same length as df rows)
+  # adding locked so that airports & stations are excluded #203
+  link_wish[!locations$wish.list & !locations$locked] <- sprintf(
     
     paste0(
       actionLink(inputId = "wish-list_%s", 
