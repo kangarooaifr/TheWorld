@@ -9,6 +9,9 @@
 # -- fucntion definition
 route_select <- function(routes, query) {
   
+  # -- check #204
+  req(!is.null(query))
+  
   cat("[route_select] Query =", as.character(query), "\n")
 
   # -- check: numeric input
