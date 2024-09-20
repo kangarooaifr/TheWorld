@@ -105,7 +105,7 @@ body <- dashboardBody(
             # -- Admin UI
             fluidRow(
               column(width = 12,
-                     kitems::admin_ui("routemngr-route")))),
+                     kitems::admin_ui("tripmngr-route")))),
     
     # -- kitems admin (trip)
     tabItem(tabName = "trip",
@@ -122,14 +122,6 @@ body <- dashboardBody(
             fluidRow(
               column(width = 12,
                      kitems::admin_ui("tripmngr-step")))),
-    
-    # -- kitems admin (transport)
-    tabItem(tabName = "transport",
-            
-            # -- Admin UI
-            fluidRow(
-              column(width = 12,
-                     kitems::admin_ui("tripmngr-transport")))),
     
     # -- kitems admin (accommodation)
     tabItem(tabName = "accommodation",

@@ -58,7 +58,6 @@ shinyServer(
                                                                    "route",
                                                                    "trip",
                                                                    "step",
-                                                                   "transport",
                                                                    "accommodation")))
 
     
