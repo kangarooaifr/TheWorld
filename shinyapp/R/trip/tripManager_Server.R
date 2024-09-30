@@ -52,7 +52,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # --------------------------------------------------------------------------
     
     # -- launch kitems sub module
-    trips <- kitems::kitemsManager_Server(id = "trip", r, path$data)
+    trips <- kitems::kitemsManager_Server(id = "trip", path = path$data)
     
     
     # --------------------------------------------------------------------------
@@ -60,7 +60,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # --------------------------------------------------------------------------
     
     # -- launch kitems sub module
-    steps <- kitems::kitemsManager_Server(id = "step", r, path$data)
+    steps <- kitems::kitemsManager_Server(id = "step", path = path$data)
     
     
     # --------------------------------------------------------------------------
@@ -68,7 +68,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # --------------------------------------------------------------------------
     
     # -- launch kitems sub module
-    accommodations <- kitems::kitemsManager_Server(id = "accommodation", r, path$data)
+    accommodations <- kitems::kitemsManager_Server(id = "accommodation", path = path$data)
     
     
     # --------------------------------------------------------------------------
@@ -76,7 +76,7 @@ tripManager_Server <- function(id, locations, countries, location_ns, r, path) {
     # --------------------------------------------------------------------------
     
     # -- launch kitems sub module
-    routes <- kitems::kitemsManager_Server(id = "route", r, path$data)
+    routes <- kitems::kitemsManager_Server(id = "route", path = path$data)
     
     
     # --------------------------------------------------------------------------

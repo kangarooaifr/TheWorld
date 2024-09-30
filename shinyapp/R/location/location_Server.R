@@ -24,7 +24,7 @@ location_Server <- function(id, r, path) {
     # --------------------------------------------------------------------------
 
     # -- launch kitems sub module
-    locations <- kitems::kitemsManager_Server(id = "location", r, path$data)
+    locations <- kitems::kitemsManager_Server(id = "location", path = path$data)
     
     
     # --------------------------------------------------------------------------
